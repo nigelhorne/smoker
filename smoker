@@ -53,6 +53,6 @@ foreach my $dist(split(/\n/, $recent)) {
 	# $dist =~ s/\//::/g;
 
 	print "$dist - ";
-	my $rc = system("perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' > /dev/null 2>&1");
+	my $rc = system("perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' > /dev/null 2>&1 < /dev/null");
 	print "returns $rc\n";
 }
