@@ -2,10 +2,6 @@
 
 # perlbrew switch-off
 
-# Ensure we find smoker if it's in the current directory, but don't export the
-# chanrge PATH
-PATH=$PATH:
-
 if [ x$TMPDIR = 'x' ]; then
 	if [[ -d $HOME/tmp ]]; then
 		export TMPDIR=$HOME/tmp
@@ -29,4 +25,3 @@ do
 	echo Mini Smoking $i
 	perlbrew exec --with $i smoker
 done
-

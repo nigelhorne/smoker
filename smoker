@@ -16,16 +16,20 @@
 use warnings;
 use strict;
 
+use Getopt::Std;
+use LWP::Simple;
+
 use File::HomeDir;
-use lib File::HomeDir->my_home() . '/.cpan/CPAN';
+use File::Spec;
+use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 
 use MyConfig;
 
 die unless($CPAN::Config->{'test_report'});
 die unless($CPAN::Config->{'urllist'});
-# 'urllist' => [q[file:///mnt/CPAN/], q[http://utilite/mirrors/CPAN/], q[http://www.mirror.8086.net/sites/CPAN/], q[http://www.cpan.org/], q[http://backpan.perl.org/]],
 
-use LWP::Simple;
+my %opts;
+getopts('i', \%opts);
 
 my $recent;
 foreach my $url(@{$CPAN::Config->{'urllist'}}) {
@@ -39,7 +43,9 @@ foreach my $url(@{$CPAN::Config->{'urllist'}}) {
 die if(!$recent);
 
 $ENV{'CPAN_SQLITE_NO_LOG_FILES'} = 1;
-$ENV{'AUTOMATED_TESTING'} = 1;
+if(!$opts{'i'}) {
+	$ENV{'AUTOMATED_TESTING'} = 1;
+}
 
 $| = 1;
 
@@ -53,6 +59,40 @@ foreach my $dist(split(/\n/, $recent)) {
 	# $dist =~ s/\//::/g;
 
 	print "$dist - ";
-	my $rc = system("perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' > /dev/null 2>&1 < /dev/null");
+	my $rc;
+	if($opts{'i'}) {
+		$rc = system("perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")'");
+	} else {
+		$rc = timed_system(300, "perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' > /dev/null 2>&1 < /dev/null");
+	}
 	print "returns $rc\n";
+}
+
+
+# http://www.perlmonks.org/?node_id=324176
+sub timed_system {
+	my $time = shift;
+
+	my $pid;
+ 
+	local $SIG {ALRM} = sub {
+		kill 15, $pid or die "kill: $!";
+		die "Timeout!"
+	}; # Just SIGTERM.
+ 
+	eval {
+		$pid = fork;
+ 
+		die "Fork failed: $!" unless defined $pid;
+ 
+		unless ($pid) {
+			exec @_;
+			die "Exec failed: $!";
+		}
+ 
+		alarm $time;
+ 
+		waitpid $pid => 0;
+	};
+	die $@ if $@ && $@ !~ /^Timeout!/;
 }
