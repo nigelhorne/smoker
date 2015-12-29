@@ -1,2 +1,4 @@
-# smoker
-Yet another minismoker for Perl
+smoker
+======
+
+Yet another mini-smoker for Perl.

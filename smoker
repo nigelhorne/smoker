@@ -1,0 +1,55 @@
+#!/usr/bin/env perl
+
+# Author Nigel Horne: njh@bandsman.co.uk
+# Copyright (C) 2015, Nigel Horne
+
+# Usage is subject to licence terms.
+# The licence terms of this software are as follows:
+# Personal single user, single computer use: GPL2
+# All other users (including Commercial, Charity, Educational, Government)
+#	must apply in writing for a licence for use from Nigel Horne at the
+#	above e-mail.
+
+# I Love App::SmokeBox::Mini, unfortunately too many of its dependancies don't
+# build on many platforms, so this is a small plaything that does for me
+
+use warnings;
+use strict;
+
+use File::HomeDir;
+use lib File::HomeDir->my_home() . '/.cpan/CPAN';
+
+use MyConfig;
+
+die unless($CPAN::Config->{'test_report'});
+die unless($CPAN::Config->{'urllist'});
+# 'urllist' => [q[file:///mnt/CPAN/], q[http://utilite/mirrors/CPAN/], q[http://www.mirror.8086.net/sites/CPAN/], q[http://www.cpan.org/], q[http://backpan.perl.org/]],
+
+use LWP::Simple;
+
+my $recent;
+foreach my $url(@{$CPAN::Config->{'urllist'}}) {
+	$recent = get("$url/RECENT");
+	if($recent) {
+		print "Fetching from $url\n";
+		last;
+	}
+}
+
+die if(!$recent);
+
+$| = 1;
+
+foreach my $dist(split(/\n/, $recent)) {
+	if($dist =~ /^authors\/id\/(.+)/) {
+		$dist = $1;
+	} else {
+		next;
+	}
+	next if($dist =~ /\/CHECKSUMS$/);
+	# $dist =~ s/\//::/g;
+
+	print "$dist - ";
+	my $rc = system("perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' > /dev/null 2>&1");
+	print "returns $rc\n";
+}
