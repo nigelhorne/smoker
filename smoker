@@ -38,6 +38,9 @@ foreach my $url(@{$CPAN::Config->{'urllist'}}) {
 
 die if(!$recent);
 
+$ENV{'CPAN_SQLITE_NO_LOG_FILES'} = 1;
+$ENV{'AUTOMATED_TESTING'} = 1;
+
 $| = 1;
 
 foreach my $dist(split(/\n/, $recent)) {
