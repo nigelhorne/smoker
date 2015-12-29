@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# perlbrew switch-off
+
+# Ensure we find smoker if it's in the current directory, but don't export the
+# chanrge PATH
+PATH=$PATH:
+
+if [ x$TMPDIR = 'x' ]; then
+	if [[ -d $HOME/tmp ]]; then
+		export TMPDIR=$HOME/tmp
+	else
+		export TMPDIR=/tmp
+	fi
+fi
+
+LOCKFILE=${TMPDIR}/cpan-test.lck
+if test -e ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
+	echo "Already running"
+	exit 0
+fi
+
+ulimit -d 524288
+
+export CPAN_SQLITE_NO_LOG_FILES=1 AUTOMATED_TESTING=1
+
+for i in perl-5.23.5 perl-5.22.1 perl-5.20.3 perl-5.18.4 perl-5.6.2 perl-5.8.9 perl-5.10.1 perl-5.12.5 perl-5.14.4 perl-5.16.3
+do
+	echo Mini Smoking $i
+	perlbrew exec --with $i smoker
+done
+
