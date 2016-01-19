@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Author Nigel Horne: njh@bandsman.co.uk
+# Copyright (C) 2015-2016, Nigel Horne
+
+# Usage is subject to licence terms.
+# The licence terms of this software are as follows:
+# Personal single user, single computer use: GPL2
+# All other users (including Commercial, Charity, Educational, Government)
+#	must apply in writing for a licence for use from Nigel Horne at the
+#	above e-mail.
+
 # perlbrew switch-off
 
 if [ x$TMPDIR = 'x' ]; then
@@ -23,5 +33,5 @@ export CPAN_SQLITE_NO_LOG_FILES=1 AUTOMATED_TESTING=1
 for i in perl-5.23.5 perl-5.22.1 perl-5.20.3 perl-5.18.4 perl-5.6.2 perl-5.8.9 perl-5.10.1 perl-5.12.5 perl-5.14.4 perl-5.16.3
 do
 	echo Mini Smoking $i
-	perlbrew exec --with $i smoker
+	perlbrew exec --with $i smoker $*
 done
