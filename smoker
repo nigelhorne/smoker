@@ -93,6 +93,10 @@ sub timed_system {
 		alarm $time;
  
 		waitpid $pid => 0;
+
+		return $?;
 	};
 	die $@ if $@ && $@ !~ /^Timeout!/;
+
+	return -1;
 }
