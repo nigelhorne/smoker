@@ -68,7 +68,6 @@ foreach my $dist(split(/\n/, $recent)) {
 	print "returns $rc\n";
 }
 
-
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {
 	my $time = shift;
