@@ -1,0 +1,81 @@
+#!/usr/bin/env perl
+
+# Author Nigel Horne: njh@bandsman.co.uk
+# Copyright (C) 2016, Nigel Horne
+
+# Usage is subject to licence terms.
+# The licence terms of this software are as follows:
+# Personal single user, single computer use: GPL2
+# All other users (including Commercial, Charity, Educational, Government)
+#	must apply in writing for a licence for use from Nigel Horne at the
+#	above e-mail.
+
+# The local minicpan repository has been updated, test all of the updated
+#	modules;
+
+use warnings;
+use strict;
+
+use IO::Socket::INET;
+use File::HomeDir;
+use File::Spec;
+use Sys::Syslog;
+use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
+use MyConfig;
+
+die unless($CPAN::Config->{'test_report'});
+
+# FIXME - should be argument
+my $port = 21212;
+
+$ENV{'CPAN_SQLITE_NO_LOG_FILES'} = 1;
+openlog 'CPAN', 'cons,pid', 'user';
+
+while(1) {
+	my $s = IO::Socket::INET->new(LocalPort => $port, Proto => 'udp')
+		or die "Can't listen on port $port";
+
+	DIST: while(1) {
+		my $dist;
+
+		$s->recv($dist, 256);
+
+		last DIST if($dist eq '');
+
+		my $rc = timed_system(300, "perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' > /dev/null 2>&1 < /dev/null");
+		syslog 'info', "$dist return $rc";
+	}
+}
+closelog;
+
+# http://www.perlmonks.org/?node_id=324176
+sub timed_system {
+	my $time = shift;
+
+	my $pid;
+ 
+	local $SIG {ALRM} = sub {
+		kill 15, $pid or die "kill: $!";
+		die "Timeout!"
+	}; # Just SIGTERM.
+ 
+	eval {
+		$pid = fork;
+ 
+		die "Fork failed: $!" unless defined $pid;
+ 
+		unless ($pid) {
+			exec @_;
+			die "Exec failed: $!";
+		}
+ 
+		alarm $time;
+ 
+		waitpid $pid => 0;
+
+		return $?;
+	};
+	die $@ if $@ && $@ !~ /^Timeout!/;
+
+	return -1;
+}
