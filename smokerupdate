@@ -45,6 +45,6 @@ if($count == 1) {
 } else {
 	$msg = "Updated $count modules";
 }
-print "$msg\n";
+# print "$msg\n";
 syslog 'info', $msg;
 closelog;
