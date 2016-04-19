@@ -76,9 +76,10 @@ sub timed_system {
  
 	local $SIG {ALRM} = sub {
 		kill 15, $pid or die "kill: $!";
-		die "Timeout!"
+		# die "Timeout!"
 	}; # Just SIGTERM.
  
+	my $rc = -1;
 	eval {
 		$pid = fork;
  
@@ -93,9 +94,9 @@ sub timed_system {
  
 		waitpid $pid => 0;
 
-		return $?;
+		$rc = $?;
 	};
-	die $@ if $@ && $@ !~ /^Timeout!/;
+	return -1 if $@ && $@ !~ /^Timeout!/;
 
-	return -1;
+	return $rc;
 }

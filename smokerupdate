@@ -9,6 +9,7 @@
 
 use strict;
 use warnings;
+use Sys::Syslog;
 use IO::Socket::INET;
 
 # Update the minicpan repository, and tell the smokers what to test
@@ -37,4 +38,13 @@ while(my $line = <$pin>) {
 
 $s->send('');
 
-print "Updated $count modules\n";
+openlog 'CPAN', 'cons,pid', 'user';
+my $msg;
+if($count == 1) {
+	$msg = "Updated 1 module\n";
+} else {
+	$msg = "Updated $count modules";
+}
+print "$msg\n";
+syslog 'info', $msg;
+closelog;

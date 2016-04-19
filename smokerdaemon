@@ -32,6 +32,7 @@ $ENV{'CPAN_SQLITE_NO_LOG_FILES'} = 1;
 openlog 'CPAN', 'cons,pid', 'user';
 
 while(1) {
+	# Not needed, but somehow it seems cleaner to close and reopen
 	my $s = IO::Socket::INET->new(LocalPort => $port, Proto => 'udp')
 		or die "Can't listen on port $port";
 
@@ -40,10 +41,13 @@ while(1) {
 
 		$s->recv($dist, 256);
 
+		chomp $dist;
+
 		last DIST if($dist eq '');
 
-		my $rc = timed_system(300, "perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' > /dev/null 2>&1 < /dev/null");
-		syslog 'info', "$dist return $rc";
+		my $rc = timed_system(300, "perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' > /dev/null 2>&1 < /dev/null");
+		# print "$dist returned $rc\n";
+		syslog 'info', "$dist returned $rc";
 	}
 }
 closelog;
@@ -56,9 +60,10 @@ sub timed_system {
  
 	local $SIG {ALRM} = sub {
 		kill 15, $pid or die "kill: $!";
-		die "Timeout!"
+		# die "Timeout!"
 	}; # Just SIGTERM.
  
+	my $rc = -1;
 	eval {
 		$pid = fork;
  
@@ -73,9 +78,11 @@ sub timed_system {
  
 		waitpid $pid => 0;
 
-		return $?;
-	};
-	die $@ if $@ && $@ !~ /^Timeout!/;
+		$rc = $?;
 
-	return -1;
+		alarm 0;
+	};
+	return -1 if $@ && $@ !~ /^Timeout!/;
+
+	return $rc;
 }
