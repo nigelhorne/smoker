@@ -25,8 +25,7 @@ my $count = 0;
 my $s = IO::Socket::INET->new(PeerPort => $port,
 		PeerAddr => inet_ntoa(INADDR_BROADCAST),
 		Proto => 'udp',
-		Broadcast => 1,
-		LocalAddr => 'localhost')
+		Broadcast => 1)
 	or die "Can't broadcast to port $port";
 
 while(my $line = <$pin>) {
