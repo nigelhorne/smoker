@@ -20,6 +20,7 @@ use IO::Socket::INET;
 use File::HomeDir;
 use File::Spec;
 use Sys::Syslog;
+use File::Temp;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
 
@@ -29,6 +30,12 @@ die unless($CPAN::Config->{'test_report'});
 my $port = 21212;
 
 $ENV{'CPAN_SQLITE_NO_LOG_FILES'} = 1;
+$ENV{'AUTOMATED_TESTING'} = 1;
+
+# TODO: read from config files
+$ENV{'PERLBREW_ROOT'} = '/home/njh/perl5/perlbrew';
+$ENV{'PERLBREW_HOME'} = '/tmp/.perlbrew';
+
 openlog 'CPAN', 'cons,pid', 'user';
 
 while(1) {
@@ -45,9 +52,14 @@ while(1) {
 
 		last DIST if($dist eq '');
 
-		my $rc = timed_system(300, "perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' > /dev/null 2>&1 < /dev/null");
-		# print "$dist returned $rc\n";
+		my $tmp = File::Temp->new(UNLINK => 0);
+		print $tmp "#!/bin/bash\n\nsource \$PERLBREW_ROOT/etc/bashrc\nperlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' > /dev/null 2>&1  < /dev/null\n";
+		my $filename = $tmp->filename();
+		close $tmp;
+		my $rc = timed_system(300, "/bin/bash $filename");
+		unlink $filename;
 		syslog 'info', "$dist returned $rc";
+		# print "$dist returned $rc";
 	}
 }
 closelog;
