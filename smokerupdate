@@ -31,7 +31,7 @@ my $s = IO::Socket::INET->new(PeerPort => $port,
 
 while(my $line = <$pin>) {
 	chomp $line;
-	next unless($line =~ /^authors\/(.+)\.tar\.gz/);
+	next unless($line =~ /^authors\/id\/(.+)\.tar\.gz/);
 	$s->send($1);
 	$count++;
 }
