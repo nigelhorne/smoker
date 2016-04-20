@@ -23,6 +23,7 @@ use Sys::Syslog;
 use File::Temp;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
+use Sys::CPU;
 
 die unless($CPAN::Config->{'test_report'});
 
@@ -37,6 +38,12 @@ $ENV{'PERLBREW_ROOT'} = $ENV{'HOME'} . '/perl5/perlbrew';
 $ENV{'PERLBREW_HOME'} = $ENV{'HOME'} . '/.perlbrew';
 
 openlog 'CPAN', 'cons,pid', 'user';
+
+my $number_of_cpus = Sys::CPU::cpu_count();
+if($number_of_cpus > 1) {
+	$ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
+	$ENV{'TEST_JOBS'} = $number_of_cpus;
+}
 
 while(1) {
 	# Not needed, but somehow it seems cleaner to close and reopen
