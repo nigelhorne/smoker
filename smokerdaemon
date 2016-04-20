@@ -39,10 +39,7 @@ $ENV{'PERLBREW_HOME'} = $ENV{'HOME'} . '/.perlbrew';
 
 openlog 'CPAN', 'cons,pid', 'user';
 
-my $cpu = Sys::Info->new()->device();
-my $number_of_cpus = $cpu->count();
-
-die $number_of_cpus;
+my $number_of_cpus = Sys::Info->new()->device('CPU')->count();
 
 if($number_of_cpus > 1) {
 	$ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
