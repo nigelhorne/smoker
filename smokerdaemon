@@ -53,11 +53,14 @@ while(1) {
 		last DIST if($dist eq '');
 
 		my $tmp = File::Temp->new(UNLINK => 0);
-		print $tmp "#!/bin/bash\n\nsource \$PERLBREW_ROOT/etc/bashrc\nperlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' > /dev/null 2>&1  < /dev/null\n";
+		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nperlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' > /dev/null 2>&1 < /dev/null\n";
 		my $filename = $tmp->filename();
 		close $tmp;
-		my $rc = timed_system(300, "/bin/bash $filename");
+
+		my $rc = timed_system(300, $CPAN::Config->{'shell'} . " $filename");
+
 		unlink $filename;
+
 		syslog 'info', "$dist returned $rc";
 		# print "$dist returned $rc";
 	}
