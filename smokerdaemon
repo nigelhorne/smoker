@@ -33,8 +33,8 @@ $ENV{'CPAN_SQLITE_NO_LOG_FILES'} = 1;
 $ENV{'AUTOMATED_TESTING'} = 1;
 
 # TODO: read from config files
-$ENV{'PERLBREW_ROOT'} = '/home/njh/perl5/perlbrew';
-$ENV{'PERLBREW_HOME'} = '/tmp/.perlbrew';
+$ENV{'PERLBREW_ROOT'} = $ENV{'HOME'} . '/perl5/perlbrew';
+$ENV{'PERLBREW_HOME'} = $ENV{'HOME'} . '/.perlbrew';
 
 openlog 'CPAN', 'cons,pid', 'user';
 
