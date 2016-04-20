@@ -39,7 +39,7 @@ $ENV{'PERLBREW_HOME'} = $ENV{'HOME'} . '/.perlbrew';
 
 openlog 'CPAN', 'cons,pid', 'user';
 
-my $cpu = SYS::Info->new()->device();
+my $cpu = Sys::Info->new()->device();
 my $number_of_cpus = $cpu->count();
 
 die $number_of_cpus;
