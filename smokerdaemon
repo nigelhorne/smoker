@@ -23,7 +23,7 @@ use Sys::Syslog;
 use File::Temp;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
-use Sys::Info::Device::CPU;
+use Sys::Info;
 
 die unless($CPAN::Config->{'test_report'});
 
