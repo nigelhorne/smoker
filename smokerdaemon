@@ -23,7 +23,7 @@ use Sys::Syslog;
 use File::Temp;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
-use Sys::CPU;
+use Sys::Info::Device::CPU;
 
 die unless($CPAN::Config->{'test_report'});
 
@@ -39,7 +39,11 @@ $ENV{'PERLBREW_HOME'} = $ENV{'HOME'} . '/.perlbrew';
 
 openlog 'CPAN', 'cons,pid', 'user';
 
-my $number_of_cpus = Sys::CPU::cpu_count();
+my $cpu = SYS::Info->new()->device();
+my $number_of_cpus = $cpu->count();
+
+die $number_of_cpus;
+
 if($number_of_cpus > 1) {
 	$ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
 	$ENV{'TEST_JOBS'} = $number_of_cpus;
