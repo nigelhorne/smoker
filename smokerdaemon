@@ -5,7 +5,7 @@
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
-# Personal single user, single computer use: GPL2
+# Personal single user: GPL2
 # All other users (including Commercial, Charity, Educational, Government)
 #	must apply in writing for a licence for use from Nigel Horne at the
 #	above e-mail.
@@ -24,6 +24,7 @@ use File::Temp;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
 use Sys::Info;
+use Sys::CpuLoad;
 
 die unless($CPAN::Config->{'test_report'});
 
@@ -59,6 +60,12 @@ while(1) {
 		chomp $dist;
 
 		last DIST if($dist eq '');
+
+		while(1) {
+			my @lav = Sys::CpuLoad::load();
+			last if($lav[0] <= 3);
+			sleep 10;
+		}
 
 		my $tmp = File::Temp->new(UNLINK => 0);
 		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nperlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' > /dev/null 2>&1 < /dev/null\n";
