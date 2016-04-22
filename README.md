@@ -14,4 +14,4 @@ OR:
     smokerupdate - update a local minicpan repositary and broadcast the updates
     	Run this out of cron
     smokerdaemon - listen to smokerupdates and test the updates
-    	Start this in the system
+    	Start this in the systems where you're going to test CPAN modules
