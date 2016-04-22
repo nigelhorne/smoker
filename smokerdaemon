@@ -25,6 +25,7 @@ use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
 use Sys::Info;
 use Sys::CpuLoad;
+use Proc::Killfam;
 
 die unless($CPAN::Config->{'test_report'});
 
@@ -91,7 +92,11 @@ sub timed_system {
 	my $pid;
  
 	local $SIG {ALRM} = sub {
-		kill 15, $pid or die "kill: $!";
+		killfam 15, $pid or die "killfam: $!";
+		sleep 2;
+		kill 15, $pid;
+		sleep 2;
+		kill 9, $pid;
 		# die "Timeout!"
 	}; # Just SIGTERM.
  
