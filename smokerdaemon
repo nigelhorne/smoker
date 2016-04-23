@@ -30,14 +30,22 @@ use Fcntl qw(:flock);
 
 die unless($CPAN::Config->{'test_report'});
 
-my $lockfile = '/tmp/cpan-test.lck';	# FIXME - configurable, use TMPDIR
-# FIXME: Exit if lockfile exists and PID still alive
+my $lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck');
+if(open(my $lock, '<', $lockfile)) {
+	my $pid = <$lock>;
+	close $lock;
+	chomp $pid;
+	if(kill(0, $pid)) {
+		print "Already running\n";
+		exit 0;
+	}
+}
 open(my $lock, '>', $lockfile) or die "$lockfile: $!";
-flock($lock, LOCK_EX);
+flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
 print $lock $$;
 flush $lock;
 
-local $SIG{INT} = $SIG{HUP} = sub {
+local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	unlink $lockfile;
 	exit 1;
 };
