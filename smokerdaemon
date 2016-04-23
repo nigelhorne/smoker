@@ -26,8 +26,21 @@ use MyConfig;
 use Sys::Info;
 use Sys::CpuLoad;
 use Proc::Killfam;
+use Fcntl qw(:flock);
 
 die unless($CPAN::Config->{'test_report'});
+
+my $lockfile = '/tmp/cpan-test.lck';	# FIXME - configurable, use TMPDIR
+# FIXME: Exit if lockfile exists and PID still alive
+open(my $lock, '>', $lockfile) or die "$lockfile: $!";
+flock($lock, LOCK_EX);
+print $lock $$;
+flush $lock;
+
+local $SIG{INT} = $SIG{HUP} = sub {
+	unlink $lockfile;
+	exit 1;
+};
 
 # FIXME - should be argument
 my $port = 21212;
@@ -53,7 +66,7 @@ eval {	# Eval added to handle RT113898
 while(1) {
 	# Not needed, but somehow it seems cleaner to close and reopen
 	my $s = IO::Socket::INET->new(LocalPort => $port, Proto => 'udp')
-		or die "Can't listen on port $port";
+		or die "Can't listen on port $port";	# FIXME unlink $lockfile
 
 	DIST: while(1) {
 		my $dist;
@@ -83,6 +96,7 @@ while(1) {
 		# print "$dist returned $rc";
 	}
 }
+unlink $lockfile;
 closelog;
 
 # http://www.perlmonks.org/?node_id=324176
@@ -91,7 +105,7 @@ sub timed_system {
 
 	my $pid;
  
-	local $SIG {ALRM} = sub {
+	local $SIG{ALRM} = sub {
 		killfam 15, $pid or die "killfam: $!";
 		sleep 2;
 		kill 15, $pid;
