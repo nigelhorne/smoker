@@ -1,5 +1,8 @@
 #!/usr/bin/env perl
 
+# Author Nigel Horne: njh@bandsman.co.uk
+# Copyright (C) 2016, Nigel Horne
+
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
 # Personal single user, single computer use: GPL2
@@ -33,6 +36,7 @@ while(my $line = <$pin>) {
 	chomp $line;
 	next unless($line =~ /^authors\/id\/(.+)\.tar\.gz/);
 	$s->send($1);
+	sleep 1;	# Give the clients a chance to do something so they don't miss the message
 	$count++;
 }
 

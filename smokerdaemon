@@ -76,6 +76,8 @@ while(1) {
 	my $s = IO::Socket::INET->new(LocalPort => $port, Proto => 'udp')
 		or die "Can't listen on port $port";	# FIXME unlink $lockfile
 
+	my @dists;
+
 	DIST: while(1) {
 		my $dist;
 
@@ -85,6 +87,10 @@ while(1) {
 
 		last DIST if($dist eq '');
 
+		push @dists, $dist;
+	}
+
+	foreach my $dist(@dists) {
 		while(1) {
 			my @lav = Sys::CpuLoad::load();
 			last if($lav[0] <= 3);
