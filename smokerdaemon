@@ -102,7 +102,7 @@ while(1) {
 		my $filename = $tmp->filename();
 		close $tmp;
 
-		my $rc = timed_system(300, $CPAN::Config->{'shell'} . " $filename");
+		my $rc = timed_system(1800, $CPAN::Config->{'shell'}, $filename);
 
 		unlink $filename;
 
@@ -118,7 +118,7 @@ sub timed_system {
 	my $time = shift;
 
 	my $pid;
- 
+
 	local $SIG{ALRM} = sub {
 		killfam 15, $pid or die "killfam: $!";
 		sleep 2;
@@ -127,20 +127,20 @@ sub timed_system {
 		kill 9, $pid;
 		# die "Timeout!"
 	}; # Just SIGTERM.
- 
+
 	my $rc = -1;
 	eval {
 		$pid = fork;
- 
+
 		die "Fork failed: $!" unless defined $pid;
- 
+
 		unless ($pid) {
 			exec @_;
 			die "Exec failed: $!";
 		}
- 
+
 		alarm $time;
- 
+
 		waitpid $pid => 0;
 
 		$rc = $?;
