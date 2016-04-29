@@ -12,6 +12,8 @@
 
 # The local minicpan repository has been updated, test all of the updated
 #	modules;
+#
+#	-v: verbose
 
 use warnings;
 use strict;
@@ -27,6 +29,7 @@ use Sys::Info;
 use Sys::CpuLoad;
 use Proc::Killfam;
 use Fcntl qw(:flock);
+use Getopt::Std;
 
 die unless($CPAN::Config->{'test_report'});
 
@@ -44,6 +47,9 @@ open(my $lock, '>', $lockfile) or die "$lockfile: $!";
 flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
 print $lock $$;
 flush $lock;
+
+my %opts;
+getopts('v', \%opts);
 
 local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	unlink $lockfile;
@@ -98,13 +104,16 @@ while(1) {
 		}
 
 		my $tmp = File::Temp->new(UNLINK => 0);
-		# print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nperlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' > /dev/null 2>&1 < /dev/null\n";
-		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nperlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' < /dev/null\n";
+		if($opts{'v'}) {
+			print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nperlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' < /dev/null\n";
+		} else {
+			print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nperlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' > /dev/null 2>&1 < /dev/null\n";
+		}
 		my $filename = $tmp->filename();
 		close $tmp;
 
-		# my $rc = timed_system(1800, $CPAN::Config->{'shell'}, $filename);
-		my $rc = timed_system(1800, $CPAN::Config->{'shell'} . " $filename");
+		my $rc = timed_system(1800, $CPAN::Config->{'shell'}, $filename);
+		# my $rc = timed_system(1800, $CPAN::Config->{'shell'} . " $filename");
 
 		unlink $filename;
 
@@ -122,10 +131,15 @@ sub timed_system {
 	my $pid;
 
 	local $SIG{ALRM} = sub {
-		killfam 15, $pid or die "killfam: $!";
+		if($opts{'v'}) {
+			print "Killing process family $pid\n";
+		}
+		syslog 'info', "killing process family $pid";
+		killfam 14, $pid or die "killfam: $!";
 		sleep 2;
-		kill 15, $pid;
+		kill 14, $pid;
 		sleep 2;
+		killfam 9, $pid;
 		kill 9, $pid;
 		# die "Timeout!"
 	}; # Just SIGTERM.
@@ -137,7 +151,6 @@ sub timed_system {
 		die "Fork failed: $!" unless defined $pid;
 
 		unless ($pid) {
-			print @_, "\n";
 			exec @_;
 			die "Exec failed: $!";
 		}
