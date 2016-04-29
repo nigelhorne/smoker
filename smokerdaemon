@@ -98,12 +98,13 @@ while(1) {
 		}
 
 		my $tmp = File::Temp->new(UNLINK => 0);
-		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nperlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' > /dev/null 2>&1 < /dev/null\n";
+		# print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nperlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' > /dev/null 2>&1 < /dev/null\n";
+		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nperlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' < /dev/null\n";
 		my $filename = $tmp->filename();
 		close $tmp;
 
 		# my $rc = timed_system(1800, $CPAN::Config->{'shell'}, $filename);
-		my $rc = timed_system(1800, $CPAN::Config->{'shell'} ." $filename");
+		my $rc = timed_system(1800, $CPAN::Config->{'shell'} . " $filename");
 
 		unlink $filename;
 
@@ -136,6 +137,7 @@ sub timed_system {
 		die "Fork failed: $!" unless defined $pid;
 
 		unless ($pid) {
+			print @_, "\n";
 			exec @_;
 			die "Exec failed: $!";
 		}
