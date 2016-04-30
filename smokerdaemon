@@ -30,6 +30,7 @@ use Sys::CpuLoad;
 use Proc::Killfam;
 use Fcntl qw(:flock);
 use Getopt::Std;
+use BSD::Resource;
 
 die unless($CPAN::Config->{'test_report'});
 
@@ -67,6 +68,9 @@ $ENV{'PERLBREW_ROOT'} = $ENV{'HOME'} . '/perl5/perlbrew';
 $ENV{'PERLBREW_HOME'} = $ENV{'HOME'} . '/.perlbrew';
 
 openlog 'CPAN', 'cons,pid', 'user';
+
+setrlimit(RLIMIT_DATA, 64 * 1024 * 1024, 64 * 1024 * 1024) or
+	warn ('Can\'t limit the data size - watch for memory usage');
 
 eval {	# Eval added to handle RT113898
 	my $number_of_cpus = Sys::Info->new()->device('CPU')->count();
