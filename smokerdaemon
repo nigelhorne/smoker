@@ -72,7 +72,7 @@ openlog 'CPAN', 'cons,pid', 'user';
 setrlimit(RLIMIT_DATA, 32 * 1024 * 1024, 32 * 1024 * 1024) or
 	warn ('Can\'t limit the data size - watch for memory usage');
 
-setrlimit(RLIMIT_CPU, 300) or
+setrlimit(RLIMIT_CPU, 60, 300) or
 	warn ('Can\'t limit the CPU time - watch for long running programs');
 
 eval {	# Eval added to handle RT113898
