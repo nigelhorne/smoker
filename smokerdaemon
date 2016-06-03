@@ -69,8 +69,11 @@ $ENV{'PERLBREW_HOME'} = $ENV{'HOME'} . '/.perlbrew';
 
 openlog 'CPAN', 'cons,pid', 'user';
 
-setrlimit(RLIMIT_DATA, 64 * 1024 * 1024, 64 * 1024 * 1024) or
+setrlimit(RLIMIT_DATA, 32 * 1024 * 1024, 32 * 1024 * 1024) or
 	warn ('Can\'t limit the data size - watch for memory usage');
+
+setrlimit(RLIMIT_CPU, 300) or
+	warn ('Can\'t limit the CPU time - watch for long running programs');
 
 eval {	# Eval added to handle RT113898
 	my $number_of_cpus = Sys::Info->new()->device('CPU')->count();
