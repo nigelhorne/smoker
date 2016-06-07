@@ -69,7 +69,7 @@ $ENV{'PERLBREW_HOME'} = $ENV{'HOME'} . '/.perlbrew';
 
 openlog 'CPAN', 'cons,pid', 'user';
 
-setrlimit(RLIMIT_DATA, 48 * 1024 * 1024, 64 * 1024 * 1024) or
+setrlimit(RLIMIT_DATA, 32 * 1024 * 1024, 64 * 1024 * 1024) or
 	warn ('Can\'t limit the data size - watch for memory usage');
 
 setrlimit(RLIMIT_CPU, 300, 1200) or
