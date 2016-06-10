@@ -34,7 +34,18 @@ use BSD::Resource;
 
 die unless($CPAN::Config->{'test_report'});
 
-my $lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck');
+my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
+if(open(my $lock, '<', $lockfile)) {
+	my $pid = <$lock>;
+	close $lock;
+	chomp $pid;
+	if(kill(0, $pid)) {
+		print "CPAN shell running\n";
+		exit 0;
+	}
+	unlink $lockfile;
+}
+$lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck');
 if(open(my $lock, '<', $lockfile)) {
 	my $pid = <$lock>;
 	close $lock;
