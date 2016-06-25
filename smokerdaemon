@@ -46,19 +46,6 @@ if(open(my $lock, '<', $lockfile)) {
 	unlink $lockfile;
 }
 $lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck');
-if(open(my $lock, '<', $lockfile)) {
-	my $pid = <$lock>;
-	close $lock;
-	chomp $pid;
-	if(kill(0, $pid)) {
-		print "Already running\n";
-		exit 0;
-	}
-}
-open(my $lock, '>', $lockfile) or die "$lockfile: $!";
-flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
-print $lock $$;
-flush $lock;
 
 my %opts;
 getopts('v', \%opts);
@@ -98,7 +85,7 @@ eval {	# Eval added to handle RT113898
 while(1) {
 	# Not needed, but somehow it seems cleaner to close and reopen
 	my $s = IO::Socket::INET->new(LocalPort => $port, Proto => 'udp')
-		or die "Can't listen on port $port";	# FIXME unlink $lockfile
+		or die "Can't listen on port $port";
 
 	my @dists;
 
@@ -112,6 +99,27 @@ while(1) {
 		last DIST if($dist eq '');
 
 		push @dists, $dist;
+	}
+
+	my $lock;
+
+	while(1) {
+		if(open($lock, '<', $lockfile)) {
+			my $pid = <$lock>;
+			close $lock;
+			chomp $pid;
+			if(kill(0, $pid)) {
+				print "Already running\n" if($opts{'v'});
+				sleep(10);
+				next;
+			}
+		}
+		close $lock;
+		open(my $lock, '>', $lockfile) or die "$lockfile: $!";
+		flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
+		print $lock $$;
+		flush $lock;
+		last;
 	}
 
 	foreach my $dist(@dists) {
@@ -138,6 +146,8 @@ while(1) {
 		syslog 'info', "$dist returned $rc";
 		# print "$dist returned $rc";
 	}
+	close $lock;
+	unlink $lockfile;
 }
 unlink $lockfile;
 closelog;
