@@ -21,6 +21,7 @@ use LWP::Simple;
 
 use File::HomeDir;
 use File::Spec;
+use Fcntl qw(:flock);
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 
 use MyConfig;
@@ -29,7 +30,7 @@ die unless($CPAN::Config->{'test_report'});
 die unless($CPAN::Config->{'urllist'});
 
 my %opts;
-getopts('i', \%opts);
+getopts('iv', \%opts);
 
 my $recent;
 foreach my $url(@{$CPAN::Config->{'urllist'}}) {
@@ -47,6 +48,24 @@ if(!$opts{'i'}) {
 	$ENV{'AUTOMATED_TESTING'} = 1;
 }
 
+my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
+if(open(my $lock, '<', $lockfile)) {
+	my $pid = <$lock>;
+	close $lock;
+	chomp $pid;
+	if(kill(0, $pid)) {
+		print "CPAN shell running\n";
+		exit;
+	}
+	unlink $lockfile;
+}
+$lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck');
+
+local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
+	unlink $lockfile;
+	exit 1;
+};
+
 $| = 1;
 
 foreach my $dist(split(/\n/, $recent)) {
@@ -58,6 +77,27 @@ foreach my $dist(split(/\n/, $recent)) {
 	next if($dist =~ /\/CHECKSUMS$/);
 	# $dist =~ s/\//::/g;
 
+	my $lock;
+
+	while(1) {
+		if(open($lock, '<', $lockfile)) {
+			my $pid = <$lock>;
+			close $lock;
+			chomp $pid;
+			if(kill(0, $pid)) {
+				print "Already running\n" if($opts{'v'});
+				sleep(10);
+				next;
+			}
+		}
+		close $lock;
+		open(my $lock, '>', $lockfile) or die "$lockfile: $!";
+		flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
+		print $lock $$;
+		flush $lock;
+		last;
+	}
+
 	print "$dist - ";
 	my $rc;
 	if($opts{'i'}) {
@@ -66,7 +106,10 @@ foreach my $dist(split(/\n/, $recent)) {
 		$rc = timed_system(300, "perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' > /dev/null 2>&1 < /dev/null");
 	}
 	print "returns $rc\n";
+	close $lock;
+	unlink $lockfile;
 }
+unlink $lockfile;
 
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {
