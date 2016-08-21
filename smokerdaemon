@@ -15,6 +15,7 @@
 #
 #	-v: verbose
 
+use autodie qw(:all);
 use warnings;
 use strict;
 
@@ -35,7 +36,7 @@ use BSD::Resource;
 die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
 
 my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
-if(open(my $lock, '<', $lockfile)) {
+if(-r $lockfile && (open(my $lock, '<', $lockfile))) {
 	my $pid = <$lock>;
 	close $lock;
 	chomp $pid;
@@ -68,6 +69,9 @@ $ENV{'PERLBREW_HOME'} = $ENV{'HOME'} . '/.perlbrew';
 openlog 'CPAN', 'cons,pid', 'user';
 
 setrlimit(RLIMIT_DATA, 32 * 1024 * 1024, 64 * 1024 * 1024) or
+	warn ('Can\'t limit the data size - watch for memory usage');
+
+setrlimit(RLIMIT_RSS, 32 * 1024 * 1024, 64 * 1024 * 1024) or
 	warn ('Can\'t limit the data size - watch for memory usage');
 
 setrlimit(RLIMIT_CPU, 300, 1200) or
