@@ -26,7 +26,7 @@ use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 
 use MyConfig;
 
-die unless($CPAN::Config->{'test_report'});
+die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
 die unless($CPAN::Config->{'urllist'});
 
 my %opts;

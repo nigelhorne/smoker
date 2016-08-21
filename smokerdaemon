@@ -32,7 +32,7 @@ use Fcntl qw(:flock);
 use Getopt::Std;
 use BSD::Resource;
 
-die unless($CPAN::Config->{'test_report'});
+die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
 
 my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
 if(open(my $lock, '<', $lockfile)) {
