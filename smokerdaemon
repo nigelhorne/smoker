@@ -108,7 +108,7 @@ while(1) {
 	my $lock;
 
 	while(1) {
-		if(open($lock, '<', $lockfile)) {
+		if((-r $lock) && open($lock, '<', $lockfile)) {
 			my $pid = <$lock>;
 			close $lock;
 			chomp $pid;
@@ -118,7 +118,6 @@ while(1) {
 				next;
 			}
 		}
-		close $lock;
 		open(my $lock, '>', $lockfile) or die "$lockfile: $!";
 		flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
 		print $lock $$;
