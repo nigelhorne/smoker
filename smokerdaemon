@@ -108,7 +108,7 @@ while(1) {
 	my $lock;
 
 	while(1) {
-		if((-r $lock) && open($lock, '<', $lockfile)) {
+		if((-r $lockfile) && open($lock, '<', $lockfile)) {
 			my $pid = <$lock>;
 			close $lock;
 			chomp $pid;
