@@ -15,7 +15,7 @@
 #
 #	-v: verbose
 
-use autodie qw(:all);
+# use autodie qw(:all);
 use warnings;
 use strict;
 
@@ -149,7 +149,9 @@ while(1) {
 		syslog 'info', "$dist returned $rc";
 		# print "$dist returned $rc";
 	}
-	close $lock;
+	if(defined($lock)) {
+		close $lock;
+	}
 	unlink $lockfile;
 }
 unlink $lockfile;
