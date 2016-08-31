@@ -15,6 +15,7 @@
 
 use warnings;
 use strict;
+# use autodie qw(:all);
 
 use Getopt::Std;
 use LWP::Simple;
@@ -36,7 +37,7 @@ my $recent;
 foreach my $url(@{$CPAN::Config->{'urllist'}}) {
 	$recent = get("$url/RECENT");
 	if($recent) {
-		print "Fetching from $url\n";
+		print "Fetching from $url\n" if($opts{'v'});
 		last;
 	}
 }
@@ -49,7 +50,7 @@ if(!$opts{'i'}) {
 }
 
 my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
-if(open(my $lock, '<', $lockfile)) {
+if((-r $lockfile) && (open(my $lock, '<', $lockfile))) {
 	my $pid = <$lock>;
 	close $lock;
 	chomp $pid;
@@ -80,7 +81,7 @@ foreach my $dist(split(/\n/, $recent)) {
 	my $lock;
 
 	while(1) {
-		if(open($lock, '<', $lockfile)) {
+		if((-r $lockfile) && (open($lock, '<', $lockfile))) {
 			my $pid = <$lock>;
 			close $lock;
 			chomp $pid;
@@ -89,8 +90,8 @@ foreach my $dist(split(/\n/, $recent)) {
 				sleep(10);
 				next;
 			}
+			close $lock;
 		}
-		close $lock;
 		open(my $lock, '>', $lockfile) or die "$lockfile: $!";
 		flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
 		print $lock $$;
@@ -106,7 +107,7 @@ foreach my $dist(split(/\n/, $recent)) {
 		$rc = timed_system(300, "perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' > /dev/null 2>&1 < /dev/null");
 	}
 	print "returns $rc\n";
-	close $lock;
+	close $lock if(defined($lock));
 	unlink $lockfile;
 }
 unlink $lockfile;
@@ -118,6 +119,7 @@ sub timed_system {
 	my $pid;
  
 	local $SIG {ALRM} = sub {
+		print "Timeout - killing $pid\n" if($opts{'v'});
 		kill 15, $pid or die "kill: $!";
 		# die "Timeout!"
 	}; # Just SIGTERM.
