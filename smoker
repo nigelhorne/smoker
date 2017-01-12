@@ -121,6 +121,8 @@ sub timed_system {
 	local $SIG {ALRM} = sub {
 		print "Timeout - killing $pid\n" if($opts{'v'});
 		kill 15, $pid or die "kill: $!";
+		sleep 5;
+		kill 9, $pid;
 		# die "Timeout!"
 	}; # Just SIGTERM.
  
