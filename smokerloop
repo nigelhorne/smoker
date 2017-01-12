@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Author Nigel Horne: njh@bandsman.co.uk
-# Copyright (C) 2015-2016, Nigel Horne
+# Copyright (C) 2015-2017, Nigel Horne
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
@@ -26,7 +26,7 @@ if test -e ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
 	exit 0
 fi
 
-ulimit -d 524288
+ulimit -d 393216
 
 export CPAN_SQLITE_NO_LOG_FILES=1 AUTOMATED_TESTING=1
 
