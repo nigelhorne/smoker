@@ -19,7 +19,7 @@ use strict;
 
 use Getopt::Std;
 use LWP::Simple;
-
+use Proc::Killfam;
 use File::HomeDir;
 use File::Spec;
 use Fcntl qw(:flock);
@@ -118,10 +118,15 @@ sub timed_system {
 
 	my $pid;
  
-	local $SIG {ALRM} = sub {
-		print "Timeout - killing $pid\n" if($opts{'v'});
-		kill 15, $pid or die "kill: $!";
-		sleep 5;
+	local $SIG{ALRM} = sub {
+		if($opts{'v'}) {
+			print "Killing process family $pid\n";
+		}
+		killfam 14, $pid or die "killfam: $!";
+		sleep 2;
+		kill 14, $pid;
+		sleep 2;
+		killfam 9, $pid;
 		kill 9, $pid;
 		# die "Timeout!"
 	}; # Just SIGTERM.
