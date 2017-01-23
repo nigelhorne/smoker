@@ -174,6 +174,10 @@ sub timed_system {
 		sleep 2;
 		killfam 9, $pid;
 		kill 9, $pid;
+		if(kill(0, $pid)) {
+			syslog 'warn', "$pid won't die";
+			die "$pid Won't die";
+		}
 		# die "Timeout!"
 	}; # Just SIGTERM.
 

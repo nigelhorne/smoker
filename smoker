@@ -128,6 +128,8 @@ sub timed_system {
 		sleep 2;
 		killfam 9, $pid;
 		kill 9, $pid;
+
+		die "$pid Won't die" if(kill(0, $pid));
 		# die "Timeout!"
 	}; # Just SIGTERM.
  
