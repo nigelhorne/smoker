@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # Author Nigel Horne: njh@bandsman.co.uk
-# Copyright (C) 2015-2016, Nigel Horne
+# Copyright (C) 2015-2017, Nigel Horne
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
@@ -23,6 +23,7 @@ use Proc::Killfam;
 use File::HomeDir;
 use File::Spec;
 use Fcntl qw(:flock);
+use BSD::Resource;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 
 use MyConfig;
@@ -65,6 +66,24 @@ $lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck');
 local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	unlink $lockfile;
 	exit 1;
+};
+
+setrlimit(RLIMIT_DATA, 32 * 1024 * 1024, 64 * 1024 * 1024) or
+	warn ('Can\'t limit the data size - watch for memory usage');
+
+setrlimit(RLIMIT_RSS, 32 * 1024 * 1024, 64 * 1024 * 1024) or
+	warn ('Can\'t limit the data size - watch for memory usage');
+
+setrlimit(RLIMIT_CPU, 300, 1200) or
+	warn ('Can\'t limit the CPU time - watch for long running programs');
+
+eval {	# Eval added to handle RT113898
+	my $number_of_cpus = Sys::Info->new()->device('CPU')->count();
+
+	if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
+		$ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
+		$ENV{'TEST_JOBS'} = $number_of_cpus;
+	}
 };
 
 $| = 1;
