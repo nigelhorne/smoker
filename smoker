@@ -95,6 +95,8 @@ foreach my $dist(split(/\n/, $recent)) {
 		next;
 	}
 	next if($dist =~ /\/CHECKSUMS$/);
+	next if($dist =~ /\.meta$/);
+	next if($dist =~ /\.readme$/);
 	# $dist =~ s/\//::/g;
 
 	my $lock;
