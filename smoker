@@ -24,6 +24,7 @@ use File::HomeDir;
 use File::Spec;
 use Fcntl qw(:flock);
 use BSD::Resource;
+use Sys::Info;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 
 use MyConfig;
