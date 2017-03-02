@@ -25,6 +25,7 @@ use File::Spec;
 use Fcntl qw(:flock);
 use BSD::Resource;
 use Sys::Info;
+use POSIX ":sys_wait_h";
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 
 use MyConfig;
@@ -168,7 +169,7 @@ sub timed_system {
  
 		alarm $time;
  
-		waitpid $pid => 0;
+		1 while waitpid(-1, WNOHANG) > 0;
 
 		$rc = $?;
 	};
