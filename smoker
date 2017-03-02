@@ -169,9 +169,9 @@ sub timed_system {
  
 		alarm $time;
  
-		1 while waitpid(-1, WNOHANG) > 0;
+		$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
 
-		$rc = $?;
+		alarm 0;
 	};
 	return -1 if $@ && $@ !~ /^Timeout!/;
 

@@ -194,9 +194,7 @@ sub timed_system {
 
 		alarm $time;
 
-		waitpid $pid => 0;
-
-		$rc = $?;
+		$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
 
 		alarm 0;
 	};
