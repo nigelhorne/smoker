@@ -90,7 +90,7 @@ setrlimit(RLIMIT_CPU, 300, 1200) or
 # }
 # };
 
-my $number_of_cpus = Unix::processors->new()->max_physical();
+my $number_of_cpus = Unix::Processors->new()->max_physical();
 if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 	$ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
 	$ENV{'TEST_JOBS'} = $number_of_cpus;
