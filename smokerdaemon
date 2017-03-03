@@ -26,7 +26,7 @@ use Sys::Syslog;
 use File::Temp;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
-use Sys::Info;
+use Unix::Processors;
 use Sys::CpuLoad;
 use Proc::Killfam;
 use Fcntl qw(:flock);
@@ -78,14 +78,22 @@ setrlimit(RLIMIT_RSS, 32 * 1024 * 1024, 64 * 1024 * 1024) or
 setrlimit(RLIMIT_CPU, 300, 1200) or
 	warn ('Can\'t limit the CPU time - watch for long running programs');
 
-eval {	# Eval added to handle RT113898
-	my $number_of_cpus = Sys::Info->new()->device('CPU')->count();
+# Eval added to handle RT113898
+# eval {
+	# my $number_of_cpus = Sys::Info->new()->device('CPU')->count();
+# 
+	# if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
+		# $ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
+		# $ENV{'TEST_JOBS'} = $number_of_cpus;
+	# }
+# }
+# };
 
-	if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
-		$ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
-		$ENV{'TEST_JOBS'} = $number_of_cpus;
-	}
-};
+my $number_of_cpus = Unix::processors->new()->max_physical();
+if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
+	$ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
+	$ENV{'TEST_JOBS'} = $number_of_cpus;
+}
 
 while(1) {
 	# Not needed, but somehow it seems cleaner to close and reopen
