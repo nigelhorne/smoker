@@ -169,7 +169,10 @@ sub timed_system {
  
 		alarm $time;
  
-		$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
+		# $rc = (waitpid($pid, 0) == $pid) ? $? : -1;
+		while(waitpid($pid, WNOHANG) > 0) {
+			$rc = $?
+		}
 
 		alarm 0;
 	};
