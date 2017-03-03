@@ -154,6 +154,8 @@ sub timed_system {
 
 		die "$pid Won't die" if(kill(0, $pid));
 		# die "Timeout!"
+
+		1 while(waitpid(-1, WNOHANG) > 0);
 	}; # Just SIGTERM.
  
 	my $rc = -1;
@@ -169,10 +171,7 @@ sub timed_system {
  
 		alarm $time;
  
-		# $rc = (waitpid($pid, 0) == $pid) ? $? : -1;
-		while(waitpid($pid, WNOHANG) > 0) {
-			$rc = $?
-		}
+		$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
 
 		alarm 0;
 	};

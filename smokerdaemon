@@ -31,6 +31,7 @@ use Sys::CpuLoad;
 use Proc::Killfam;
 use Fcntl qw(:flock);
 use Getopt::Std;
+use POSIX ":sys_wait_h";
 use BSD::Resource;
 
 die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
@@ -179,6 +180,8 @@ sub timed_system {
 			die "$pid Won't die";
 		}
 		# die "Timeout!"
+
+		1 while(waitpid(-1, WNOHANG) > 0);
 	}; # Just SIGTERM.
 
 	my $rc = -1;
@@ -194,10 +197,7 @@ sub timed_system {
 
 		alarm $time;
 
-		# $rc = (waitpid($pid, 0) == $pid) ? $? : -1;
-		while(waitpid($pid, WNOHANG) > 0) {
-			$rc = $?
-		}
+		$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
 
 		alarm 0;
 	};
