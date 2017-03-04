@@ -211,5 +211,7 @@ sub timed_system {
 	};
 	return -1 if $@ && $@ !~ /^Timeout!/;
 
+	1 while(waitpid(-1, WNOHANG) > 0);
+
 	return $rc;
 }
