@@ -140,6 +140,8 @@ foreach my $dist(split(/\n/, $recent)) {
 	print "returns $rc\n";
 	close $lock if(defined($lock));
 	unlink $lockfile;
+
+	1 while(waitpid(-1, WNOHANG) > 0);
 }
 unlink $lockfile;
 
@@ -184,8 +186,6 @@ sub timed_system {
 		alarm 0;
 	};
 	return -1 if $@ && $@ !~ /^Timeout!/;
-
-	1 while(waitpid(-1, WNOHANG) > 0);
 
 	return $rc;
 }
