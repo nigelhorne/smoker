@@ -27,7 +27,7 @@ use File::Spec;
 use Fcntl qw(:flock);
 use BSD::Resource;
 use Unix::Processors;
-use Linux::loadavg;
+use Sys::LoadAvg;
 use POSIX ":sys_wait_h";
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 
@@ -115,9 +115,9 @@ foreach my $dist(split(/\n/, $recent)) {
 	my $lock;
 
 	while(1) {
-		my @avgs = Linux::loadavg::loadavg(1);
-		if($avgs[LOADAVG_1MIN] >= 3) {
-			print STDERR 'Busy - Load Average ', $avgs[LOADAVG_1MIN], "\n";
+		my @load = Sys::LoadAvg::loadavg(1);
+		if($load[LOADAVG_1MIN] >= 3) {
+			print STDERR 'Busy - Load Average ', $load[LOADAVG_1MIN], "\n";
 			sleep 120;
 			next;
 		}
