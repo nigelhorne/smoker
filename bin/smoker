@@ -151,7 +151,7 @@ foreach my $dist(split(/\n/, $recent)) {
 	close $lock if(defined($lock));
 	unlink $lockfile;
 
-	1 while(waitpid(-1, WNOHANG) > 0);
+	1 while(waitpid(-1, WNOHANG) >= 0);
 }
 unlink $lockfile;
 
@@ -175,7 +175,7 @@ sub timed_system {
 		die "$pid Won't die" if(kill(0, $pid));
 		# die "Timeout!"
 
-		1 while(waitpid(-1, WNOHANG) > 0);
+		1 while(waitpid(-1, WNOHANG) >= 0);
 	}; # Just SIGTERM.
  
 	my $rc = -1;
