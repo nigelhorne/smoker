@@ -115,7 +115,7 @@ foreach my $dist(split(/\n/, $recent)) {
 	my $lock;
 
 	while(1) {
-		my @load = Sys::LoadAvg::loadavg(1);
+		my @load = Sys::LoadAvg::loadavg();
 		if($load[LOADAVG_1MIN] >= 3) {
 			print STDERR 'Busy - Load Average ', $load[LOADAVG_1MIN], "\n";
 			sleep 120;
