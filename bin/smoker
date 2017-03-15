@@ -73,11 +73,11 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	exit 1;
 };
 
-setrlimit(RLIMIT_DATA, 32 * 1024 * 1024, 64 * 1024 * 1024) or
-	warn ('Can\'t limit the data size - watch for memory usage');
+# setrlimit(RLIMIT_DATA, 32 * 1024 * 1024, 64 * 1024 * 1024) or
+	# warn ('Can\'t limit the data size - watch for memory usage');
 
-setrlimit(RLIMIT_RSS, 32 * 1024 * 1024, 64 * 1024 * 1024) or
-	warn ('Can\'t limit the data size - watch for memory usage');
+# setrlimit(RLIMIT_RSS, 32 * 1024 * 1024, 64 * 1024 * 1024) or
+	# warn ('Can\'t limit the data size - watch for memory usage');
 
 setrlimit(RLIMIT_CPU, 300, 1200) or
 	warn ('Can\'t limit the CPU time - watch for long running programs');
@@ -148,6 +148,8 @@ foreach my $dist(split(/\n/, $recent)) {
 	my $rc;
 	if($opts{'i'}) {
 		$rc = system("perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")'");
+	} elsif($opts{'v'}) {
+		$rc = timed_system(300, "perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' < /dev/null");
 	} else {
 		$rc = timed_system(300, "perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' > /dev/null 2>&1 < /dev/null");
 	}
@@ -189,6 +191,7 @@ sub timed_system {
 		die "Fork failed: $!" unless defined $pid;
  
 		unless ($pid) {
+			print @_, "\n" if($opts{'v'});
 			exec @_;
 			die "Exec failed: $!";
 		}
