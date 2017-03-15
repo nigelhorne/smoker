@@ -113,6 +113,7 @@ foreach my $dist(split(/\n/, $recent)) {
 	# $dist =~ s/\//::/g;
 
 	my $lock;
+	my $count = 0;
 
 	while(1) {
 		my @load = Sys::LoadAvg::loadavg();
@@ -127,6 +128,9 @@ foreach my $dist(split(/\n/, $recent)) {
 			close $lock;
 			chomp $pid;
 			if(kill(0, $pid)) {
+				if(++$count >= 6) {
+					die "Already running";
+				}
 				print "Already running\n" if($opts{'v'});
 				sleep(10);
 				next;
