@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+if [ x$TMPDIR = 'x' ]; then
+	if [[ -d $HOME/tmp ]]; then
+		export TMPDIR=$HOME/tmp
+	else
+		export TMPDIR=/tmp
+	fi
+fi
+
+LOCKFILE=${TMPDIR}/cpan-test.lck
+if test -e ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
+	# echo "Already running"
+	exit 0
+fi
+
+# make sure the lockfile is removed when we exit and then claim it
+trap "rm -f ${LOCKFILE}; exit" INT TERM ALRM EXIT
+echo $$ > ${LOCKFILE}
+
+# Stage 3
+PERLS="5.26.0 5.24.1 5.22.2 5.20.3 5.18.4 5.16.3 5.14.0 5.14.1 5.14.2 5.14.4 5.10.0 5.8.1 5.8.2 5.8.3 5.8.4 5.8.5 5.8.6 5.8.7 5.8.8 5.8.9 5.10.1 5.12.5 5.14.3 5.16.2 5.18.0 5.6.2"
+
+. ~/perl5/perlbrew/etc/bashrc
+
+rm -rf $HOME/.cpan/build/*&
+
+export CPAN_SQLITE_NO_LOG_FILES=1
+
+for i in $PERLS
+do
+	if [ ! -d $PERLBREW_ROOT/perls/perl-$i ]; then
+		continue
+	fi
+
+	perlbrew use perl-$i
+
+	echo $i:
+
+	perl -MCPAN -e 'CPAN::Shell->install(YAML::Syck)'
+	perl -MCPAN -e 'CPAN::Shell->install(App::Cpan)'
+	HARNESS_OPTIONS=c TEST_JOBS= perl -MCPAN -e 'CPAN::Shell->install(App::Cpan)'
+	perl -MCPAN -e 'CPAN::Shell->install(CPAN::SQLite)'
+	HARNESS_OPTIONS=c TEST_JOBS= perl -MCPAN -e 'CPAN::Shell->install(CPAN::SQLite)'
+	# cpan CPAN::SQLite
+done
+
+rm -f ${LOCKFILE}

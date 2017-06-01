@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+if [ x$TMPDIR = 'x' ]; then
+	if [[ -d $HOME/tmp ]]; then
+		export TMPDIR=$HOME/tmp
+	else
+		export TMPDIR=/tmp
+	fi
+fi
+
+LOCKFILE=${TMPDIR}/cpan-test.lck
+if test -e ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
+	# echo "Already running"
+	exit 0
+fi
+
+# make sure the lockfile is removed when we exit and then claim it
+trap "rm -f ${LOCKFILE}; exit" INT TERM ALRM EXIT
+echo $$ > ${LOCKFILE}
+
+ALLPERLS="26.0 24.1 22.2 22.0 20.2 20.1 18.4 16.3 14.0 14.1 14.2 14.4 10.0 8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 10.1 12.5 14.3 16.2 18.0 6.2"
+EARLYPERLS="6.2 8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 10.0 10.1"
+
+# read the options
+TEMP=`getopt -o ns --long no5.6.2,skip-bootstrap -n 'loadall1' -- "$@"`
+eval set -- "$TEMP"
+SKIPBOOTSTRAP=no
+
+while true ; do
+	case "$1" in
+		-n|--no5.6.2)
+			ALLPERLS="23.0 22.0 20.2 20.1 18.4 16.3 14.0 14.1 14.2 14.4 10.0 8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 10.1 12.5 14.3 16.2 18.0"
+			EARLYPERLS="8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 10.0 10.1"
+			shift;;
+		-s|--skip-bootstrap)
+			SKIPBOOTSTRAP=yes; shift;;
+		--) shift; break;;
+		*) echo "Internal error"; exit 1;
+	esac
+done
+
+# Stage 1
+
+if [ -r ~/perl5/perlbrew/etc/bashrc ]; then
+	. ~/perl5/perlbrew/etc/bashrc
+	fi
+
+rm -rf $HOME/.cpan/build/*&
+
+export CPAN_SQLITE_NO_LOG_FILES=1
+
+if [ $SKIPBOOTSTRAP == 'no' ]; then
+	for i in $EARLYPERLS; do
+		if [ -d $PERLBREW_ROOT/perls/perl-5.$i ]; then
+			perlbrew use perl-5.$i
+
+			perl -MCPAN -e 'CPAN::Shell->install("A/AD/ADAMK/File-Which-1.09.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("K/KW/KWILLIAMS/PathTools-3.2701.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("G/GA/GAAS/Digest-MD5-2.40.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install(Scalar::Util)'
+			perl -MCPAN -e 'CPAN::Shell->install("G/GA/GAAS/URI-1.10.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("G/GA/GAAS/HTML-Parser-3.33.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("G/GA/GAAS/libwww-perl-5.837.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("R/RA/RAM/Storable-1.0.14.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("A/AD/ADAMK/Config-Tiny-2.10.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("D/DA/DAGOLDEN/Capture-Tiny-0.21.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("D/DA/DAGOLDEN/File-pushd-0.32.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("B/BI/BINGOS/IPC-Cmd-0.76.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("E/EW/EWILHELM/Module-Build-0.32.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("D/DA/DAGOLDEN/CPAN-Reporter-1.1902.tar.gz")'
+		fi
+	done
+fi
+
+for i in $ALLPERLS
+do
+	if [ ! -d $PERLBREW_ROOT/perls/perl-5.$i ]; then
+		continue
+	fi
+
+	perlbrew use perl-5.$i
+
+	perl -MCPAN -e 'CPAN::Shell->install("A/AN/ANDK/CPAN-1.99_51.tar.gz")'
+	perl -MCPAN -e 'CPAN::Shell->install(ExtUtils::MakeMaker)'
+	perl -MCPAN -e 'CPAN::Shell->install(File::pushd)'
+	perl -MCPAN -e 'CPAN::Shell->install(Test::Reporter::Transport::Socket)'
+	perl -MCPAN -e 'CPAN::Shell->install(CPAN::Reporter)'
+done
+
+rm -f ${LOCKFILE}
