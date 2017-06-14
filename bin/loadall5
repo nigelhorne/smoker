@@ -29,5 +29,6 @@ perlbrew exec perl -MCPAN -e 'CPAN::Shell->install(Unix::Processors)'
 perlbrew exec perl -MCPAN -e 'CPAN::Shell->install(LWP::Simple)'
 perlbrew exec perl -MCPAN -e 'CPAN::Shell->install(Proc::Killfam)'
 perlbrew exec perl -MCPAN -e 'CPAN::Shell->install(Sys::LoadAvg)'
+perlbrew exec perl -MCPAN -e 'CPAN::Shell->install(BSD::Resource)'
 
 rm -f ${LOCKFILE}
