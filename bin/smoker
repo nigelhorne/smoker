@@ -99,8 +99,6 @@ if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 	$ENV{'TEST_JOBS'} = $number_of_cpus;
 }
 
-$| = 1;
-
 my @dists;
 
 foreach my $dist(split(/\n/, $recent)) {
