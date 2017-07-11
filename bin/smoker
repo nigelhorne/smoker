@@ -101,6 +101,8 @@ if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 
 $| = 1;
 
+my @dists;
+
 foreach my $dist(split(/\n/, $recent)) {
 	if($dist =~ /^authors\/id\/(.+)/) {
 		$dist = $1;
@@ -112,54 +114,62 @@ foreach my $dist(split(/\n/, $recent)) {
 	next if($dist =~ /\.readme$/);
 	# $dist =~ s/\//::/g;
 
-	my $lock;
-	my $count = 0;
+	push @dists, $dist;
+}
 
-	while(1) {
-		my @load = Sys::LoadAvg::loadavg();
-		if($load[LOADAVG_1MIN] >= 3) {
-			print STDERR 'Busy - Load Average ', $load[LOADAVG_1MIN], "\n";
-			sleep 120;
+my $lock;
+my $count = 0;
+
+while(1) {
+	my @load = Sys::LoadAvg::loadavg();
+	if($load[LOADAVG_1MIN] >= 3) {
+		print STDERR 'Busy - Load Average ', $load[LOADAVG_1MIN], "\n";
+		sleep 120;
+		next;
+	}
+
+	if((-r $lockfile) && (open($lock, '<', $lockfile))) {
+		my $pid = <$lock>;
+		close $lock;
+		chomp $pid;
+		if(kill(0, $pid)) {
+			if(++$count >= 6) {
+				die "Already running";
+			}
+			print "Already running\n" if($opts{'v'});
+			sleep(10);
 			next;
 		}
-
-		if((-r $lockfile) && (open($lock, '<', $lockfile))) {
-			my $pid = <$lock>;
-			close $lock;
-			chomp $pid;
-			if(kill(0, $pid)) {
-				if(++$count >= 6) {
-					die "Already running";
-				}
-				print "Already running\n" if($opts{'v'});
-				sleep(10);
-				next;
-			}
-			close $lock;
-		}
-		open(my $lock, '>', $lockfile) or die "$lockfile: $!";
-		flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
-		print $lock $$;
-		flush $lock;
-		last;
+		close $lock;
 	}
-
-	print "$dist - ";
-	my $rc;
-	if($opts{'i'}) {
-		$rc = system("perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")'");
-	} elsif($opts{'v'}) {
-		$rc = timed_system(300, "perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' < /dev/null");
-	} else {
-		$rc = timed_system(300, "perl -MCPAN -e 'CPAN::Shell->test(\"$dist\")' > /dev/null 2>&1 < /dev/null");
-	}
-	print "returns $rc\n";
-	close $lock if(defined($lock));
-	unlink $lockfile;
-
-	1 while(waitpid(-1, WNOHANG) >= 0);
+	open(my $lock, '>', $lockfile) or die "$lockfile: $!";
+	flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
+	print $lock $$;
+	flush $lock;
+	last;
 }
+
+if(scalar(@dists)) {
+	my $list;
+	foreach my $dist(@dists) {
+		if($list) {
+			$list .= ',';
+		}
+		$list .= "\"$dist\"";
+	}
+	if($opts{'i'}) {
+		system("perl -MCPAN -e 'CPAN::Shell->test($list)'"),
+	} elsif($opts{'v'}) {
+		timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null");
+	} else {
+		print join("\n", @dists), "\n";
+		timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' > /dev/null 2>&1 < /dev/null");
+	}
+}
+close $lock if(defined($lock));
 unlink $lockfile;
+
+1 while(waitpid(-1, WNOHANG) >= 0);
 
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {
