@@ -116,6 +116,14 @@ while(1) {
 		push @dists, $dist;
 	}
 
+	my $list;
+	foreach my $dist(@dists) {
+		if($list) {
+			$list .= ',';
+		}
+		$list .= "\"$dist.tar.gz\"";
+	}
+
 	my $lock;
 
 	while(1) {
@@ -140,14 +148,6 @@ while(1) {
 		print $lock $$;
 		flush $lock;
 		last;
-	}
-
-	my $list;
-	foreach my $dist(@dists) {
-		if($list) {
-			$list .= ',';
-		}
-		$list .= "\"$dist.tar.gz\"";
 	}
 
 	syslog 'info', "Smoking $list";
