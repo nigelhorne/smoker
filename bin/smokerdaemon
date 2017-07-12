@@ -69,13 +69,14 @@ $ENV{'PERLBREW_HOME'} = $ENV{'HOME'} . '/.perlbrew';
 
 openlog 'CPAN', 'cons,pid', 'user';
 
-setrlimit(RLIMIT_DATA, 32 * 1024 * 1024, 64 * 1024 * 1024) or
-	warn ('Can\'t limit the data size - watch for memory usage');
+# setrlimit(RLIMIT_DATA, 64 * 1024 * 1024, 96 * 1024 * 1024) or
+	# warn ('Can\'t limit the data size - watch for memory usage');
 
-setrlimit(RLIMIT_RSS, 32 * 1024 * 1024, 64 * 1024 * 1024) or
-	warn ('Can\'t limit the data size - watch for memory usage');
+# setrlimit(RLIMIT_RSS, 64 * 1024 * 1024, 96 * 1024 * 1024) or
+	# warn ('Can\'t limit the data size - watch for memory usage');
 
-setrlimit(RLIMIT_CPU, 300, 1200) or
+# Give 5 minutes to tidyup before the next hourly cron job starts
+setrlimit(RLIMIT_CPU, 3300, 3600) or
 	warn ('Can\'t limit the CPU time - watch for long running programs');
 
 # Eval added to handle RT113898
@@ -102,6 +103,7 @@ while(1) {
 
 	my @dists;
 
+	# push @dists, 'M/MI/MILSO/Pod-Weaver-Section-CommentString-0.03';
 	DIST: while(1) {
 		my $dist;
 
@@ -117,6 +119,12 @@ while(1) {
 	my $lock;
 
 	while(1) {
+		my @lav = Sys::CpuLoad::load();
+		if($lav[0] > 3) {
+			sleep(10);
+			next;
+		}
+
 		if((-r $lockfile) && open($lock, '<', $lockfile)) {
 			my $pid = <$lock>;
 			close $lock;
@@ -134,37 +142,43 @@ while(1) {
 		last;
 	}
 
+	my $list;
 	foreach my $dist(@dists) {
-		while(1) {
-			my @lav = Sys::CpuLoad::load();
-			last if($lav[0] <= 3);
-			sleep 10;
+		if($list) {
+			$list .= ',';
 		}
-
-		my $tmp = File::Temp->new(UNLINK => 0);
-		if($opts{'v'}) {
-			print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' < /dev/null\n";
-		} else {
-			print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test(\"$dist.tar.gz\")' > /dev/null 2>&1 < /dev/null\n";
-		}
-		my $filename = $tmp->filename();
-		close $tmp;
-
-		my $rc = timed_system(1800, $CPAN::Config->{'shell'}, $filename);
-		# my $rc = timed_system(1800, $CPAN::Config->{'shell'} . " $filename");
-
-		unlink $filename;
-
-		syslog 'info', "$dist returned $rc";
-		# print "$dist returned $rc";
-
-		1 while(waitpid(-1, WNOHANG) >= 0);
+		$list .= "\"$dist.tar.gz\"";
 	}
+
+	syslog 'info', "Smoking $list";
+	print 'Smoking ', join("\n", @dists), "\n";
+
+	my $tmp = File::Temp->new(UNLINK => 0);
+	if($opts{'v'}) {
+		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null\n";
+		print "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null\n";
+	} else {
+		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' > /dev/null 2>&1 < /dev/null\n";
+	}
+	my $filename = $tmp->filename();
+	close $tmp;
+
+	if($opts{'v'}) {
+		my $rc = timed_system(3300, $CPAN::Config->{'shell'}, '-v', $filename);
+	} else {
+		my $rc = timed_system(3300, $CPAN::Config->{'shell'}, $filename);
+	}
+
+	unlink $filename;
+
+	1 while(waitpid(-1, WNOHANG) >= 0);
+
 	if(defined($lock)) {
 		close $lock;
 	}
 	unlink $lockfile;
 }
+
 unlink $lockfile;
 closelog;
 
