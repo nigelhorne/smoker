@@ -79,7 +79,7 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 # setrlimit(RLIMIT_RSS, 32 * 1024 * 1024, 64 * 1024 * 1024) or
 	# warn ('Can\'t limit the data size - watch for memory usage');
 
-setrlimit(RLIMIT_CPU, 300, 1200) or
+setrlimit(RLIMIT_CPU, 3300, 3600) or
 	warn ('Can\'t limit the CPU time - watch for long running programs');
 
 # Eval added to handle RT113898
