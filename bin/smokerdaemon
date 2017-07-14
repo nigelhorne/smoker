@@ -124,6 +124,11 @@ while(1) {
 		$list .= "\"$dist.tar.gz\"";
 	}
 
+	if(!defined($list)) {
+		sleep(1);	# avoid looping
+		next;
+	}
+
 	syslog 'info', "Smoking $list";
 	print 'Smoking ', join("\n", @dists), "\n";
 
