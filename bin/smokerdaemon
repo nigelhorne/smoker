@@ -124,6 +124,9 @@ while(1) {
 		$list .= "\"$dist.tar.gz\"";
 	}
 
+	syslog 'info', "Smoking $list";
+	print 'Smoking ', join("\n", @dists), "\n";
+
 	my $lock;
 
 	while(1) {
@@ -149,9 +152,6 @@ while(1) {
 		flush $lock;
 		last;
 	}
-
-	syslog 'info', "Smoking $list";
-	print 'Smoking ', join("\n", @dists), "\n";
 
 	my $tmp = File::Temp->new(UNLINK => 0);
 	if($opts{'v'}) {
