@@ -175,23 +175,6 @@ sub timed_system {
 
 	my $pid;
  
-	local $SIG{ALRM} = sub {
-		if($opts{'v'}) {
-			print "Killing process family $pid\n";
-		}
-		killfam 14, $pid or die "killfam: $!";
-		sleep 2;
-		kill 14, $pid;
-		sleep 2;
-		killfam 9, $pid;
-		kill 9, $pid;
-
-		die "$pid Won't die" if(kill(0, $pid));
-		# die "Timeout!"
-
-		1 while(waitpid(-1, WNOHANG) >= 0);
-	}; # Just SIGTERM.
- 
 	my $rc = -1;
 	eval {
 		$pid = fork;
@@ -204,6 +187,26 @@ sub timed_system {
 			die "Exec failed: $!";
 		}
  
+		local $SIG{ALRM} = sub {
+			if($opts{'v'}) {
+				print "Killing process family $pid\n";
+			}
+			killfam 14, $pid;
+			sleep 2;
+			kill 14, $pid;
+			sleep 2;
+			killfam 9, $pid;
+			kill 9, $pid;
+
+			if(kill(0, $pid)) {
+				# syslog 'warn', "$pid won't die";
+				die "$pid Won't die";
+			}
+			# die "Timeout!"
+
+			1 while(waitpid(-1, WNOHANG) >= 0);
+		}; # Just SIGTERM.
+	 
 		alarm $time;
  
 		$rc = (waitpid($pid, 0) == $pid) ? $? : -1;

@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # Author Nigel Horne: njh@bandsman.co.uk
-# Copyright (C) 2016, Nigel Horne
+# Copyright (C) 2016-2017, Nigel Horne
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
@@ -195,26 +195,6 @@ sub timed_system {
 
 	my $pid;
 
-	local $SIG{ALRM} = sub {
-		if($opts{'v'}) {
-			print "Killing process family $pid\n";
-		}
-		syslog 'info', "killing process family $pid";
-		killfam 14, $pid or die "killfam: $!";
-		sleep 2;
-		kill 14, $pid;
-		sleep 2;
-		killfam 9, $pid;
-		kill 9, $pid;
-		if(kill(0, $pid)) {
-			syslog 'warn', "$pid won't die";
-			die "$pid Won't die";
-		}
-		# die "Timeout!"
-
-		1 while(waitpid(-1, WNOHANG) >= 0);
-	}; # Just SIGTERM.
-
 	my $rc = -1;
 	eval {
 		$pid = fork;
@@ -225,6 +205,26 @@ sub timed_system {
 			exec @_;
 			die "Exec failed: $!";
 		}
+
+		local $SIG{ALRM} = sub {
+			if($opts{'v'}) {
+				print "Killing process family $pid\n";
+			}
+			syslog 'info', "killing process family $pid";
+			killfam 14, $pid;
+			sleep 2;
+			kill 14, $pid;
+			sleep 2;
+			killfam 9, $pid;
+			kill 9, $pid;
+			if(kill(0, $pid)) {
+				syslog 'warn', "$pid won't die";
+				die "$pid Won't die";
+			}
+			# die "Timeout!"
+
+			1 while(waitpid(-1, WNOHANG) >= 0);
+		};
 
 		alarm $time;
 
