@@ -85,7 +85,7 @@ setrlimit(RLIMIT_CPU, 3300, 3600) or
 # Eval added to handle RT113898
 # eval {
 	# my $number_of_cpus = Sys::Info->new()->device('CPU')->count();
-# 
+#
 	# if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 		# $ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
 		# $ENV{'TEST_JOBS'} = $number_of_cpus;
@@ -174,19 +174,19 @@ sub timed_system {
 	my $time = shift;
 
 	my $pid;
- 
+
 	my $rc = -1;
 	eval {
 		$pid = fork;
- 
+
 		die "Fork failed: $!" unless defined $pid;
- 
+
 		unless ($pid) {
 			print @_, "\n" if($opts{'v'});
 			exec @_;
 			die "Exec failed: $!";
 		}
- 
+
 		local $SIG{ALRM} = sub {
 			if($opts{'v'}) {
 				print "Killing process family $pid\n";
@@ -206,9 +206,9 @@ sub timed_system {
 
 			1 while(waitpid(-1, WNOHANG) >= 0);
 		}; # Just SIGTERM.
-	 
+
 		alarm $time;
- 
+
 		$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
 
 		alarm 0;
