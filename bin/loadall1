@@ -18,7 +18,6 @@ fi
 trap "rm -f ${LOCKFILE}; exit" INT TERM ALRM EXIT
 echo $$ > ${LOCKFILE}
 
-ALLPERLS="27.2 26.0 24.2 22.4 22.0 20.2 20.1 18.4 16.3 14.0 14.1 14.2 14.4 10.0 8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 10.1 12.5 14.3 16.2 18.0 6.2"
 EARLYPERLS="6.2 8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 10.0 10.1"
 
 # read the options
@@ -29,7 +28,6 @@ SKIPBOOTSTRAP=no
 while true ; do
 	case "$1" in
 		-n|--no5.6.2)
-			ALLPERLS="27.2 26.0 24.2 22.4 20.2 20.1 18.4 16.3 14.0 14.1 14.2 14.4 10.0 8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 10.1 12.5 14.3 16.2 18.0"
 			EARLYPERLS="8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 10.0 10.1"
 			shift;;
 		-s|--skip-bootstrap)
@@ -72,19 +70,23 @@ if [ $SKIPBOOTSTRAP == 'no' ]; then
 	done
 fi
 
-for i in $ALLPERLS
+perlbrew switch-off
+
+if [ $1x == x ]; then
+	LIST=`perlbrew list`
+else
+	LIST=$*
+fi
+
+for i in $LIST
 do
-	if [ ! -d $PERLBREW_ROOT/perls/perl-5.$i ]; then
+	if [ ! -d $PERLBREW_ROOT/perls/$i ]; then
 		continue
 	fi
 
-	perlbrew use perl-5.$i
+	perlbrew use $i
 
-	perl -MCPAN -e 'CPAN::Shell->install("A/AN/ANDK/CPAN-1.99_51.tar.gz")'
-	perl -MCPAN -e 'CPAN::Shell->install(ExtUtils::MakeMaker)'
-	perl -MCPAN -e 'CPAN::Shell->install(File::pushd)'
-	perl -MCPAN -e 'CPAN::Shell->install(Test::Reporter::Transport::Socket)'
-	perl -MCPAN -e 'CPAN::Shell->install(CPAN::Reporter)'
+	perl -MCPAN -e 'CPAN::Shell->install("A/AN/ANDK/CPAN-1.99_51.tar.gz", "ExtUtils::MakeMaker", "File::pushd", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
 done
 
 rm -f ${LOCKFILE}

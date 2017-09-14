@@ -20,14 +20,32 @@ fi
 trap "rm -f ${LOCKFILE}; exit" INT TERM ALRM EXIT
 echo $$ > ${LOCKFILE}
 
-rm -rf $HOME/.cpan/build&
+# Stage 5
+. ~/perl5/perlbrew/etc/bashrc
+
+rm -rf $HOME/.cpan/build/*&
 
 export CPAN_SQLITE_NO_LOG_FILES=1
 
-perlbrew exec perl -MCPAN -e 'CPAN::Shell->install(CPAN::Reporter)'
-perlbrew exec perl -MCPAN -e 'CPAN::Shell->install(Unix::Processors)'
-perlbrew exec perl -MCPAN -e 'CPAN::Shell->install(LWP::Simple)'
-perlbrew exec perl -MCPAN -e 'CPAN::Shell->install(Proc::Killfam)'
-perlbrew exec perl -MCPAN -e 'CPAN::Shell->install(Sys::LoadAvg)'
+perlbrew switch-off
+
+if [ $1x == x ]; then
+	LIST=`perlbrew list`
+else
+	LIST=$*
+fi
+
+for i in $LIST
+do
+	if [ ! -d $PERLBREW_ROOT/perls/$i ]; then
+		continue
+	fi
+
+	perlbrew use $i
+
+	echo $i:
+
+	perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "Unix::Processors", "LWP::Simple", "Proc::Killfam", "Sys::LoadAvg")'
+done
 
 rm -f ${LOCKFILE}
