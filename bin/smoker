@@ -51,6 +51,9 @@ foreach my $url(@{$CPAN::Config->{'urllist'}}) {
 die if(!$recent);
 
 $ENV{'CPAN_SQLITE_NO_LOG_FILES'} = 1;
+delete $ENV{'CC'};
+delete $ENV{'CFLAGS'};
+delete $ENV{'LDFLAGS'};
 if(!$opts{'i'}) {
 	$ENV{'AUTOMATED_TESTING'} = 1;
 }

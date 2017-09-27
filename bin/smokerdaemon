@@ -61,6 +61,9 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 my $port = 21212;
 
 $ENV{'CPAN_SQLITE_NO_LOG_FILES'} = 1;
+delete $ENV{'CC'};
+delete $ENV{'CFLAGS'};
+delete $ENV{'LDFLAGS'};
 $ENV{'AUTOMATED_TESTING'} = 1;
 
 # TODO: read from config files

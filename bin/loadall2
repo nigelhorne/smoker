@@ -26,6 +26,9 @@ echo $$ > ${LOCKFILE}
 rm -rf $HOME/.cpan/build/*&
 
 export CPAN_SQLITE_NO_LOG_FILES=1
+export CC=
+export CFLAGS=
+export LDFLAGS=
 
 perlbrew switch-off
 
