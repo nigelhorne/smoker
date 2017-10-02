@@ -48,7 +48,7 @@ do
 
 	echo $i:
 
-	perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "Unix::Processors", "LWP::Simple", "Proc::Killfam", "Sys::LoadAvg")'
+	perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "Unix::Processors", "LWP::Simple", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource")'
 done
 
 rm -f ${LOCKFILE}
