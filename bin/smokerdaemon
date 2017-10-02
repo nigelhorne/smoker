@@ -107,6 +107,7 @@ while(1) {
 	my @dists;
 
 	syslog 'info', 'Waiting to be told what to smoke';
+	print "Wating to be told what to smoke\n" if($opts{'v'});
 
 	# push @dists, 'M/MI/MILSO/Pod-Weaver-Section-CommentString-0.03';
 	DIST: while(1) {
@@ -165,10 +166,13 @@ while(1) {
 
 	my $tmp = File::Temp->new(UNLINK => 0);
 	if($opts{'v'}) {
-		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null\n";
-		print "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null\n";
+		# print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null\n";
+		# print "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null\n";
+		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list' < /dev/null\n";
+		print "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list < /dev/null\n";
 	} else {
-		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' > /dev/null 2>&1 < /dev/null\n";
+		# print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' > /dev/null 2>&1 < /dev/null\n";
+		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list > /dev/null 2>&1 < /dev/null\n";
 	}
 	my $filename = $tmp->filename();
 	close $tmp;

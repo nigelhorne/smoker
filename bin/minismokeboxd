@@ -1,0 +1,129 @@
+#!/usr/bin/env bash
+
+if [ x$TMPDIR = 'x' ]; then
+	if [[ -d $HOME/tmp ]]; then
+		export TMPDIR=$HOME/tmp
+	else
+		export TMPDIR=/tmp
+	fi
+fi
+
+LOCKFILE=${TMPDIR}/cpan-test.lck
+if test -e ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
+	echo "Already running"
+	exit 0
+fi
+
+# make sure the lockfile is removed when we exit and then claim it
+trap "rm -f ${LOCKFILE}; exit" INT TERM ALRM EXIT
+echo $$ > ${LOCKFILE}
+
+ulimit -d 524288
+
+export CPAN_SQLITE_NO_LOG_FILES=1 AUTOMATED_TESTING=1
+
+if [ -d /var/www/mirrors/CPAN ]; then
+	# CPAN=file:///var/www/mirrors/CPAN/
+	CPAN=http://localhost/mirrors/CPAN/
+elif [ -d /var/www/html/mirrors/CPAN ]; then
+	# CPAN=file:///var/www/html/mirrors/CPAN/
+	CPAN=http://localhost/mirrors/CPAN/
+elif [ -d /mnt/CPAN ]; then
+	CPAN=file:///mnt/CPAN/
+else
+	# UK
+	CPAN=http://www.mirror.8086.net/sites/CPAN/
+	# US
+	# CPAN=http://mirror.jmu.edu/pub/CPAN/
+fi
+
+# TODO: add ionice -3 where supported
+
+# See http://searchco.de/codesearch/view/17183976
+
+while true; do
+	mv $HOME/.cpan/build $HOME/.cpan/Obuild
+	chmod -R 777 $HOME/.cpan/Obuild &&
+	mkdir -p $HOME/.cpan/build &&
+	rm -rf $HOME/.cpan/Obuild
+
+	for i in 5.27.3 5.26.1 5.24.2 5.22.4 5.20.3 5.18.4 5.18.3 5.6.2 5.8.8 5.8.9 5.10.0 5.10.1 5.12.5 5.14.4 5.14.2 5.14.3 5.16.2 5.16.3 5.20.1 5.20.0; do
+		loadavg=`uptime | awk '{print $10}'`
+		# bash doesn't understand floating point
+		# so convert the number to an interger
+		thisloadavg=`echo $loadavg|awk -F \. '{print $1}'`
+		if [ "$thisloadavg" -ge "1" ]; then
+			echo "Busy - Load Average $loadavg ($thisloadavg) "
+			sleep 120
+			# Will miss this Perl - catch it next time
+			continue
+		fi
+		echo Mini Smoking $i
+
+		# eval `perlbrew -q exec --with perl-$i perl << 'EOF'
+# use Config;
+# print "export CFLAGS=\"$Config{ccflags}\"\n";
+# print "export LDFLAGS=\"$Config{ldflags}\"\n";
+# EOF`
+export CC=
+export CFLAGS=
+export LDFLAGS=
+
+		if [ -r $HOME/.cpanreporter/perl-$i/config.ini ]; then
+			export PERL_CPAN_REPORTER_DIR=$HOME/.cpanreporter/perl-$i
+		else
+			export PERL_CPAN_REPORTER_DIR=
+		fi
+		if [ -x /usr/bin/timeout ]; then
+			if [[ `perlbrew -q exec --with perl-$i perl -V | fgrep sanitize` ]]; then
+				LIMIT=unlimited
+			else
+				LIMIT=524288
+			fi
+
+			timeout -s SIGALRM -k 60s 30m $SHELL -c "ulimit -v $LIMIT; nice perlbrew exec --with perl-$i minismokebox --backend CPAN::Reporter --url $CPAN --perlenv"
+		else
+			nice perlbrew exec --with perl-$i minismokebox --backend CPAN::Reporter --url $CPAN --perlenv
+		fi
+	done
+
+	# nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author nhorne
+	# nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^A[N-Z]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^B[A-M]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^B[N-Z]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^C'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^D[A-M]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^D[N-Z]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^[EF]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^G'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^[HI]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^J[A-M]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^J[N-Z]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^K'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^L'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^M[A-M]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^M[N-Z]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^[NO]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^[PQ]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^R[A-M]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^R[N-Z]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^S[A-M]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^S[N-Z]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^T'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^[UVWXY]'
+	# # nice perlbrew exec minismokebox --backend CPAN::Reporter --url $CPAN --perlenv --author '^Z'
+
+	# # for i in `perlbrew exec which perl | grep /home`; do nice $i -w -Mstrict /usr/local/bin/minismokebox --backend CPAN::Reporter --url $CPAN --perl $i --perlenv; done
+	for i in /usr/local/bin/perl5.*; do nice /usr/local/bin/minismokebox --backend CPAN::Reporter --url $CPAN --perl $i; done
+	nice /usr/bin/perl -w -Mstrict /usr/local/bin/minismokebox --perl /usr/bin/perl --backend CPAN::Reporter --url $CPAN
+
+	# if [ `date +%H` -ge 16 ]
+	# then
+		# sleep 3600
+	# else
+		sleep 60
+	# fi
+done
+
+rm -f ${LOCKFILE}
