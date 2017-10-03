@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# set -x
 set -e
 source $PERLBREW_ROOT/etc/bashrc
 
@@ -7,4 +8,4 @@ if [ -r $HOME/.cpanreporter/$PERLBREW_PERL/config.ini ]; then
 	export PERL_CPAN_REPORTER_DIR=$HOME/.cpanreporter/$PERLBREW_PERL
 fi
 
-exec perl -MCPAN -e CPAN::Shell->test($*)
+exec perl -MCPAN -e "CPAN::Shell->test($*)"
