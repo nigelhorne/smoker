@@ -168,7 +168,7 @@ while(1) {
 	if($opts{'v'}) {
 		# print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null\n";
 		# print "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null\n";
-		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list' < /dev/null\n";
+		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list < /dev/null\n";
 		print "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list < /dev/null\n";
 	} else {
 		# print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' > /dev/null 2>&1 < /dev/null\n";
