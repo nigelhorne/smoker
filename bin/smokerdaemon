@@ -130,7 +130,7 @@ while(1) {
 		if($list) {
 			$list .= ',';
 		}
-		$list .= "\\"$dist.tar.gz\\"";
+		$list .= "\\\"$dist.tar.gz\\\"";
 	}
 
 	if(!defined($list)) {
