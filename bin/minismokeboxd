@@ -65,9 +65,7 @@ while true; do
 # print "export CFLAGS=\"$Config{ccflags}\"\n";
 # print "export LDFLAGS=\"$Config{ldflags}\"\n";
 # EOF`
-export CC=
-export CFLAGS=
-export LDFLAGS=
+		unset CC CFLAGS LDFLAGS
 
 		if [ -r $HOME/.cpanreporter/perl-$i/config.ini ]; then
 			export PERL_CPAN_REPORTER_DIR=$HOME/.cpanreporter/perl-$i

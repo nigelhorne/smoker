@@ -45,6 +45,11 @@ do
 
 	echo $i:
 
+	if [ -r $HOME/.cpanreporter/perl-$i/config.ini ]; then
+		export PERL_CPAN_REPORTER_DIR=$HOME/.cpanreporter/perl-$i
+	else
+		unset PERL_CPAN_REPORTER_DIR
+	fi
 	perl -MCPAN -e 'CPAN::Shell->install("Curses", "LWP", "Term::Cap", "Term::ReadKey", "Socket::GetAddrInfo", "App::SmokeBox::Mini", "Bundle::CPAN::Reporter::Smoker::Tests")'
 	HARNESS_OPTIONS=c TEST_JOBS= perl -MCPAN -e 'CPAN::Shell->install(App::SmokeBox::Mini)'
 

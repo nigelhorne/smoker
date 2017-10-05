@@ -46,6 +46,11 @@ do
 
 	echo $i:
 
+	if [ -r $HOME/.cpanreporter/perl-$i/config.ini ]; then
+		export PERL_CPAN_REPORTER_DIR=$HOME/.cpanreporter/perl-$i
+	else
+		unset PERL_CPAN_REPORTER_DIR
+	fi
 	perl -MCPAN -e 'CPAN::Shell->install("YAML::XS", "YAML::Any")'
 done
 
