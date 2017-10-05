@@ -36,6 +36,8 @@ else
 	LIST=$*
 fi
 
+ulimit -d 524288
+
 for i in $LIST
 do
 	if [ ! -d $PERLBREW_ROOT/perls/$i ]; then
