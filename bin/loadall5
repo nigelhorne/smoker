@@ -36,7 +36,7 @@ else
 	LIST=$*
 fi
 
-ulimit -d 524288
+ulimit -d 393216
 
 for i in $LIST
 do

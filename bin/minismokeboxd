@@ -18,7 +18,7 @@ fi
 trap "rm -f ${LOCKFILE}; exit" INT TERM ALRM EXIT
 echo $$ > ${LOCKFILE}
 
-ulimit -d 524288
+ulimit -d 393216
 
 export CPAN_SQLITE_NO_LOG_FILES=1 AUTOMATED_TESTING=1
 
