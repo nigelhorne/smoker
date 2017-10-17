@@ -84,7 +84,7 @@ while true; do
 			if [[ `perlbrew -q exec --with perl-$i perl -V | fgrep sanitize` ]]; then
 				LIMIT=unlimited
 			else
-				LIMIT=524288
+				LIMIT=393216
 			fi
 
 			timeout -s SIGALRM -k 60s 30m $SHELL -c "ulimit -v $LIMIT; nice perlbrew exec --with perl-$i minismokebox --backend CPAN::Reporter --url $CPAN --perlenv"
