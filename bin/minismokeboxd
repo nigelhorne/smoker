@@ -67,29 +67,29 @@ while true; do
 		fi
 		echo Mini Smoking $i
 
-		# eval `perlbrew -q exec --with perl-$i perl << 'EOF'
+		# eval `perlbrew -q exec --with $i perl << 'EOF'
 # use Config;
 # print "export CFLAGS=\"$Config{ccflags}\"\n";
 # print "export LDFLAGS=\"$Config{ldflags}\"\n";
 # EOF`
 		unset CC CFLAGS LDFLAGS
 
-		if [ -r $HOME/.cpanreporter/perl-$i/config.ini ]; then
-			export PERL_CPAN_REPORTER_DIR=$HOME/.cpanreporter/perl-$i
+		if [ -r $HOME/.cpanreporter/$i/config.ini ]; then
+			export PERL_CPAN_REPORTER_DIR=$HOME/.cpanreporter/$i
 		else
-			export PERL_CPAN_REPORTER_DIR=
+			unset PERL_CPAN_REPORTER_DIR
 		fi
 
 		if [ -x /usr/bin/timeout ]; then
-			if [[ `perlbrew -q exec --with perl-$i perl -V | fgrep sanitize` ]]; then
+			if [[ `perlbrew -q exec --with $i perl -V | fgrep sanitize` ]]; then
 				LIMIT=unlimited
 			else
 				LIMIT=393216
 			fi
 
-			timeout -s SIGALRM -k 60s 30m $SHELL -c "ulimit -v $LIMIT; nice perlbrew exec --with perl-$i minismokebox --backend CPAN::Reporter --url $CPAN --perlenv"
+			timeout -s SIGALRM -k 60s 30m $SHELL -c "ulimit -v $LIMIT; nice perlbrew exec --with $i minismokebox --backend CPAN::Reporter --url $CPAN --perlenv"
 		else
-			nice perlbrew exec --with perl-$i minismokebox --backend CPAN::Reporter --url $CPAN --perlenv
+			nice perlbrew exec --with $i minismokebox --backend CPAN::Reporter --url $CPAN --perlenv
 		fi
 	done
 
