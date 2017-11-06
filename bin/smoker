@@ -159,7 +159,7 @@ if(scalar(@dists)) {
 		$list .= "\"$dist\"";
 	}
 	if($opts{'i'}) {
-		system("perl -MCPAN -e 'CPAN::Shell->test($list)'"),
+		system("perl -MCPAN -e 'CPAN::Shell->test($list)'");
 	} elsif($opts{'v'}) {
 		timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null");
 	} else {
