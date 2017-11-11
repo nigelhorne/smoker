@@ -18,7 +18,8 @@ use IO::Socket::INET;
 # Update the minicpan repository, and tell the smokers what to test
 
 # FIXME - should be arguments
-my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://www.cpan.org/ -C ~njh/.minicpanrc';
+# my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://www.cpan.org/ -C ~njh/.minicpanrc';
+my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://cpan.mirror.constant.com/ -C ~njh/.minicpanrc';
 my $port = 21212;
 
 umask(022);
