@@ -29,6 +29,7 @@ use BSD::Resource;
 use Unix::Processors;
 use Sys::LoadAvg;
 use POSIX ":sys_wait_h";
+use IO::Handle;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 
 use MyConfig;
@@ -141,12 +142,11 @@ while(1) {
 			sleep(10);
 			next;
 		}
-		close $lock;
 	}
 	open(my $lock, '>', $lockfile) or die "$lockfile: $!";
 	flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
 	print $lock $$;
-	flush $lock;
+	$lock->flush();
 	last;
 }
 
