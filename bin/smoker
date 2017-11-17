@@ -13,7 +13,9 @@
 # I Love App::SmokeBox::Mini, unfortunately too many of its dependancies don't
 # build on many platforms, so this is a small plaything that does for me
 
-# 19 * * * * [ -r .perlbrew/init ] && /bin/bash bin/perlbrew-cron bin/smoker
+# Takes an optional argument of the number of minutes since the last run
+
+# 19 * * * * [ -r .perlbrew/init ] && /bin/bash bin/perlbrew-cron bin/smoker 60
 
 use warnings;
 use strict;
@@ -105,19 +107,24 @@ if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 
 my @dists;
 
-foreach my $dist(split(/\n/, $recent)) {
-	if($dist =~ /^authors\/id\/(.+)/) {
-		$dist = $1;
-	} else {
-		next;
-	}
-	next if($dist =~ /\/CHECKSUMS$/);
-	next if($dist =~ /\.meta$/);
-	next if($dist =~ /\.readme$/);
-	# $dist =~ s/\//::/g;
+if($ARGV[0]) {
+	require CPAN::Recent::Uploads;
 
-	push @dists, $dist;
-}
+	@dists = CPAN::Recent::Uploads->recent($ARGV[0] * 60, @{$CPAN::Config->{'urllist'}}[0]);
+} else {
+	foreach my $dist(split(/\n/, $recent)) {
+		if($dist =~ /^authors\/id\/(.+)/) {
+			$dist = $1;
+		} else {
+			next;
+		}
+		next if($dist =~ /\/CHECKSUMS$/);
+		next if($dist =~ /\.meta$/);
+		next if($dist =~ /\.readme$/);
+		# $dist =~ s/\//::/g;
+
+		push @dists, $dist;
+	}
 
 my $lock;
 my $count = 0;
