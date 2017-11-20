@@ -36,8 +36,6 @@ else
 	LIST=$*
 fi
 
-ulimit -d 393216
-
 for i in $LIST
 do
 	if [ ! -d $PERLBREW_ROOT/perls/$i ]; then
@@ -54,7 +52,7 @@ do
 		unset PERL_CPAN_REPORTER_DIR
 	fi
 	perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "Unix::Processors", "LWP::Simple", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "CPAN::Reporter::Smoker")'
-	# perl -MCPAN::Reporter::Smoker -e start
+	perl -MCPAN::Reporter::Smoker -e start
 done
 
 rm -f ${LOCKFILE}

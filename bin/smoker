@@ -125,6 +125,7 @@ if($ARGV[0]) {
 
 		push @dists, $dist;
 	}
+}
 
 my $lock;
 my $count = 0;
