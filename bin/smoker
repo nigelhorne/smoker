@@ -174,7 +174,7 @@ if(scalar(@dists)) {
 	} else {
 		print join("\n", @dists), "\n";
 		# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' > /dev/null 2>&1 < /dev/null");
-		timed_system(3300, "testwrapper $list' > /dev/null 2>&1 < /dev/null");
+		timed_system(3300, "testwrapper $list > /dev/null 2>&1 < /dev/null");
 	}
 }
 close $lock if(defined($lock));
