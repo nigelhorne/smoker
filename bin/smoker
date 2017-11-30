@@ -164,7 +164,7 @@ if(scalar(@dists)) {
 		if($list) {
 			$list .= ',';
 		}
-		$list .= "\"$dist\"";
+		$list .= "\"\\\"$dist\\\"\"";
 	}
 	if($opts{'i'}) {
 		system("perl -MCPAN -e 'CPAN::Shell->test($list)'");
