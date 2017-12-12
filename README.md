@@ -25,13 +25,14 @@ Here's what I have at the moment in
 /etc/apparmor.d/home.njh.src.njh.smoker.bin:
 
    #include <tunables/global>
-   /home/njh/src/njh/smoker/bin flags=(complain) {
+   /home/njh/src/njh/smoker/bin {
    	audit deny @{HOME}/** rw,
 	audit deny /usr/bin/sudo rwx,
     }
 
 I then ran
 
-    systemctl reload apparmor.service
+    apparmor_parser -a /etc/apparmor.d/home.njh.src.njh.smoker.bin
+    systemctl reload apparmor
 
 This is experimental.
