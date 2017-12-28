@@ -110,7 +110,7 @@ while(1) {
 	my @dists;
 
 	syslog 'info', 'Waiting to be told what to smoke';
-	print "Wating to be told what to smoke\n" if($opts{'v'});
+	print "Waiting to be told what to smoke\n" if($opts{'v'});
 
 	# push @dists, 'M/MI/MILSO/Pod-Weaver-Section-CommentString-0.03';
 	DIST: while(1) {
