@@ -51,7 +51,8 @@ do
 	else
 		unset PERL_CPAN_REPORTER_DIR
 	fi
-	perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "Unix::Processors", "LWP::Simple", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "CPAN::Reporter::Smoker", "Bundle::CPAN::Reporter::Smoker::Tests")'
+	# perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "Unix::Processors", "LWP::Simple", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "CPAN::Reporter::Smoker", "Bundle::CPAN::Reporter::Smoker::Tests")'
+	perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "Unix::Processors", "LWP::Simple", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "Bundle::CPAN::Reporter::Smoker::Tests")'
 	perl -MCPAN::Reporter::Smoker -e start
 done
 
