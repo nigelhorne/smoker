@@ -161,6 +161,7 @@ while(1) {
 if(scalar(@dists)) {
 	my $list;
 	foreach my $dist(@dists) {
+		next(if($dist =~ /^perl-5\./));
 		if($list) {
 			$list .= ',';
 		}
