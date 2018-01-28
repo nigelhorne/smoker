@@ -29,7 +29,7 @@ unset CC CFLAGS LDFLAGS
 perlbrew switch-off
 
 if [ $1x == x ]; then
-	LIST=`perlbrew list`
+	LIST=`perlbrew list | awk '{ print $1; }'`
 else
 	LIST=$*
 fi
