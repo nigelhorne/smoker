@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # Author Nigel Horne: njh@bandsman.co.uk
-# Copyright (C) 2015-2017, Nigel Horne
+# Copyright (C) 2015-2018, Nigel Horne
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
@@ -23,6 +23,7 @@ use strict;
 
 use Getopt::Std;
 use LWP::Simple;
+# use Proc::Govern;
 use Proc::Killfam;
 use File::HomeDir;
 use File::Spec;
@@ -186,6 +187,13 @@ unlink $lockfile;
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {
 	my $time = shift;
+	# my $command = shift;
+
+	# return Proc::Govern::govern_process(
+		# name => 'foo',
+		# command => $command,
+		# timeout => $time,
+	# );
 
 	my $pid;
 
