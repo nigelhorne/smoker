@@ -23,8 +23,9 @@ use strict;
 
 use Getopt::Std;
 use LWP::Simple;
-# use Proc::Govern;
-use Proc::Killfam;
+# use Proc::Killfam;
+use Proc::Govern;	# Use this instead of Proc::Killfam since that needs
+			# Proc::Processtable which doesn't support DragonflyBSD
 use File::HomeDir;
 use File::Spec;
 use Fcntl qw(:flock);
@@ -159,6 +160,7 @@ while(1) {
 	last;
 }
 
+
 if(scalar(@dists)) {
 	my $list;
 	foreach my $dist(@dists) {
@@ -169,14 +171,15 @@ if(scalar(@dists)) {
 		$list .= "\"\\\"$dist\\\"\"";
 	}
 	if($opts{'i'}) {
-		system("perl -MCPAN -e 'CPAN::Shell->test($list)'");
-	} elsif($opts{'v'}) {
-		# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null");
-		timed_system(3300, "testwrapper $list < /dev/null");
+		# system("perl -MCPAN -e 'CPAN::Shell->test($list)'");
+		system("testwrapper $list");
 	} else {
 		print join("\n", @dists), "\n";
 		# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' > /dev/null 2>&1 < /dev/null");
-		timed_system(3300, "testwrapper $list > /dev/null 2>&1 < /dev/null");
+		# timed_system(3300, "testwrapper $list > /dev/null 2>&1 < /dev/null");
+		close(STDIN);
+		open(STDIN, '<', '/dev/null');
+		timed_system(3300, "testwrapper $list");
 	}
 }
 close $lock if(defined($lock));
@@ -186,56 +189,66 @@ unlink $lockfile;
 
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {
-	my $time = shift;
-	# my $command = shift;
+	my $timeout = shift;
+	my @command = ('bash', '-c', shift);
 
-	# return Proc::Govern::govern_process(
-		# name => 'foo',
-		# command => $command,
-		# timeout => $time,
-	# );
+	my %args = (
+		name => 'testwrapper',
+		command => \@command,
+		timeout => $timeout,
+	);
 
-	my $pid;
+	if($opts{'v'}) {
+		$args{show_stdout} = 1;
+		$args{show_stderr} = 1;
+	} else {
+		$args{show_stdout} = 0;
+		$args{show_stderr} = 0;
+	}
 
-	my $rc = -1;
-	eval {
-		$pid = fork;
+	return Proc::Govern::govern_process(%args);
 
-		die "Fork failed: $!" unless defined $pid;
-
-		unless ($pid) {
-			print @_, "\n" if($opts{'v'});
-			exec @_;
-			die "Exec failed: $!";
-		}
-
-		local $SIG{ALRM} = sub {
-			if($opts{'v'}) {
-				print "Killing process family $pid\n";
-			}
-			killfam 14, $pid;
-			sleep 2;
-			kill 14, $pid;
-			sleep 2;
-			killfam 9, $pid;
-			kill 9, $pid;
-
-			if(kill(0, $pid)) {
-				# syslog 'warn', "$pid won't die";
-				die "$pid Won't die";
-			}
-			# die "Timeout!"
-
-			1 while(waitpid(-1, WNOHANG) >= 0);
-		}; # Just SIGTERM.
-
-		alarm $time;
-
-		$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
-
-		alarm 0;
-	};
-	return -1 if $@ && $@ !~ /^Timeout!/;
-
-	return $rc;
+#	my $pid;
+#
+#	my $rc = -1;
+#	eval {
+#		$pid = fork;
+#
+#		die "Fork failed: $!" unless defined $pid;
+#
+#		unless ($pid) {
+#			print @_, "\n" if($opts{'v'});
+#			exec @_;
+#			die "Exec failed: $!";
+#		}
+#
+#		local $SIG{ALRM} = sub {
+#			if($opts{'v'}) {
+#				print "Killing process family $pid\n";
+#			}
+#			killfam 14, $pid;
+#			sleep 2;
+#			kill 14, $pid;
+#			sleep 2;
+#			killfam 9, $pid;
+#			kill 9, $pid;
+#
+#			if(kill(0, $pid)) {
+#				# syslog 'warn', "$pid won't die";
+#				die "$pid Won't die";
+#			}
+#			# die "Timeout!"
+#
+#			1 while(waitpid(-1, WNOHANG) >= 0);
+#		}; # Just SIGTERM.
+#
+#		alarm $timeout;
+#
+#		$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
+#
+#		alarm 0;
+#	};
+#	return -1 if $@ && $@ !~ /^Timeout!/;
+#
+#	return $rc;
 }
