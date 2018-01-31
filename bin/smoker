@@ -31,7 +31,8 @@ use File::Spec;
 use Fcntl qw(:flock);
 use BSD::Resource;
 use Unix::Processors;
-use Sys::LoadAvg;
+# use Sys::LoadAvg;	# Core dumps because the array isn't big enough. Bug report has been ignored
+use Sys::CpuLoad;
 use POSIX ":sys_wait_h";
 use IO::Handle;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
@@ -133,9 +134,13 @@ my $lock;
 my $count = 0;
 
 while(1) {
-	my @load = Sys::LoadAvg::loadavg();
-	if($load[LOADAVG_1MIN] >= 3) {
-		print STDERR 'Busy - Load Average ', $load[LOADAVG_1MIN], "\n";
+	# my @load = Sys::LoadAvg::loadavg();
+	# if($load[LOADAVG_1MIN] >= 3) {
+		# print STDERR 'Busy - Load Average ', $load[LOADAVG_1MIN], "\n";
+
+	my @lav = Sys::CpuLoad::load();
+	if($lav[0] > 3) {
+		print STDERR 'Busy - Load Average ', $lav[3], "\n";
 		sleep 120;
 		next;
 	}

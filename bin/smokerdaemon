@@ -159,7 +159,7 @@ while(1) {
 				next;
 			}
 		}
-		open(my $lock, '>', $lockfile) or die "$lockfile: $!";
+		open($lock, '>', $lockfile) or die "$lockfile: $!";
 		flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
 		print $lock $$;
 		flush $lock;
