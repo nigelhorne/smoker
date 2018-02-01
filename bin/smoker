@@ -203,7 +203,7 @@ sub timed_system {
 		timeout => $timeout,
 	);
 
-	if($opts{'v'}) {
+	if($opts{'v'} || $opts{'i'}) {
 		$args{show_stdout} = 1;
 		$args{show_stderr} = 1;
 	} else {
