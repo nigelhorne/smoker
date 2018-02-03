@@ -23,9 +23,6 @@ use strict;
 
 use Getopt::Std;
 use LWP::Simple;
-# use Proc::Killfam;
-use Proc::Govern;	# Use this instead of Proc::Killfam since that needs
-			# Proc::Processtable which doesn't support DragonflyBSD
 use File::HomeDir;
 use File::Spec;
 use Fcntl qw(:flock);
@@ -36,14 +33,37 @@ use Sys::CpuLoad;
 use POSIX ":sys_wait_h";
 use IO::Handle;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
+use IPC::Cmd;
+use Config;
 
 use MyConfig;
+
+my $mode;
+
+# Work out the best way to run commands
+if(defined($^V) && ($^V ge 'v5.10.0')) {
+	# Doesn't needs at least Perl 5.10.0
+	require Proc::Govern;
+	Proc::Govern->import();
+	$mode = 'govern';
+} elsif($Config{'osname'} ne 'dragonfly') {
+	# Needs Proc::Processtable which doesn't support DragonflyBSD
+	require Proc::Killfam;
+	Proc::Killfam->import();
+	$mode = 'killfam';
+} else {
+	require IPC::Cmd;
+	IPC::Cmd->import();
+	$mode = 'cmd';
+}
 
 die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
 die unless($CPAN::Config->{'urllist'});
 
 my %opts;
 getopts('iv', \%opts);
+
+print "Mode: $mode\n" if($opts{'v'});
 
 my $recent;
 foreach my $url(@{$CPAN::Config->{'urllist'}}) {
@@ -180,80 +200,95 @@ if(scalar(@dists)) {
 		system("testwrapper $list");
 	} else {
 		print join("\n", @dists), "\n";
-		# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' > /dev/null 2>&1 < /dev/null");
-		# timed_system(3300, "testwrapper $list > /dev/null 2>&1 < /dev/null");
-		close(STDIN);
-		open(STDIN, '<', '/dev/null');
-		timed_system(3300, "testwrapper $list");
+		if($mode eq 'govern') {
+			close(STDIN);
+			open(STDIN, '<', '/dev/null');
+			timed_system(3300, "testwrapper $list");
+		} else {
+			timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' > /dev/null 2>&1 < /dev/null");
+			timed_system(3300, "testwrapper $list > /dev/null 2>&1 < /dev/null");
+		}
 	}
 }
 close $lock if(defined($lock));
 unlink $lockfile;
 
-1 while(waitpid(-1, WNOHANG) >= 0);
+if($mode) {
+	1 while(waitpid(-1, WNOHANG) >= 0);
+}
 
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {
 	my $timeout = shift;
-	my @command = ('bash', '-c', shift);
+	my @command;
 
-	my %args = (
-		name => 'testwrapper',
-		command => \@command,
-		timeout => $timeout,
-	);
+	if($mode eq 'govern') {
+		@command = ('bash', '-c', shift);
+		my %args = (
+			name => 'testwrapper',
+			command => \@command,
+			timeout => $timeout,
+		);
 
-	if($opts{'v'} || $opts{'i'}) {
-		$args{show_stdout} = 1;
-		$args{show_stderr} = 1;
-	} else {
-		$args{show_stdout} = 0;
-		$args{show_stderr} = 0;
+		if($opts{'v'} || $opts{'i'}) {
+			$args{show_stdout} = 1;
+			$args{show_stderr} = 1;
+		} else {
+			$args{show_stdout} = 0;
+			$args{show_stderr} = 0;
+		}
+
+		return Proc::Govern::govern_process(%args);
 	}
 
-	return Proc::Govern::govern_process(%args);
+	my $command = join(' ', @_);
 
-#	my $pid;
-#
-#	my $rc = -1;
-#	eval {
-#		$pid = fork;
-#
-#		die "Fork failed: $!" unless defined $pid;
-#
-#		unless ($pid) {
-#			print @_, "\n" if($opts{'v'});
-#			exec @_;
-#			die "Exec failed: $!";
-#		}
-#
-#		local $SIG{ALRM} = sub {
-#			if($opts{'v'}) {
-#				print "Killing process family $pid\n";
-#			}
-#			killfam 14, $pid;
-#			sleep 2;
-#			kill 14, $pid;
-#			sleep 2;
-#			killfam 9, $pid;
-#			kill 9, $pid;
-#
-#			if(kill(0, $pid)) {
-#				# syslog 'warn', "$pid won't die";
-#				die "$pid Won't die";
-#			}
-#			# die "Timeout!"
-#
-#			1 while(waitpid(-1, WNOHANG) >= 0);
-#		}; # Just SIGTERM.
-#
-#		alarm $timeout;
-#
-#		$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
-#
-#		alarm 0;
-#	};
-#	return -1 if $@ && $@ !~ /^Timeout!/;
-#
-#	return $rc;
+	if($mode eq 'killfam') {
+		my $pid;
+	
+		my $rc = -1;
+		eval {
+			$pid = fork;
+	
+			die "Fork failed: $!" unless defined $pid;
+	
+			unless ($pid) {
+				print "$command\n" if($opts{'v'});
+				exec $command;
+				die "Exec failed: $!";
+			}
+	
+			local $SIG{ALRM} = sub {
+				if($opts{'v'}) {
+					print "Killing process family $pid\n";
+				}
+				Proc::Killfam::killfam(14, $pid);
+				sleep 2;
+				kill 14, $pid;
+				sleep 2;
+				Proc::Killfam::killfam(9, $pid);
+				kill 9, $pid;
+	
+				if(kill(0, $pid)) {
+					# syslog 'warn', "$pid won't die";
+					die "$pid Won't die";
+				}
+				# die "Timeout!"
+	
+				1 while(waitpid(-1, WNOHANG) >= 0);
+			}; # Just SIGTERM.
+	
+			alarm $timeout;
+	
+			$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
+	
+			alarm 0;
+		};
+		return -1 if $@ && $@ !~ /^Timeout!/;
+	
+		return $rc;
+	}
+
+	@command = ('bash', '-c', $command);
+	return IPC::Cmd::run(command => \@command, timeout => $timeout, verbose => $opts{'v'});
 }
