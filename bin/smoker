@@ -160,7 +160,7 @@ while(1) {
 
 	my @lav = Sys::CpuLoad::load();
 	if($lav[0] > 3) {
-		print STDERR 'Busy - Load Average ', $lav[3], "\n";
+		print STDERR 'Busy - Load Average ', $lav[0], "\n";
 		sleep 120;
 		next;
 	}
