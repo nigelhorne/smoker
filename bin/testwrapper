@@ -9,6 +9,9 @@ if [ -r $HOME/.cpanreporter/$PERLBREW_PERL/config.ini ]; then
 fi
 
 ulimit -d 393216
-ulimit -m 393216
+kernel=`uname`
+if [[ "$kernel" != 'SunOS' ]]; then
+        ulimit -m 393216
+fi
 
 exec perl -MCPAN -e "CPAN::Shell->test($*)"
