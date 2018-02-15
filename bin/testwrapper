@@ -5,7 +5,7 @@ set -e
 source $PERLBREW_ROOT/etc/bashrc
 
 if [ -r $HOME/.cpanreporter/$PERLBREW_PERL/config.ini ]; then
-	export PERL_CPAN_REPORTER_DIR=$HOME/.cpanreporter/$PERLBREW_PERL
+        export PERL_CPAN_REPORTER_DIR=$HOME/.cpanreporter/$PERLBREW_PERL
 fi
 
 ulimit -d 393216
@@ -14,4 +14,17 @@ if [[ "$kernel" != 'SunOS' ]]; then
         ulimit -m 393216
 fi
 
-exec perl -MCPAN -e "CPAN::Shell->test($*)"
+LOCKFILE=${TMPDIR-/tmp}/lock.txt
+if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
+        logger "$0: already running"
+        exit
+fi
+
+echo $$ > ${LOCKFILE}
+
+# make sure the lockfile is removed when we exit and then claim it
+trap "rm -f ${LOCKFILE}; exit" INT TERM EXIT
+
+perl -MCPAN -e "CPAN::Shell->test($*)"
+
+rm -f ${LOCKFILE}
