@@ -23,6 +23,7 @@ use strict;
 use IO::Socket::INET;
 use File::HomeDir;
 use File::Spec;
+use File::Basename;
 use Sys::Syslog;
 use File::Temp;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
@@ -101,7 +102,7 @@ if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 	$ENV{'TEST_JOBS'} = $number_of_cpus;
 }
 
-my $logfile = File::Spec->catfile(File::Spec->tmpdir(), "$0.log");
+my $logfile = File::Spec->catfile(File::Spec->tmpdir(), basename("$0.log"));
 
 while(1) {
 	# Not needed, but somehow it seems cleaner to close and reopen
