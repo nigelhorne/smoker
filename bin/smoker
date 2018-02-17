@@ -174,6 +174,7 @@ if($ARGV[0]) {
 
 my $lock;
 my $count = 0;
+my $logfile = File::Spec->catfile(File::Spec->tmpdir(), "$0.log");
 
 while(1) {
 	# my @load = Sys::LoadAvg::loadavg();
@@ -227,8 +228,8 @@ if(scalar(@dists)) {
 			open(STDIN, '<', '/dev/null');
 			timed_system(3300, "testwrapper $list");
 		} else {
-			timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' > /dev/null 2>&1 < /dev/null");
-			timed_system(3300, "testwrapper $list > /dev/null 2>&1 < /dev/null");
+			# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' > $logfile 2>&1 < /dev/null");
+			timed_system(3300, "testwrapper $list > $logfile 2>&1 < /dev/null");
 		}
 	}
 }
