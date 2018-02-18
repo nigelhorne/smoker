@@ -257,6 +257,9 @@ sub timed_system {
 		if($opts{'v'} || $opts{'i'}) {
 			$args{show_stdout} = 1;
 			$args{show_stderr} = 1;
+			$args{log_stderr}->{'dir'} = File::Spec->tmpdir();
+			$args{log_stderr}->{'size'} = '1M';
+			$args{log_stderr}->{'histories'} = '100';
 		} else {
 			$args{show_stdout} = 0;
 			$args{show_stderr} = 0;
