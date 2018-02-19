@@ -229,8 +229,8 @@ if(scalar(@dists)) {
 			open(STDIN, '<', '/dev/null');
 			timed_system(3300, "testwrapper $list");
 		} else {
-			# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' > $logfile.out 2> $logfile.err < /dev/null");
-			timed_system(3300, "testwrapper $list > $logfile.out 2> $logfile.err < /dev/null");
+			# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' >> $logfile.out 2>> $logfile.err < /dev/null");
+			timed_system(3300, "testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
 		}
 	}
 }
@@ -272,19 +272,19 @@ sub timed_system {
 
 	if($mode eq 'killfam') {
 		my $pid;
-	
+
 		my $rc = -1;
 		eval {
 			$pid = fork;
-	
+
 			die "Fork failed: $!" unless defined $pid;
-	
+
 			unless ($pid) {
 				print "$command\n" if($opts{'v'});
 				exec $command;
 				die "Exec failed: $!";
 			}
-	
+
 			local $SIG{ALRM} = sub {
 				if($opts{'v'}) {
 					print "Killing process family $pid\n";
@@ -300,24 +300,24 @@ sub timed_system {
 				kill 15, $pid;
 				sleep 2;
 				kill 9, $pid;
-	
+
 				if(kill(0, $pid)) {
 					# syslog 'warn', "$pid won't die";
 					die "$pid Won't die";
 				}
 				# die "Timeout!"
-	
+
 				1 while(waitpid(-1, WNOHANG) >= 0);
 			}; # Just SIGTERM.
-	
+
 			alarm $timeout;
-	
+
 			$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
-	
+
 			alarm 0;
 		};
 		return -1 if $@ && $@ !~ /^Timeout!/;
-	
+
 		return $rc;
 	}
 
