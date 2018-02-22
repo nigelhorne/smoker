@@ -57,7 +57,7 @@ if($Config{'osname'} eq 'solaris') {
 			require Proc::Govern;
 			Proc::Govern->import();
 			$mode = 'govern';
-		}
+		};
 	}
 	if(!defined($mode)) {
 		require IPC::Cmd;
