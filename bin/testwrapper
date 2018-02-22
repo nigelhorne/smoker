@@ -9,7 +9,7 @@ if [ -r $HOME/.cpanreporter/$PERLBREW_PERL/config.ini ]; then
 fi
 
 kernel=`uname`
-if [[ "$kernel" != 'FreeBSD' ]]; then
+if [[ "$kernel" != 'FreeBSD' && "$kernel" != 'OpenBSD' ]]; then
 	ulimit -d 393216
 fi
 if [[ "$kernel" != 'SunOS' ]]; then
