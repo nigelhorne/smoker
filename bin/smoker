@@ -315,6 +315,12 @@ sub timed_system {
 			$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
 
 			alarm 0;
+
+			Proc::Killfam::killfam(14, $pid);
+			sleep 2;
+			Proc::Killfam::killfam(15, $pid);
+			sleep 2;
+			Proc::Killfam::killfam(9, $pid);
 		};
 		return -1 if $@ && $@ !~ /^Timeout!/;
 
