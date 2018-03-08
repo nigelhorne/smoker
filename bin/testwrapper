@@ -16,7 +16,7 @@ if [[ "$kernel" != 'SunOS' ]]; then
 	ulimit -m 393216
 fi
 ulimit -f 200000
-ulimit -u 32
+ulimit -u 256
 
 LOCKFILE=${TMPDIR-/tmp}/lock.txt
 if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
