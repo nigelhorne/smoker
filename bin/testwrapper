@@ -14,9 +14,9 @@ if [[ "$kernel" != 'FreeBSD' && "$kernel" != 'OpenBSD' ]]; then
 fi
 if [[ "$kernel" != 'SunOS' ]]; then
 	ulimit -m 393216
+	ulimit -u 256
 fi
 ulimit -f 200000
-ulimit -u 256
 
 LOCKFILE=${TMPDIR-/tmp}/lock.txt
 if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
