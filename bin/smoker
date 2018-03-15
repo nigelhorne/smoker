@@ -219,11 +219,16 @@ if(scalar(@dists)) {
 		}
 		$list .= "\"\\\"$dist\\\"\"";
 	}
+	print join("\n", @dists), "\n";
 	if($opts{'i'}) {
 		# system("perl -MCPAN -e 'CPAN::Shell->test($list)'");
-		system("testwrapper $list");
+		if($opts{'v'}) {
+			my $shell = $ENV{'SHELL'} || 'bash';
+			system("$shell -x testwrapper $list");
+		} else {
+			system("testwrapper $list");
+		}
 	} else {
-		print join("\n", @dists), "\n";
 		if($mode eq 'govern') {
 			close(STDIN);
 			open(STDIN, '<', '/dev/null');
@@ -246,8 +251,10 @@ sub timed_system {
 	my $timeout = shift;
 	my @command;
 
+	my $shell = $ENV{'SHELL'} || 'bash';
+
 	if($mode eq 'govern') {
-		@command = ('bash', '-c', shift);
+		@command = ($shell, '-c', shift);
 		my %args = (
 			name => 'testwrapper',
 			command => \@command,
@@ -327,6 +334,10 @@ sub timed_system {
 		return $rc;
 	}
 
-	@command = ('bash', '-c', $command);
+	if($opts{'v'}) {
+		@command = ($shell, '-xc', $command);
+	} else {
+		@command = ($shell, '-c', $command);
+	}
 	return IPC::Cmd::run(command => \@command, timeout => $timeout, verbose => $opts{'v'});
 }
