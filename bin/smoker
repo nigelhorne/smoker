@@ -182,11 +182,15 @@ while(1) {
 	# if($load[LOADAVG_1MIN] >= 3) {
 		# print STDERR 'Busy - Load Average ', $load[LOADAVG_1MIN], "\n";
 
-	my @lav = Sys::CpuLoad::load();
-	if(defined($lav[0]) && ($lav[0] > 3)) {
-		print STDERR 'Busy - Load Average ', $lav[0], "\n";
-		sleep 120;
-		next;
+	if($Config{'osname'} ne 'cygwin') {
+		# I don't know what Cygwin's load average is calculated from
+		# so I don't trust it
+		my @lav = Sys::CpuLoad::load();
+		if(defined($lav[0]) && ($lav[0] > 3)) {
+			print STDERR 'Busy - Load Average ', $lav[0], "\n";
+			sleep 120;
+			next;
+		}
 	}
 
 	if((-r $lockfile) && (open($lock, '<', $lockfile))) {
