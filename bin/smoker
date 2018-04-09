@@ -197,7 +197,7 @@ while(1) {
 		my $pid = <$lock>;
 		close $lock;
 		chomp $pid;
-		if(kill(0, $pid)) {
+		if($pid && kill(0, $pid)) {
 			if(++$count >= 6) {
 				die "Already running";
 			}
