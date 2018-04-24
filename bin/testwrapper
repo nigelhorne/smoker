@@ -20,7 +20,8 @@ if [[ "$kernel" != 'CYGWIN_NT-10.0' ]]; then
 	ulimit -f 200000
 fi
 
-LOCKFILE=${TMPDIR-/tmp}/lock.txt
+NEWTMPDIR=${TMPDIR-/tmp}/testwrapper.$$
+LOCKFILE=${TMPDIR-/tmp}/testwrapper.lck
 if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
 	logger "$0: already running"
 	exit
@@ -28,9 +29,13 @@ fi
 
 echo $$ > ${LOCKFILE}
 
-# make sure the lockfile is removed when we exit and then claim it
-trap "rm -f ${LOCKFILE}; exit" INT TERM EXIT
+mkdir $NEWTMPDIR
 
-perl -MCPAN -e "CPAN::Shell->test($*)"
+# make sure the lockfile is removed when we exit and then claim it
+trap "rm -fr ${LOCKFILE} ${NEWTMPDIR}; exit" INT TERM EXIT
+
+TMPDIR=$NEWTMPDIR perl -MCPAN -e "CPAN::Shell->test($*)"
 
 rm -f ${LOCKFILE}
+
+rm -rf ${NEWTMPDIR}
