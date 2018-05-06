@@ -24,6 +24,7 @@ use strict;
 use Getopt::Std;
 use LWP::Simple;
 use File::HomeDir;
+use File::Path;
 use File::Spec;
 use File::Basename;
 use Fcntl qw(:flock);
@@ -241,6 +242,9 @@ if(scalar(@dists)) {
 			# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' >> $logfile.out 2>> $logfile.err < /dev/null");
 			timed_system(3300, "testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
 		}
+	}
+	if(my $build_dir = $CPAN::Config->{'build_dir'}) {
+		File::Path::rmtree($build_dir, { safe => 1 });
 	}
 }
 close $lock if(defined($lock));
