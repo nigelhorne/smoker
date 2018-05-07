@@ -194,7 +194,7 @@ while(1) {
 	1 while(waitpid(-1, WNOHANG) >= 0);
 
 	if(my $build_dir = $CPAN::Config->{'build_dir'}) {
-		File::Path::rmtree($build_dir, { safe => 1 });
+		File::Path::rmtree($build_dir);
 	}
 	if(defined($lock)) {
 		close $lock;
