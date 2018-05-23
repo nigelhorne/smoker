@@ -2,7 +2,7 @@
 
 # Run this every hour via cron
 
-# Doesn't work on OS/X or Dragonfly
+# Doesn't work on OS/X and *BSD
 # https://unix.stackexchange.com/questions/102691/get-age-of-given-file
 
 function fileAge {
