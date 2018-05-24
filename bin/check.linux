@@ -2,14 +2,14 @@
 
 # Run this every hour via cron
 
-# Doesn't work on OS/X
+# Use this for Linux
 # https://unix.stackexchange.com/questions/102691/get-age-of-given-file
 
 function fileAge {
         local fileMod
         if fileMod=$(stat -c %Y -- "$1")
         then
-                echo $(( $(date +%s) - $fileMod ))
+                echo $(($(date +%s) - $fileMod))
         else
                 return $?
         fi
