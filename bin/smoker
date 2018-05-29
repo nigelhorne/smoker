@@ -47,7 +47,7 @@ if($Config{'osname'} eq 'solaris') {
 	# Work around /usr/lib being built with Sun's C compiler, so
 	# less is available because of link handshake errors
 	eval {
-		# Needs Proc::Processtable which doesn't support DragonflyBSD
+		# Needs Proc::ProcessTable which doesn't support DragonflyBSD
 		require Proc::Killfam;
 		Proc::Killfam->import();
 		$mode = 'killfam';
@@ -66,7 +66,7 @@ if($Config{'osname'} eq 'solaris') {
 		$mode = 'cmd';
 	}
 } elsif($Config{'osname'} ne 'dragonfly') {
-        # Needs Proc::Processtable which doesn't support DragonflyBSD
+        # Needs Proc::ProcessTable which doesn't support DragonflyBSD
         require Proc::Killfam;
         Proc::Killfam->import();
         $mode = 'killfam';
