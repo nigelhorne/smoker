@@ -65,20 +65,21 @@ if($Config{'osname'} eq 'solaris') {
 		IPC::Cmd->import();
 		$mode = 'cmd';
 	}
-} elsif($Config{'osname'} ne 'dragonfly') {
+# } elsif($Config{'osname'} ne 'dragonfly') {
+} else {
         # Needs Proc::ProcessTable which doesn't support DragonflyBSD
         require Proc::Killfam;
         Proc::Killfam->import();
         $mode = 'killfam';
-} elsif(defined($^V) && ($^V ge 'v5.10.1')) {
-        # Doesn't needs at least Perl 5.10.1
-        require Proc::Govern;
-        Proc::Govern->import();
-        $mode = 'govern';
-} else {
-        require IPC::Cmd;
-        IPC::Cmd->import();
-        $mode = 'cmd';
+# } elsif(defined($^V) && ($^V ge 'v5.10.1')) {
+        # # Doesn't needs at least Perl 5.10.1
+        # require Proc::Govern;
+        # Proc::Govern->import();
+        # $mode = 'govern';
+# } else {
+        # require IPC::Cmd;
+        # IPC::Cmd->import();
+        # $mode = 'cmd';
 }
 
 die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
