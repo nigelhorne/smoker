@@ -160,7 +160,8 @@ if($ARGV[0]) {
 
 	@dists = CPAN::Recent::Uploads->recent($ARGV[0] * 60, @{$CPAN::Config->{'urllist'}}[0]);
 } else {
-	foreach my $dist(split(/\n/, $recent)) {
+	my $lastdist;
+	foreach my $dist(reverse sort split(/\n/, $recent)) {
 		if($dist =~ /^authors\/id\/(.+)/) {
 			$dist = $1;
 		} else {
@@ -169,11 +170,24 @@ if($ARGV[0]) {
 		next if($dist =~ /\/CHECKSUMS$/);
 		next if($dist =~ /\.meta$/);
 		next if($dist =~ /\.readme$/);
+		# Don't test earlier versions
+		if($dist =~ /^([A-Z0-9\-\/]+)[v\-\.]\d/i) {
+			my $module = $1;
+			if($lastdist) {
+				# Ignore earlier version
+				# print "-$dist\n";
+				next if($module eq $lastdist);
+			}
+			$lastdist = $module;
+		}
 		# $dist =~ s/\//::/g;
 
-		push @dists, $dist;
+		# It's a new version
+		unshift @dists, $dist;
 	}
 }
+
+exit if(scalar(@dists) == 0);
 
 my $lock;
 my $count = 0;
@@ -219,38 +233,37 @@ if(my $build_dir = $CPAN::Config->{'build_dir'}) {
 	File::Path::rmtree($build_dir);
 }
 
-if(scalar(@dists)) {
-	my $list;
-	foreach my $dist(@dists) {
-		next if($dist =~ /\/perl-5\./);
-		if($list) {
-			$list .= ',';
-		}
-		$list .= "\"\\\"$dist\\\"\"";
+my $list;
+foreach my $dist(@dists) {
+	next if($dist =~ /\/perl-5\./);
+	if($list) {
+		$list .= ',';
 	}
-	print join("\n", @dists), "\n";
-	if($opts{'i'}) {
-		# system("perl -MCPAN -e 'CPAN::Shell->test($list)'");
-		if($opts{'v'}) {
-			my $shell = $ENV{'SHELL'} || 'bash';
-			system("$shell -x testwrapper $list");
-		} else {
-			system("testwrapper $list");
-		}
+	$list .= "\"\\\"$dist\\\"\"";
+}
+print join("\n", @dists), "\n";
+if($opts{'i'}) {
+	# system("perl -MCPAN -e 'CPAN::Shell->test($list)'");
+	if($opts{'v'}) {
+		my $shell = $ENV{'SHELL'} || 'bash';
+		system("$shell -x testwrapper $list");
 	} else {
-		if($mode eq 'govern') {
-			close(STDIN);
-			open(STDIN, '<', '/dev/null');
-			timed_system(3300, "testwrapper $list");
-		} else {
-			# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' >> $logfile.out 2>> $logfile.err < /dev/null");
-			timed_system(3300, "testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
-		}
+		system("testwrapper $list");
 	}
-	if(my $build_dir = $CPAN::Config->{'build_dir'}) {
-		File::Path::rmtree($build_dir);
+} else {
+	if($mode eq 'govern') {
+		close(STDIN);
+		open(STDIN, '<', '/dev/null');
+		timed_system(3300, "testwrapper $list");
+	} else {
+		# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' >> $logfile.out 2>> $logfile.err < /dev/null");
+		timed_system(3300, "testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
 	}
 }
+if(my $build_dir = $CPAN::Config->{'build_dir'}) {
+	File::Path::rmtree($build_dir);
+}
+
 close $lock if(defined($lock));
 unlink $lockfile;
 
