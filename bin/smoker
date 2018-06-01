@@ -198,7 +198,7 @@ if($ARGV[0]) {
 		# $dist =~ s/\//::/g;
 
 		# Don't test versions already tested
-		if(!defined($prev_tests->{$dist})) {
+		if(!defined($prev_tests->{$^V}->{$dist})) {
 			# It's a new version
 			unshift @dists, $dist;
 		}
@@ -280,7 +280,7 @@ if($opts{'i'}) {
 }
 
 foreach my $dist(@dists) {
-	$prev_tests->{$dist} = 1;
+	$prev_tests->{$^V}->{$dist} = 1;
 }
 
 if(open(my $fout, '>', $json_file)) {
@@ -298,6 +298,7 @@ unlink $lockfile;
 
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {
+return;
 	my $timeout = shift;
 	my @command;
 
