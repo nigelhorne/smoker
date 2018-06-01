@@ -298,7 +298,6 @@ unlink $lockfile;
 
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {
-return;
 	my $timeout = shift;
 	my @command;
 
