@@ -40,6 +40,7 @@ use IO::Handle;
 use IPC::Cmd;
 use Config;
 use JSON;
+use DateTime;
 
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
@@ -176,6 +177,7 @@ if($ARGV[0]) {
 	@dists = CPAN::Recent::Uploads->recent($ARGV[0] * 60, @{$CPAN::Config->{'urllist'}}[0]);
 } else {
 	my $lastdist;
+	my $now = DateTime->now()->epoch();
 	foreach my $dist(reverse sort split(/\n/, $recent)) {
 		if($dist =~ /^authors\/id\/(.+)/) {
 			$dist = $1;
@@ -198,14 +200,19 @@ if($ARGV[0]) {
 		# $dist =~ s/\//::/g;
 
 		# Don't test versions already tested
-		if(!defined($prev_tests->{$^V}->{$dist})) {
+		if(my $then = $prev_tests->{$^V}->{$dist}) {
+			if(($now - $then) > 7 * 24 * 3600) {
+				# Prune the tree of old results
+				delete $prev_tests->{$^V}->{$dist};
+			}
+		} else {
 			# It's a new version
 			unshift @dists, $dist;
 		}
 	}
 }
 
-exit if(scalar(@dists) == 0);
+exit if(scalar(@dists) == 0);	# Won't write the pruned tree
 
 my $lock;
 my $count = 0;
@@ -279,8 +286,9 @@ if($opts{'i'}) {
 	}
 }
 
+my $now = DateTime->now()->epoch();
 foreach my $dist(@dists) {
-	$prev_tests->{$^V}->{$dist} = 1;
+	$prev_tests->{$^V}->{$dist} = $now;
 }
 
 if(open(my $fout, '>', $json_file)) {
