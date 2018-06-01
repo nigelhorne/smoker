@@ -27,8 +27,6 @@ use File::Spec;
 use File::Basename;
 use Sys::Syslog;
 use File::Temp;
-use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
-use MyConfig;
 use Unix::Processors;
 use Sys::CpuLoad;
 use Proc::Killfam;
@@ -36,6 +34,9 @@ use Fcntl qw(:flock);
 use Getopt::Std;
 use POSIX ":sys_wait_h";
 use BSD::Resource;
+
+use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
+use MyConfig;
 
 die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
 

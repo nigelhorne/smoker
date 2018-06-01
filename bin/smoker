@@ -15,6 +15,9 @@
 
 # Takes an optional argument of the number of minutes since the last run
 
+# TODO:  $HOME/.cpan_smoker.rc doesn't get pruned.  Should remove entries older
+#	than a week, for example
+
 # 19 * * * * [ -r .perlbrew/init ] && /bin/bash bin/perlbrew-cron bin/smoker 60
 
 use warnings;
@@ -34,11 +37,14 @@ use Unix::Processors;
 use Sys::CpuLoad;
 use POSIX ":sys_wait_h";
 use IO::Handle;
-use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use IPC::Cmd;
 use Config;
+use JSON;
 
+use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
+
+die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
 
 my $mode;
 
@@ -154,6 +160,15 @@ if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 }
 
 my @dists;
+my $prev_tests;
+
+my $json_file = File::Spec->catfile(File::HomeDir->my_home(), '/.cpan_smoker.rc');
+if(open(my $fin, '<', $json_file)) {
+	my $json = JSON->new()->allow_nonref();
+	local $/ = undef;
+	$prev_tests = $json->decode(<$fin>);
+	close $fin;
+}
 
 if($ARGV[0]) {
 	require CPAN::Recent::Uploads;
@@ -182,8 +197,11 @@ if($ARGV[0]) {
 		}
 		# $dist =~ s/\//::/g;
 
-		# It's a new version
-		unshift @dists, $dist;
+		# Don't test versions already tested
+		if(!defined($prev_tests->{$dist})) {
+			# It's a new version
+			unshift @dists, $dist;
+		}
 	}
 }
 
@@ -260,16 +278,23 @@ if($opts{'i'}) {
 		timed_system(3300, "testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
 	}
 }
-if(my $build_dir = $CPAN::Config->{'build_dir'}) {
-	File::Path::rmtree($build_dir);
+
+foreach my $dist(@dists) {
+	$prev_tests->{$dist} = 1;
 }
 
-close $lock if(defined($lock));
-unlink $lockfile;
+if(open(my $fout, '>', $json_file)) {
+	my $json = JSON->new()->allow_nonref();
+	print $fout JSON->new()->allow_nonref()->encode($prev_tests);
+	close $fout;
+}
 
 if($mode) {
 	1 while(waitpid(-1, WNOHANG) >= 0);
 }
+
+close $lock if(defined($lock));
+unlink $lockfile;
 
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {
