@@ -40,7 +40,6 @@ use IO::Handle;
 use IPC::Cmd;
 use Config;
 use JSON;
-use DateTime;
 
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
@@ -177,7 +176,7 @@ if($ARGV[0]) {
 	@dists = CPAN::Recent::Uploads->recent($ARGV[0] * 60, @{$CPAN::Config->{'urllist'}}[0]);
 } else {
 	my $lastdist;
-	my $now = DateTime->now()->epoch();
+	my $now = time;
 	foreach my $dist(reverse sort split(/\n/, $recent)) {
 		if($dist =~ /^authors\/id\/(.+)/) {
 			$dist = $1;
@@ -286,7 +285,7 @@ if($opts{'i'}) {
 	}
 }
 
-my $now = DateTime->now()->epoch();
+my $now = time;
 foreach my $dist(@dists) {
 	$prev_tests->{$^V}->{$dist} = $now;
 }
