@@ -12,7 +12,7 @@ kernel=`uname`
 if [[ "$kernel" != 'FreeBSD' && "$kernel" != 'OpenBSD' && "$kernel" != 'CYGWIN_NT-10.0' && `ulimit -d` = unlimited ]]; then
 	ulimit -d 393216
 fi
-if [[ "$kernel" != 'SunOS' && "$kernel" != 'CYGWIN_NT-10.0' ]]; then
+if [[ "$kernel" != 'SunOS' && "$kernel" != 'CYGWIN_NT-10.0' && `ulimit -m` = unlimited ]]; then
 	ulimit -m 393216
 	ulimit -u 256
 fi
