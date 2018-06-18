@@ -17,7 +17,7 @@ if [[ "$kernel" != 'SunOS' && "$kernel" != 'CYGWIN_NT-10.0' && `ulimit -m` = unl
 	ulimit -u 256
 fi
 if [[ "$kernel" != 'CYGWIN_NT-10.0' ]]; then
-	ulimit -f 200000
+	ulimit -f 300000
 fi
 
 NEWTMPDIR=${TMPDIR-/tmp}/testwrapper.$$
