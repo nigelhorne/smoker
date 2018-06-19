@@ -233,13 +233,14 @@ while(1) {
 		}
 	}
 
-	if((-r $lockfile) && (open($lock, '<', $lockfile))) {
+	if((-r $lockfile) && open($lock, '<', $lockfile)) {
 		my $pid = <$lock>;
 		close $lock;
 		chomp $pid;
 		if($pid && kill(0, $pid)) {
 			if(++$count >= 6) {
-				die "Already running";
+				die "Already running" if($opts{'v'});
+				exit(0);
 			}
 			print "Already running\n" if($opts{'v'});
 			sleep(10);
