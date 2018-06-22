@@ -6,13 +6,13 @@
 # https://unix.stackexchange.com/questions/102691/get-age-of-given-file
 
 function fileAge {
-        local fileMod
-        if fileMod=$(stat -c %Y -- "$1")
-        then
-                echo $(($(date +%s) - $fileMod))
-        else
-                return $?
-        fi
+	local fileMod
+	if fileMod=$(stat -c %Y -- "$1")
+	then
+		echo $(($(date +%s) - $fileMod))
+	else
+		return $?
+	fi
 }
 
 typeset -r age=$(fileAge $HOME/.cpanreporter/reports-sent.db)
