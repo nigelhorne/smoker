@@ -368,7 +368,7 @@ sub timed_system {
 
 				if(kill(0, $pid)) {
 					# syslog 'warn', "$pid won't die";
-					die "$pid Won't die";
+					die "Timeout! $pid Won't die";
 				}
 				# die "Timeout!"
 
