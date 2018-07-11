@@ -130,7 +130,19 @@ while(1) {
 	}
 
 	my $list;
-	foreach my $dist(@dists) {
+	my $lastdist;
+
+	foreach my $dist(reverse sort @dists) {
+		# Don't test earlier versions
+		if($dist =~ /^([A-Z0-9\-\/]+)[v\-\.]\d+/i) {
+			my $module = $1;
+			if($lastdist) {
+				# Ignore earlier version
+				# print "-$dist\n";
+				next if($module eq $lastdist);
+			}
+			$lastdist = $module;
+		}
 		if($list) {
 			$list .= ',';
 		}
