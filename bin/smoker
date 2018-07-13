@@ -188,6 +188,9 @@ if($ARGV[0]) {
 		next if($dist =~ /\/CHECKSUMS$/);
 		next if($dist =~ /\.meta$/);
 		next if($dist =~ /\.readme$/);
+
+		print "Considering $dist\n" if($opts{'v'});
+
 		# Don't test earlier versions
 		if($dist =~ /^([A-Z0-9\-\/]+)[v\-\.]\d+/i) {
 			my $module = $1;
@@ -202,13 +205,16 @@ if($ARGV[0]) {
 
 		# Don't test versions already tested
 		if(my $then = $prev_tests->{$^V}->{$dist}) {
+			print "now: $now; then: $then\n" if($opts{'v'});
 			if(($now - $then) > 7 * 24 * 3600) {
 				# Prune the tree of old results
+				print "Prune $dist from history\n" if($opts{'v'});
 				delete $prev_tests->{$^V}->{$dist};
 			}
 		} else {
 			# It's a new version
 			unshift @dists, $dist;
+			print "Will test $dist\n" if($opts{'v'});
 		}
 	}
 }
