@@ -117,7 +117,7 @@ if((-r $lock) && (open(my $fin, '<', $lock))) {
 	unlink $lock;
 }
 
-$lock = Proc::PID::File->new(dir => File::Spec->tmpdir(), file => 'cpan-test.lck');
+$lock = Proc::PID::File->new(dir => File::Spec->tmpdir(), name => 'cpan-test.lck');
 
 local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	$lock->release();
