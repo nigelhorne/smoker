@@ -40,6 +40,7 @@ use IO::Handle;
 use IPC::Cmd;
 use Config;
 use JSON;
+use Proc::PID::File;
 
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
@@ -104,21 +105,22 @@ if(!$opts{'i'}) {
 	$ENV{'AUTOMATED_TESTING'} = 1;
 }
 
-my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
-if((-r $lockfile) && (open(my $lock, '<', $lockfile))) {
-	my $pid = <$lock>;
-	close $lock;
+my $lock = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
+if((-r $lock) && (open(my $fin, '<', $lock))) {
+	my $pid = <$fin>;
+	close $fin;
 	chomp $pid;
 	if(kill(0, $pid)) {
 		print "CPAN shell running\n";
 		exit;
 	}
-	unlink $lockfile;
+	unlink $lock;
 }
-$lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck');
+
+$lock = Proc::PID::File->new(dir => File::Spec->tmpdir(), file => 'cpan-test.lck');
 
 local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
-	unlink $lockfile;
+	$lock->release();
 	exit 1;
 };
 
@@ -213,7 +215,6 @@ if($ARGV[0]) {
 
 exit if(scalar(@dists) == 0);	# Won't write the pruned tree
 
-my $lock;
 my $count = 0;
 my $logfile = File::Spec->catfile(File::Spec->tmpdir(), basename($0));
 
@@ -233,24 +234,15 @@ while(1) {
 		}
 	}
 
-	if((-r $lockfile) && open($lock, '<', $lockfile)) {
-		my $pid = <$lock>;
-		close $lock;
-		chomp $pid;
-		if($pid && kill(0, $pid)) {
-			if(++$count >= 6) {
-				die "Already running" if($opts{'v'});
-				exit(0);
-			}
-			print "Already running\n" if($opts{'v'});
-			sleep(10);
-			next;
+	while($lock->alive()) {
+		if(++$count >= 6) {
+			die "Already running" if($opts{'v'});
+			exit(0);
 		}
+		print "Already running\n" if($opts{'v'});
+		sleep(10);
 	}
-	open($lock, '>', $lockfile) or die "$lockfile: $!";
-	flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
-	print $lock $$;
-	$lock->flush();
+	$lock->touch();
 	last;
 }
 
@@ -302,8 +294,7 @@ if($mode) {
 	1 while(waitpid(-1, WNOHANG) >= 0);
 }
 
-close $lock if(defined($lock));
-unlink $lockfile;
+$lock->release();
 
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {

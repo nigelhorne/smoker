@@ -34,23 +34,24 @@ use Fcntl qw(:flock);
 use Getopt::Std;
 use POSIX ":sys_wait_h";
 use BSD::Resource;
+use Proc::PID::File;
 
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
 
 die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
 
-my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
-if(-r $lockfile && (open(my $lock, '<', $lockfile))) {
-	my $pid = <$lock>;
-	close $lock;
+my $lock = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
+if(-r $lock && (open(my $fin, '<', $lock))) {
+	my $pid = <$fin>;
+	close $fin;
 	chomp $pid;
 	if(kill(0, $pid)) {
 		die "CPAN shell running\n";
 	}
-	unlink $lockfile;
+	unlink $lock;
 }
-$lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck');
+$lock = Proc::PID::File->new(dir => File::Spec->tmpdir(), file => 'cpan-test.lck');
 
 my %opts;
 getopts('dv', \%opts);
@@ -58,7 +59,7 @@ getopts('dv', \%opts);
 $opts{'v'} = 1 if($opts{'d'});
 
 local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
-	unlink $lockfile;
+	$lock->release();
 	exit 1;
 };
 
@@ -157,8 +158,6 @@ while(1) {
 	syslog 'info', "Smoking $list";
 	print 'Smoking ', join("\n", @dists), "\n";
 
-	my $lock;
-
 	while(1) {
 		my @lav = Sys::CpuLoad::load();
 		if($lav[0] > 3) {
@@ -166,20 +165,15 @@ while(1) {
 			next;
 		}
 
-		if((-r $lockfile) && open($lock, '<', $lockfile)) {
-			my $pid = <$lock>;
-			close $lock;
-			chomp $pid;
-			if(kill(0, $pid)) {
-				print "Already running\n" if($opts{'v'});
-				sleep(10);
-				next;
+		while($lock->alive()) {
+			if(++$count >= 6) {
+				die "Already running" if($opts{'v'});
+				exit(0);
 			}
+			print "Already running\n" if($opts{'v'});
+			sleep(10);
 		}
-		open($lock, '>', $lockfile) or die "$lockfile: $!";
-		flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
-		print $lock $$;
-		flush $lock;
+		$lock->touch();
 		last;
 	}
 
@@ -209,13 +203,10 @@ while(1) {
 	if(my $build_dir = $CPAN::Config->{'build_dir'}) {
 		File::Path::rmtree($build_dir);
 	}
-	if(defined($lock)) {
-		close $lock;
-	}
-	unlink $lockfile;
+	$lock->release();
 }
 
-unlink $lockfile;
+$lock->release();
 closelog;
 
 # http://www.perlmonks.org/?node_id=324176

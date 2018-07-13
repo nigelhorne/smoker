@@ -10,7 +10,7 @@ if [ x$TMPDIR = 'x' ]; then
 	fi
 fi
 
-LOCKFILE=${TMPDIR}/cpan-test.lck
+LOCKFILE=${TMPDIR}/cpan-test.lck.pid
 if test -e ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
 	# echo "Already running"
 	exit 0
@@ -51,9 +51,9 @@ do
 	else
 		unset PERL_CPAN_REPORTER_DIR
 	fi
-	# perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "CPAN::Recent::Uploads", "CPAN::Reporter::Smoker", "Bundle::CPAN::Reporter::Smoker::Tests")'
+	# perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "CPAN::Recent::Uploads", "CPAN::Reporter::Smoker", "Bundle::CPAN::Reporter::Smoker::Tests", "Proc::PID::File")'
 	# perl -MCPAN::Reporter::Smoker -e start
-	perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "CPAN::Recent::Uploads", "Bundle::CPAN::Reporter::Smoker::Tests")'
+	perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "CPAN::Recent::Uploads", "Bundle::CPAN::Reporter::Smoker::Tests", "Proc::PID::File")'
 done
 
 rm -f ${LOCKFILE}
