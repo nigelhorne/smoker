@@ -29,7 +29,7 @@ unset CC CFLAGS LDFLAGS
 
 for i in perl-5.29.0 perl-5.28.0 perl-5.26.2 perl-5.24.4 perl-5.22.4 perl-5.20.3 perl-5.18.4 perl-5.6.2 perl-5.8.9 perl-5.10.1 perl-5.12.5 perl-5.14.4 perl-5.16.3
 do
-	if test -e ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
+	if test -s ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
 		# echo "Already running"
 		exit 0
 	fi
