@@ -22,7 +22,7 @@
 
 use warnings;
 use strict;
-# use autodie qw(:all);
+use autodie qw(:all);
 
 use Getopt::Std;
 use LWP::Simple;
@@ -40,7 +40,12 @@ use IO::Handle;
 use IPC::Cmd;
 use Config;
 use JSON;
-use Proc::PID::File;
+
+my $ppf_is_installed = 0;
+if(eval { require Proc::PID::File; } ) {
+	Proc::Pid::File->import();
+	$ppf_is_installed = 1;
+}
 
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
@@ -105,8 +110,8 @@ if(!$opts{'i'}) {
 	$ENV{'AUTOMATED_TESTING'} = 1;
 }
 
-my $lock = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
-if((-r $lock) && (open(my $fin, '<', $lock))) {
+my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
+if((-r $lockfile) && (open(my $fin, '<', $lockfile))) {
 	my $pid = <$fin>;
 	close $fin;
 	chomp $pid;
@@ -114,13 +119,22 @@ if((-r $lock) && (open(my $fin, '<', $lock))) {
 		print "CPAN shell running\n";
 		exit;
 	}
-	unlink $lock;
+	unlink $lockfile;
 }
 
-$lock = Proc::PID::File->new(dir => File::Spec->tmpdir(), name => 'cpan-test.lck');
+my $lock;
+if($ppf_is_installed) {
+	$lock = Proc::PID::File->new(dir => File::Spec->tmpdir(), name => 'cpan-test.lck', verify => 1);
+} else {
+	$lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck.pid');
+}
 
 local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
-	$lock->release();
+	if($ppf_is_installed) {
+		$lock->release();
+	} else {
+		unlink $lockfile;
+	}
 	exit 1;
 };
 
@@ -154,7 +168,7 @@ my @dists;
 my $prev_tests;
 
 my $json_file = File::Spec->catfile(File::HomeDir->my_home(), '/.cpan_smoker.rc');
-if(open(my $fin, '<', $json_file)) {
+if((-e $json_file) && open(my $fin, '<', $json_file)) {
 	my $json = JSON->new()->allow_nonref();
 	local $/ = undef;
 	$prev_tests = $json->decode(<$fin>);
@@ -240,15 +254,34 @@ while(1) {
 		}
 	}
 
-	while($lock->alive()) {
-		if(++$count >= 6) {
-			die "Already running" if($opts{'v'});
-			exit(0);
+	if($ppf_is_installed) {
+		while($lock->alive()) {
+			if(++$count >= 6) {
+				die "Already running" if($opts{'v'});
+				exit(0);
+			}
+			print "Already running\n" if($opts{'v'});
+			sleep(10);
 		}
-		print "Already running\n" if($opts{'v'});
-		sleep(10);
+		$lock->touch();
+	} elsif((-r $lockfile) && open($lock, '<', $lockfile)) {
+		my $pid = <$lock>;
+		close $lock;
+		chomp $pid;
+		if($pid && kill(0, $pid)) {
+			if(++$count >= 6) {
+				die "Already running" if($opts{'v'});
+				exit(0);
+			}
+			print "Already running\n" if($opts{'v'});
+			sleep(10);
+			next;
+		}
+		open($lock, '>', $lockfile) or die "$lockfile: $!";
+		flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
+		print $lock $$;
+		$lock->flush();
 	}
-	$lock->touch();
 	last;
 }
 
@@ -300,7 +333,12 @@ if($mode) {
 	1 while(waitpid(-1, WNOHANG) >= 0);
 }
 
-$lock->release();
+if($ppf_is_installed) {
+	$lock->release();
+} else {
+	close $lock if(defined($lock));
+	unlink $lockfile if(-r $lockfile)
+}
 
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {
