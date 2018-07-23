@@ -234,7 +234,7 @@ while(1) {
 		$lock->release();
 	} else {
 		close $lock if(defined($lock));
-		unlink $lockfile if(-r $lockfile)
+		unlink $lockfile if(-r $lockfile);
 	}
 }
 
