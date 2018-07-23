@@ -22,7 +22,7 @@
 
 use warnings;
 use strict;
-use autodie qw(:all);
+# use autodie qw(:all);	# Don't enable, since the kill failing isn't caught
 
 use Getopt::Std;
 use LWP::Simple;
