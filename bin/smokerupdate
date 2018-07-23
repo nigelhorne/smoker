@@ -35,8 +35,8 @@ my $s = IO::Socket::INET->new(PeerPort => $port,
 
 while(my $line = <$pin>) {
 	chomp $line;
-	next unless(($line =~ /^authors\/id\/(.+)\.tar\.gz/) || ($line =~ /^authors\/id\.(.+)\.tgz/));
 	next if($line =~ /\/perl-?[56][\.\/]/i);
+	next unless(($line =~ /^authors\/id\/(.+)\.tar\.gz/) || ($line =~ /^authors\/id\.(.+)\.tgz/));
 	$s->send($1);
 	sleep 1;	# Give the clients a chance to do something so they don't miss the message
 	$count++;
