@@ -337,7 +337,7 @@ if($ppf_is_installed) {
 	$lock->release();
 } else {
 	close $lock if(defined($lock));
-	unlink $lockfile if(-r $lockfile)
+	unlink $lockfile if(-r $lockfile);
 }
 
 # http://www.perlmonks.org/?node_id=324176
