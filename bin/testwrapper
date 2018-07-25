@@ -30,6 +30,7 @@ fi
 echo $$ > ${LOCKFILE}
 
 mkdir $NEWTMPDIR
+chmod 700 $NEWTMPDIR
 
 # make sure the lockfile is removed when we exit and then claim it
 trap "rm -fr ${LOCKFILE} ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
