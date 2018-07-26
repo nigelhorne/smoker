@@ -20,8 +20,15 @@ if [[ "$kernel" != 'CYGWIN_NT-10.0' ]]; then
 	ulimit -f 300000
 fi
 
-NEWTMPDIR=${TMPDIR-/tmp}/testwrapper.$$
-LOCKFILE=${TMPDIR-/tmp}/testwrapper.lck
+typeset -r NEWTMPDIR=${TMPDIR-/tmp}/testwrapper.$$
+typeset -r ID=`id -u`
+
+if [[ -d /run/user/$ID ]]; then
+	typeset -r LOCKFILE=/run/user/$ID/testwrapper.lck
+else
+	typeset -r LOCKFILE=${TMPDIR-/tmp}/testwrapper.lck
+fi
+
 if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
 	logger "$0: already running"
 	exit
