@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # Author Nigel Horne: njh@bandsman.co.uk
-# Copyright (C) 2016-2017, Nigel Horne
+# Copyright (C) 2016-2018, Nigel Horne
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
@@ -227,9 +227,9 @@ while(1) {
 
 	1 while(waitpid(-1, WNOHANG) >= 0);
 
-	if(my $build_dir = $CPAN::Config->{'build_dir'}) {
-		File::Path::rmtree($build_dir);
-	}
+	# if(my $build_dir = $CPAN::Config->{'build_dir'}) {
+		# File::Path::rmtree($build_dir);
+	# }
 	if($ppf_is_installed) {
 		$lock->release();
 	} else {
