@@ -9,15 +9,15 @@ function fileAge {
 	local fileMod
 	if fileMod=$(stat -c %Y -- "$1")
 	then
-		echo $(($(date +%s) - $fileMod))
+		echo $(($(date +%s) - fileMod))
 	else
 		return $?
 	fi
 }
 
-typeset -r age=$(fileAge $HOME/.cpanreporter/reports-sent.db)
+typeset -r age=$(fileAge ~/.cpanreporter/reports-sent.db)
 
-if (( $age > 14400 )); then
+if (( age > 14400 )); then
 	logger 'reports-sent.db is old: check system is testing CPAN'
 	echo reports-sent.db is old: check CPAN is being tested |
 		mail -s "Check CPAN on `hostname`" root
