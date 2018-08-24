@@ -190,11 +190,13 @@ while(1) {
 		} elsif((-r $lockfile) && open($lock, '<', $lockfile)) {
 			my $pid = <$lock>;
 			close $lock;
-			chomp $pid;
-			if($pid && kill(0, $pid)) {
-				print "Already running\n" if($opts{'v'});
-				sleep(10);
-				next;
+			if($pid) {
+				chomp $pid;
+				if(kill(0, $pid)) {
+					print "Already running\n" if($opts{'v'});
+					sleep(10);
+					next;
+				}
 			}
 			open($lock, '>', $lockfile) or die "$lockfile: $!";
 			flock($lock, LOCK_EX|LOCK_NB) or die "$lockfile: $!";
