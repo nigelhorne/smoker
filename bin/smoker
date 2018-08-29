@@ -199,9 +199,10 @@ if($ARGV[0]) {
 		} else {
 			next;
 		}
-		next if($dist =~ /\/CHECKSUMS$/);
-		next if($dist =~ /\.meta$/);
-		next if($dist =~ /\.readme$/);
+		next if($dist =~ /\/CHECKSUMS$/i);
+		next if($dist =~ /\.meta$/i);
+		next if($dist =~ /\.readme$/i);
+		next if($dist =~ /\.html$/i);
 
 		print "Considering $dist\n" if($opts{'v'});
 
