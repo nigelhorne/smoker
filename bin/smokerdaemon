@@ -94,11 +94,13 @@ $ENV{'PERLBREW_HOME'} = $ENV{'HOME'} . '/.perlbrew';
 
 openlog 'CPAN', 'cons,pid', 'user';
 
-setrlimit(RLIMIT_DATA, 128 * 1024 * 1024, 256 * 1024 * 1024) or
-	warn ('Can\'t limit the data size - watch for memory usage');
+if($^O ne 'cygwin') {
+	setrlimit(RLIMIT_DATA, 128 * 1024 * 1024, 256 * 1024 * 1024) or
+		warn ('Can\'t limit the data size - watch for memory usage');
 
-setrlimit(RLIMIT_RSS, 128 * 1024 * 1024, 256 * 1024 * 1024) or
-	warn ('Can\'t limit the data size - watch for memory usage');
+	setrlimit(RLIMIT_RSS, 128 * 1024 * 1024, 256 * 1024 * 1024) or
+		warn ('Can\'t limit the data size - watch for memory usage');
+}
 
 # Give 5 minutes to tidyup before the next hourly cron job starts
 setrlimit(RLIMIT_CPU, 3300, 3600) or
