@@ -31,10 +31,7 @@ elif [ -d /var/www/html/mirrors/CPAN ]; then
 elif [ -d /mnt/CPAN ]; then
 	CPAN=file:///mnt/CPAN/
 else
-	# UK
-	CPAN=http://www.mirror.8086.net/sites/CPAN/
-	# US
-	# CPAN=http://mirror.jmu.edu/pub/CPAN/
+	CPAN=http://cpan.metacpan.org/
 fi
 
 # TODO: add ionice -3 where supported
