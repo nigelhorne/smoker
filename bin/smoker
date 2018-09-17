@@ -188,7 +188,7 @@ if($ARGV[0]) {
 		}
 	}
 
-	die if(!$recent);
+	die "Can't retrieve the RECENT file" if(!$recent);
 
 	my $lastdist;
 	my $now = time;
