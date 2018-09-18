@@ -66,6 +66,7 @@ if [ $SKIPBOOTSTRAP == 'no' ]; then
 			perl -MCPAN -e 'CPAN::Shell->install("D/DA/DAGOLDEN/File-pushd-0.32.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("B/BI/BINGOS/IPC-Cmd-0.76.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("E/EW/EWILHELM/Module-Build-0.32.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("A/AD/ADAMK/File-HomeDir-1.00.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("D/DA/DAGOLDEN/CPAN-Reporter-1.1902.tar.gz")'
 		fi
 	done
