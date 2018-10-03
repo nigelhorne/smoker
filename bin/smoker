@@ -328,6 +328,9 @@ foreach my $dist(@dists) {
 	$prev_tests->{$^V}->{$dist} = $now;
 }
 
+if(-e $json_file) {
+	unlink($json_file);
+}
 if(open(my $fout, '>', $json_file)) {
 	my $json = JSON->new()->allow_nonref();
 	print $fout JSON->new()->allow_nonref()->encode($prev_tests);
