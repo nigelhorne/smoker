@@ -139,7 +139,7 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 };
 
 if($Config{'osname'} ne 'cygwin') {
-	setrlimit(RLIMIT_DATA, 32 * 1024 * 1024, 64 * 1024 * 1024) or
+	setrlimit(RLIMIT_DATA, 256 * 1024 * 1024, 512 * 1024 * 1024) or
 		warn ('Can\'t limit the data size - watch for memory usage');
 
 	if($Config{'osname'} ne 'solaris') {
