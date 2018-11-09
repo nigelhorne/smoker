@@ -52,7 +52,7 @@ do
 		unset PERL_CPAN_REPORTER_DIR
 	fi
 	# perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "CPAN::Recent::Uploads", "CPAN::Reporter::Smoker", "Bundle::CPAN::Reporter::Smoker::Tests", "Proc::PID::File", "IPC::System::Simple", "File::Spec")'
-	perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "CPAN::Recent::Uploads", "Bundle::CPAN::Reporter::Smoker::Tests", "Proc::PID::File", "IPC::System::Simple", "File::Spec")'
+	perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "Proc::PID::File", "IPC::System::Simple", "File::Spec", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads")'
 
 	# Create a baseline
 	# PERL_CR_SMOKER_RUNONCE=1 perl -MCPAN::Reporter::Smoker -e start
