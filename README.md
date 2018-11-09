@@ -36,3 +36,18 @@ I then ran
     systemctl reload apparmor
 
 This is experimental.
+
+# DOCKER
+
+I use Docker images so that I can isolate several smokers running once.
+You'll see that I use /mnt/CPAN as an NFS point for the CPAN modules,
+you'll probably want to change that.
+
+To build an image
+
+    cd dockerprojects
+    bash -e perl-5.29.3-smoker.install
+
+To run an image
+
+    run "docker run --log-driver syslog --log-opt syslog-address=udp://loghost:42185 -dt --name perl-5.29.3-smoker --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly perl-5.29.3-smoker

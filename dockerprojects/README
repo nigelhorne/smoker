@@ -1,0 +1,1 @@
+Assumes CPAN modules are NFS mounted at /mnt/CPAN.  If not remove or change all references in the files

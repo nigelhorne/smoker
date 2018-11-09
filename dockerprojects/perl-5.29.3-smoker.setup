@@ -1,0 +1,11 @@
+# Install system programs needed by the smoker
+
+set -e
+set -x
+
+# export http_proxy="http://zack:3128"
+# export https_proxy="http://zack:3128"
+# mount -o remount,rw,hidepid=2 /proc
+apt-get update && apt-get install -y libpam-tmpdir git procps curl build-essential libxml2-dev sqlite3 && apt-get clean
+# CPAN mount point
+mkdir -p /mnt/CPAN && chmod 0 /mnt/CPAN
