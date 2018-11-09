@@ -1,7 +1,6 @@
 # Install system programs needed by the smoker
 
-set -e
-set -x
+set -ex
 
 # export http_proxy="http://zack:3128"
 # export https_proxy="http://zack:3128"

@@ -16,4 +16,4 @@ COPY perl-5.29.3-smoker.build build
 RUN bash build && rm build
 
 ENV PATH $PATH::
-CMD ["/bin/bash", "-xc", "source perl5/perlbrew/etc/bashrc && perlbrew use perl-5.29.3 && cd smoker/bin && PATH=$PATH:: ./smokerdaemon -v"]
+CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use perl-5.29.3 && cd smoker/bin && PATH=$PATH:: ./smokerdaemon"]
