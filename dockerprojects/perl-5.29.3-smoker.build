@@ -4,10 +4,10 @@ curl -L https://install.perlbrew.pl | bash
 
 export CFLAGS="-O2 -pipe"
 source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j2 -n perl-5.29.3
-rm -rf perl5/perlbrew/dists perl5/perlbrew/build
+rm -rf perl5/perlbrew/dists perl5/perlbrew/build perl5/perlbrew/*log
 
 # cd /tmp && rm build && git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall1 && ./loadall2 && ./loadall3 && ./loadall5
 perlbrew use perl-5.29.3 && perl -MCPAN -e 'CPAN::Shell->install("Test::Reporter::Transport::Socket", "CPAN::Reporter")' && git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall2 && ./loadall3 && ./loadall5
 
-rm -rf .cpan/sources/authors/id/? .cpan/build
+rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/build
 # apt-get purge -y git
