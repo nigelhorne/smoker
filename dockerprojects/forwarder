@@ -13,24 +13,18 @@ my $sin = IO::Socket::INET->new(LocalPort => 21212, Proto => 'udp')
 	or die "Can't listen on port 21212";
 
 my $sout21213 = IO::Socket::INET->new(PeerPort => 21213,
-		# PeerAddr => inet_ntoa(INADDR_BROADCAST),
 		PeerAddr => '127.0.0.1',
-		Proto => 'udp',
-		Broadcast => 1)
+		Proto => 'udp')
 	or die "Can't broadcast to port 21213";
 
 my $sout21214 = IO::Socket::INET->new(PeerPort => 21214,
-		# PeerAddr => inet_ntoa(INADDR_BROADCAST),
 		PeerAddr => '127.0.0.1',
-		Proto => 'udp',
-		Broadcast => 1)
+		Proto => 'udp')
 	or die "Can't broadcast to port 21214";
 
 my $sout21215 = IO::Socket::INET->new(PeerPort => 21215,
-		# PeerAddr => inet_ntoa(INADDR_BROADCAST),
 		PeerAddr => '127.0.0.1',
-		Proto => 'udp',
-		Broadcast => 1)
+		Proto => 'udp')
 	or die "Can't broadcast to port 21215";
 
 while(1) {
@@ -38,8 +32,9 @@ while(1) {
 
 	$sin->recv($line, 256);
 
-	print "$line\n";
+	print $line;
 
-	$sout21214->send($line);
 	$sout21213->send($line);
+	$sout21214->send($line);
+	$sout21215->send($line);
 }
