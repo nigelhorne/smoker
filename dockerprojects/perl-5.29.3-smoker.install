@@ -1,7 +1,7 @@
 set -ex
 
-rm -f config.ini MyConfig.ini
-ln $HOME/.cpanreporter/config.ini $HOME/.cpan/CPAN/MyConfig.ini .
+rm -f config.ini MyConfig.pm
+ln $HOME/.cpanreporter/config.ini $HOME/.cpan/CPAN/MyConfig.pm .
 
 docker build -t perl-5.29.3-smoker -f perl-5.29.3-smoker.dockerfile .
 
