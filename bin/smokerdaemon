@@ -164,6 +164,8 @@ while(1) {
 				next if($module eq $lastdist);
 			}
 			$lastdist = $module;
+		} else {
+			print "Didn't match regex\n" if($opts{'v'});
 		}
 		if($list) {
 			$list .= ',';
@@ -172,6 +174,7 @@ while(1) {
 	}
 
 	if(!defined($list)) {
+		print "Nothing to smoke\n" if($opts{'v'});
 		sleep(1);	# avoid looping
 		next;
 	}
