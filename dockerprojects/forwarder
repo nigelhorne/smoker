@@ -1,0 +1,30 @@
+#!/usr/bin/env perl
+
+# The smokerupdate program broadcasts updates on port 21212. Forward the
+# update notifications to the docker images on the local machine.  In this
+# example the docker image is listening on port 21214 (see *dockerfile and
+# *install)
+
+use strict;
+use warnings;
+use IO::Socket::INET;
+
+my $sin = IO::Socket::INET->new(LocalPort => 21212, Proto => 'udp')
+	or die "Can't listen on port 21212";
+
+my $sout21214 = IO::Socket::INET->new(PeerPort => 21214,
+		# PeerAddr => inet_ntoa(INADDR_BROADCAST),
+		PeerAddr => '127.0.0.1',
+		Proto => 'udp',
+		Broadcast => 1)
+	or die "Can't broadcast to port 21214";
+
+while(1) {
+	my $line;
+
+	$sin->recv($line, 256);
+
+	print "$line\n";
+
+	$sout21214->send($line);
+}
