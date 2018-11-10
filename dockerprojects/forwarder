@@ -26,6 +26,13 @@ my $sout21214 = IO::Socket::INET->new(PeerPort => 21214,
 		Broadcast => 1)
 	or die "Can't broadcast to port 21214";
 
+my $sout21215 = IO::Socket::INET->new(PeerPort => 21215,
+		# PeerAddr => inet_ntoa(INADDR_BROADCAST),
+		PeerAddr => '127.0.0.1',
+		Proto => 'udp',
+		Broadcast => 1)
+	or die "Can't broadcast to port 21215";
+
 while(1) {
 	my $line;
 
