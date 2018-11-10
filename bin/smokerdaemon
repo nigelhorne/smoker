@@ -13,8 +13,9 @@
 # The local minicpan repository has been updated, test all of the updated
 #	modules;
 #
-#	-v: verbose
+#	-p: port (default 21212)
 #	-d: debugging
+#	-v: verbose
 
 use warnings;
 use strict;
@@ -65,7 +66,7 @@ if($ppf_is_installed) {
 }
 
 my %opts;
-getopts('dv', \%opts);
+getopts('dp:v', \%opts);
 
 $opts{'v'} = 1 if($opts{'d'});
 
@@ -80,7 +81,7 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 };
 
 # FIXME - should be argument
-my $port = 21212;
+my $port = $opts{'p'} || 21212;
 
 $ENV{'CPAN_SQLITE_NO_LOG_FILES'} = 1;
 delete $ENV{'CC'};
