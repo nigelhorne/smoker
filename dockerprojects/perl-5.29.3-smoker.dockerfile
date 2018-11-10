@@ -8,6 +8,7 @@ WORKDIR /home/smoker
 
 ENV TEST_JOBS 2
 ENV HARNESS_OPTIONS c:j2
+EXPOSE 21212:21212/udp
 
 RUN mkdir -p .cpanreporter .cpan/CPAN
 COPY config.ini .cpanreporter/config.ini
