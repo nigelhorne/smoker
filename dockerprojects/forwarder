@@ -15,17 +15,22 @@ my $sin = IO::Socket::INET->new(LocalPort => 21212, Proto => 'udp')
 my $sout21213 = IO::Socket::INET->new(PeerPort => 21213,
 		PeerAddr => '127.0.0.1',
 		Proto => 'udp')
-	or die "Can't broadcast to port 21213";
+	or die "Can't send to port 21213";
 
 my $sout21214 = IO::Socket::INET->new(PeerPort => 21214,
 		PeerAddr => '127.0.0.1',
 		Proto => 'udp')
-	or die "Can't broadcast to port 21214";
+	or die "Can't send to port 21214";
 
 my $sout21215 = IO::Socket::INET->new(PeerPort => 21215,
 		PeerAddr => '127.0.0.1',
 		Proto => 'udp')
-	or die "Can't broadcast to port 21215";
+	or die "Can't send to port 21215";
+
+my $sout22000 = IO::Socket::INET->new(PeerPort => 22000,
+		PeerAddr => '127.0.0.1',
+		Proto => 'udp')
+	or die "Can't send to port 22000";
 
 while(1) {
 	my $line;
@@ -37,4 +42,5 @@ while(1) {
 	$sout21213->send($line);
 	$sout21214->send($line);
 	$sout21215->send($line);
+	$sout22000->send($line);
 }
