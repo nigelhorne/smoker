@@ -142,11 +142,14 @@ while(1) {
 
 		$s->recv($dist, 256);
 
+		if($dist eq "\n") {
+			print "End of list\n" if($opts{'v'});
+			last DIST;
+		}
+
 		print "queuing $dist" if($opts{'v'});
 
 		chomp $dist;
-
-		last DIST if($dist eq '');
 
 		push @dists, $dist;
 	}

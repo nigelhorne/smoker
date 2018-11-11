@@ -38,13 +38,13 @@ while(my $line = <$pin>) {
 	next if($line =~ /\/perl-?[56][\.\/]/i);
 	next unless(($line =~ /^authors\/id\/(.+)\.tar\.gz/) || ($line =~ /^authors\/id\.(.+)\.tgz/));
 	$s->send($1);
-	sleep 1;	# Give the clients a chance to do something so they don't miss the message
+	sleep(1);	# Give the clients a chance to do something so they don't miss the message
 	$count++;
 }
 
-$s->send('');
-
 close $pin;
+
+$s->send("\n");
 
 openlog 'CPAN', 'cons,pid', 'user';
 my $msg;
