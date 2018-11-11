@@ -34,7 +34,6 @@ my $s = IO::Socket::INET->new(PeerPort => $port,
 	or die "Can't broadcast to port $port";
 
 while(my $line = <$pin>) {
-	chomp $line;
 	next if($line =~ /\/perl-?[56][\.\/]/i);
 	next unless(($line =~ /^authors\/id\/(.+)\.tar\.gz/) || ($line =~ /^authors\/id\.(.+)\.tgz/));
 	$s->send($1);
