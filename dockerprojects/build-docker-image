@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+
+# Usage: 'install perlversion port'
+#	e.g. 'install 5.29.3 21213
+
+# FIXME: remove temporary files on error or signal
+
+PERL=${1:-5.29.3}
+PORT=${2:-21212}
+TMPDIR=${TMPDIR:-/tmp}
+NPROC=$(grep -c ^processor /proc/cpuinfo)
+
+echo $PERL
+
+rm -f config.ini
+ln $HOME/.cpanreporter/config.ini .
+# rm -f MyConfig.pm
+# ln $HOME/.cpan/CPAN/MyConfig.pm .
+
+cat > setup.$$ <<EOF
+#!/usr/bin/env bash
+
+# Install system programs needed by the smoker
+
+set -ex
+
+# hostname smoker-$PERL.microcenter.bandsman.co.uk
+export http_proxy="http://zack:3128"
+export https_proxy="http://zack:3128"
+# mount -o remount,rw,hidepid=2 /proc
+apt-get update && apt-get install -y libpam-tmpdir git procps curl build-essential libxml2-dev sqlite3 && apt-get clean
+# CPAN mount point
+mkdir -p /mnt/CPAN && chmod 0 /mnt/CPAN
+echo smoker-$PERL > /etc/hostname
+EOF
+
+cat > build.$$ <<EOF
+#!/usr/bin/env bash
+
+# Install user programs needed by the smoker
+
+curl -L https://install.perlbrew.pl | bash
+
+export CFLAGS="-O2 -W -Wformat=2 -Wswitch -Wshadow -Wwrite-strings -Wuninitialized -Wall -pipe -fomit-frame-pointer -pedantic -D_FORTIFY_SOURCE=2 -Wpointer-arith -Wstrict-prototypes -fstack-protector -Wstack-protector -Wextra -Wbad-function-cast -Wcast-align -Wcast-qual -Wdisabled-optimization -Wendif-labels -Wfloat-equal -Wformat-nonliteral -Winline -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wpointer-arith -Wundef -Wformat-security -ftree-vectorize -msse -mfpmath=sse -msse2 -mssse3 -msse4.1 -msse4.2 -maes -fdiagnostics-color=auto -mtune=native -march=native"
+source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n perl-$PERL
+rm -rf perl5/perlbrew/dists perl5/perlbrew/build perl5/perlbrew/*log
+
+# cd /tmp && rm build && git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall1 && ./loadall2 && ./loadall3 && ./loadall5
+perlbrew use perl-$PERL && perl -MCPAN -e 'CPAN::Shell->install("Test::Reporter::Transport::Socket", "CPAN::Reporter")' && git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall2 && ./loadall3 && ./loadall5
+
+rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/build
+# apt-get purge -y git
+EOF
+
+cat > $TMPDIR/dockerfile <<EOF
+FROM debian
+COPY setup.$$ /tmp/setup
+RUN bash /tmp/setup && rm /tmp/setup
+
+RUN useradd -ms /bin/bash smoker
+USER smoker
+WORKDIR /home/smoker
+
+ENV TEST_JOBS $NPROC
+ENV HARNESS_OPTIONS c:j$NPROC
+EXPOSE $PORT:$PORT/udp
+
+RUN mkdir -p .cpanreporter .cpan/CPAN
+COPY config.ini .cpanreporter/config.ini
+COPY MyConfig.pm .cpan/CPAN/MyConfig.pm
+COPY build.$$ build
+RUN bash build && rm build
+
+ENV PATH $PATH::
+CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use perl-$PERL && cd smoker/bin && ./smokerdaemon -p $PORT"]
+EOF
+docker build -t perl-$PERL-smoker -f $TMPDIR/dockerfile .
+
+rm -f $TMPDIR/dockerfile setup.$$ build.$$
+
+echo "run 'socat -u UDP4-RECVFROM:$PORT - | tee >(socat - UDP4:127.0.0.1:$PORT) > /dev/null'"
+echo 'run "./udp-forwarder" if not already running"'
+echo "run 'docker run --hostname=perl-$PERL.microcenter.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 -dt --name perl-$PERL-smoker --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp perl-$PERL-smoker' to start the image"

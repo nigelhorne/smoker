@@ -1,1 +1,16 @@
-Assumes CPAN modules are NFS mounted at /mnt/CPAN.  If not remove or change all references in the files
+Run 'install <perl-version> <port>' for each perl version,
+
+For example:
+
+    install 5.28.0 21213
+
+Then modify 'udp-forwarder', adding <port> and start the program.
+
+To start each image:
+
+    docker run --hostname=perl-$PERL.example.com -dt --name perl-$PERL-smoker --mount -p 0.0.0.0:$PORT:$PORT/udp perl-$PERL-smoker
+
+If you wish to mirror what I do (I use /mnt/CPAN as an NFS mount to my
+local CPAN mirror, and syslog to a server):
+
+    docker run --hostname=perl-$PERL.example.com --log-driver syslog --log-opt syslog-address=udp://loghost:42185 -dt --name perl-$PERL-smoker --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp perl-$PERL-smoker

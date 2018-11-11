@@ -1,8 +1,0 @@
-set -ex
-
-rm -f config.ini MyConfig.pm
-ln $HOME/.cpanreporter/config.ini $HOME/.cpan/CPAN/MyConfig.pm .
-
-docker build -t perl-5.29.3-smoker -f perl-5.29.3-smoker.dockerfile .
-
-echo 'run "docker run -hostname=perl-5-29-3.localhost --log-driver syslog --log-opt syslog-address=udp://loghost:42185 -dt --name perl-5.29.3-smoker --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:21214:21214/udp perl-5.29.3-smoker" to start the image'
