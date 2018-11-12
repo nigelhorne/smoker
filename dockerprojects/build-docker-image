@@ -5,12 +5,11 @@
 
 # FIXME: remove temporary files on error or signal
 
-PERL=${1:-5.29.3}
-PORT=${2:-21212}
-TMPDIR=${TMPDIR:-/tmp}
-NPROC=$(grep -c ^processor /proc/cpuinfo)
-
-echo $PERL
+typeset -r PERL=${1:-5.29.3}
+typeset -r PORT=${2:-21212}
+typeset -r TMPDIR=${TMPDIR:-/tmp}
+typeset -r NPROC=$(grep -c ^processor /proc/cpuinfo)
+typeset -r HOSTNAME=$(echo smoker-$PERL | sed s/\\./-/)
 
 rm -f config.ini
 ln $HOME/.cpanreporter/config.ini .
@@ -24,14 +23,14 @@ cat > setup.$$ <<EOF
 
 set -ex
 
-# hostname smoker-$PERL.microcenter.bandsman.co.uk
+# hostname $HOSTNAME.example.com
 export http_proxy="http://zack:3128"
 export https_proxy="http://zack:3128"
 # mount -o remount,rw,hidepid=2 /proc
 apt-get update && apt-get install -y libpam-tmpdir git procps curl build-essential libxml2-dev sqlite3 && apt-get clean
 # CPAN mount point
 mkdir -p /mnt/CPAN && chmod 0 /mnt/CPAN
-echo smoker-$PERL > /etc/hostname
+echo $HOSTNAME > /etc/hostname
 EOF
 
 cat > build.$$ <<EOF
@@ -71,8 +70,8 @@ COPY MyConfig.pm .cpan/CPAN/MyConfig.pm
 COPY build.$$ build
 RUN bash build && rm build
 
-ENV PATH $PATH::
-CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use perl-$PERL && cd smoker/bin && ./smokerdaemon -p $PORT"]
+ENV PATH \$PATH::
+CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use perl-$PERL && cd smoker/bin && PATH=\$PATH:: ./smokerdaemon -vp $PORT"]
 EOF
 docker build -t perl-$PERL-smoker -f $TMPDIR/dockerfile .
 
@@ -80,4 +79,4 @@ rm -f $TMPDIR/dockerfile setup.$$ build.$$
 
 echo "run 'socat -u UDP4-RECVFROM:$PORT - | tee >(socat - UDP4:127.0.0.1:$PORT) > /dev/null'"
 echo 'run "./udp-forwarder" if not already running"'
-echo "run 'docker run --hostname=perl-$PERL.microcenter.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 -dt --name perl-$PERL-smoker --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp perl-$PERL-smoker' to start the image"
+echo "run 'docker run --hostname=$HOSTNAME.example.com --log-driver syslog --log-opt syslog-address=udp://loghost:42185 -dt --name perl-$PERL-smoker --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp perl-$PERL-smoker' to start the image"
