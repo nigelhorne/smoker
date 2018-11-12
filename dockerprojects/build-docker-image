@@ -38,6 +38,8 @@ cat > build.$$ <<EOF
 
 # Install user programs needed by the smoker
 
+set -e
+
 curl -L https://install.perlbrew.pl | bash
 
 export CFLAGS="-O2 -W -Wformat=2 -Wswitch -Wshadow -Wwrite-strings -Wuninitialized -Wall -pipe -fomit-frame-pointer -pedantic -D_FORTIFY_SOURCE=2 -Wpointer-arith -Wstrict-prototypes -fstack-protector -Wstack-protector -Wextra -Wbad-function-cast -Wcast-align -Wcast-qual -Wdisabled-optimization -Wendif-labels -Wfloat-equal -Wformat-nonliteral -Winline -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wpointer-arith -Wundef -Wformat-security -ftree-vectorize -msse -mfpmath=sse -msse2 -mssse3 -msse4.1 -msse4.2 -maes -fdiagnostics-color=auto -mtune=native -march=native"
