@@ -124,7 +124,8 @@ if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 	$ENV{'TEST_JOBS'} = $number_of_cpus;
 }
 
-my $logfile = File::Spec->catfile(File::Spec->tmpdir(), basename("$0.log"));
+my $logfile = File::Spec->catfile(File::Spec->tmpdir(), basename("$0.out"));
+my $errfile = File::Spec->catfile(File::Spec->tmpdir(), basename("$0.err"));
 
 while(1) {
 	# Not needed, but somehow it seems cleaner to close and reopen
@@ -224,8 +225,8 @@ while(1) {
 		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list < /dev/null\n";
 		print "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list < /dev/null\n";
 	} else {
-		# print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' > $logfile 2>&1 < /dev/null\n";
-		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list > $logfile 2>&1 < /dev/null\n";
+		# print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' > $logfile 2> $errfile < /dev/null\n";
+		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list > $logfile 2> $errfile < /dev/null\n";
 	}
 	my $filename = $tmp->filename();
 	close $tmp;
