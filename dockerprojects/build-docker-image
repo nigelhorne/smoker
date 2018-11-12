@@ -71,7 +71,7 @@ COPY build.$$ build
 RUN bash build && rm build
 
 ENV PATH \$PATH::
-CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use perl-$PERL && cd smoker/bin && PATH=\$PATH:: ./smokerdaemon -vp $PORT"]
+CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use perl-$PERL && cd smoker/bin && PATH=\$PATH:: ./smokerdaemon -p $PORT"]
 EOF
 docker build -t perl-$PERL-smoker -f $TMPDIR/dockerfile .
 
