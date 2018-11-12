@@ -7,18 +7,21 @@
 
 use strict;
 use warnings;
-use IO::Socket::INET;
 use autodie qw(:all);
+use IO::Socket::INET;
+use Unix::Processors;
 
 my $sin = IO::Socket::INET->new(LocalPort => 21212, Proto => 'udp')
 	or die "Can't listen on port 21212";
+
+my $number_of_cpus = Unix::Processors->new()->max_physical() || 1;
 
 while(1) {
 	get_dists();
 }
 
 sub get_dists {
-	my $dists;
+	my @dists;
 
 	while(1) {
 		my $line;
@@ -27,9 +30,9 @@ sub get_dists {
 
 		print $line;
 
-		$dists .= $line;
-
 		last if($line eq "\n");
+
+		push @dists, $line;
 	}
 
 	open(my $pin, '-|', '/usr/bin/docker ps');
@@ -46,16 +49,27 @@ sub get_dists {
 
 	die "Couldn't detect any smokers\n" if(scalar(@ports) == 0);
 
+	my $count = $number_of_cpus;;
+
 	foreach my $port(@ports) {
-		print "Send to $port:$dists\n";
+		print "Send to $port\n";
 		my $sout = IO::Socket::INET->new(PeerPort => $port,
 				PeerAddr => '127.0.0.1',
 				Proto => 'udp')
 			or die "Can't send to port $port";
 
-		# TODO: break up if the dists is a large packet
-		$sout->send($dists);
+		foreach my $dist(@dists) {
+			$sout->send($dist);
+		}
+		$sout->send("\n");
 
 		close($sout);
+
+		$count--;
+
+		if($count <= 0) {
+			sleep(30);
+			$count = $number_of_cpus;;
+		}
 	}
 }
