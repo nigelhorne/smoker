@@ -45,7 +45,7 @@ while(my $line = <$pin>) {
 
 close $pin;
 
-$s->send("\n");
+$s->send("\n") if($count);
 
 openlog 'CPAN', 'cons,pid', 'user';
 my $msg;

@@ -60,6 +60,7 @@ sub get_dists {
 
 		foreach my $dist(@dists) {
 			$sout->send($dist);
+			sleep(1);	# Ensure the remote end is ready
 		}
 		$sout->send("\n");
 
@@ -69,7 +70,7 @@ sub get_dists {
 
 		if($count <= 0) {
 			sleep(30);
-			$count = $number_of_cpus;;
+			$count = $number_of_cpus;
 		}
 	}
 }
