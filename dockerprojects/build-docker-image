@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 # Usage: 'install perlversion port'
-#	e.g. 'install 5.29.3 21213
+#	e.g. build-docker-image 5.29.3 21213
+#	build-docker-image 5.18.2 21214 --thread
 
 # FIXME: remove temporary files on error or signal
 
@@ -9,7 +10,11 @@ typeset -r PERL=${1:-5.29.3}
 typeset -r PORT=${2:-21212}
 typeset -r TMPDIR=${TMPDIR:-/tmp}
 typeset -r NPROC=$(grep -c ^processor /proc/cpuinfo)
-typeset -r HOSTNAME=$(echo smoker-$PERL | sed s/\\./-/)
+typeset -r HOSTNAME=$(echo smoker-$PERL | sed s/\\./-/g)
+
+shift
+shift
+typeset -r ARGS=$@
 
 rm -f config.ini
 ln $HOME/.cpanreporter/config.ini .
@@ -23,7 +28,7 @@ cat > setup.$$ <<EOF
 
 set -ex
 
-# hostname $HOSTNAME.example.com
+# hostname $HOSTNAME.microcenter.bandsman.co.uk
 export http_proxy="http://zack:3128"
 export https_proxy="http://zack:3128"
 # mount -o remount,rw,hidepid=2 /proc
@@ -36,14 +41,14 @@ EOF
 cat > build.$$ <<EOF
 #!/usr/bin/env bash
 
-# Install user programs needed by the smoker
+set -ex
 
-set -e
+# Install user programs needed by the smoker
 
 curl -L https://install.perlbrew.pl | bash
 
 export CFLAGS="-O2 -W -Wformat=2 -Wswitch -Wshadow -Wwrite-strings -Wuninitialized -Wall -pipe -fomit-frame-pointer -pedantic -D_FORTIFY_SOURCE=2 -Wpointer-arith -Wstrict-prototypes -fstack-protector -Wstack-protector -Wextra -Wbad-function-cast -Wcast-align -Wcast-qual -Wdisabled-optimization -Wendif-labels -Wfloat-equal -Wformat-nonliteral -Winline -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wpointer-arith -Wundef -Wformat-security -ftree-vectorize -msse -mfpmath=sse -msse2 -mssse3 -msse4.1 -msse4.2 -maes -fdiagnostics-color=auto -mtune=native -march=native"
-source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n perl-$PERL
+source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n perl-$PERL $ARGS
 rm -rf perl5/perlbrew/dists perl5/perlbrew/build perl5/perlbrew/*log
 
 # cd /tmp && rm build && git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall1 && ./loadall2 && ./loadall3 && ./loadall5
@@ -81,4 +86,4 @@ rm -f $TMPDIR/dockerfile setup.$$ build.$$
 
 echo "run 'socat -u UDP4-RECVFROM:$PORT - | tee >(socat - UDP4:127.0.0.1:$PORT) > /dev/null'"
 echo 'run "./udp-forwarder" if not already running"'
-echo "run 'docker run --hostname=$HOSTNAME.example.com --log-driver syslog --log-opt syslog-address=udp://loghost:42185 -dt --name perl-$PERL-smoker --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp perl-$PERL-smoker' to start the image"
+echo "run 'docker run --hostname=$HOSTNAME.microcenter.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME.microcenter -dt --name perl-$PERL-smoker --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp perl-$PERL-smoker' to start the image"
