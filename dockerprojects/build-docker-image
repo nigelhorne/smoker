@@ -10,7 +10,7 @@ typeset -r PERL=${1:-5.29.3}
 typeset -r PORT=${2:-21212}
 typeset -r TMPDIR=${TMPDIR:-/tmp}
 typeset -r NPROC=$(grep -c ^processor /proc/cpuinfo)
-typeset -r HOSTNAME=$(echo smoker-$PERL | sed s/\\./-/g)
+typeset -r HOSTNAME=$(echo smoker-$PERL | sed s/\\./-/g).$(hostname)
 
 shift
 shift
@@ -28,11 +28,11 @@ cat > setup.$$ <<EOF
 
 set -ex
 
-# hostname $HOSTNAME.microcenter.bandsman.co.uk
+# hostname $HOSTNAME.bandsman.co.uk
 export http_proxy="http://zack:3128"
 export https_proxy="http://zack:3128"
 # mount -o remount,rw,hidepid=2 /proc
-apt-get update && apt-get install -y libpam-tmpdir git procps curl build-essential libxml2-dev sqlite3 && apt-get clean
+apt-get update && apt-get install -y libpam-tmpdir git procps curl build-essential libxml2-dev sqlite3 && apt-get clean && apt-get -s clean
 # CPAN mount point
 mkdir -p /mnt/CPAN && chmod 0 /mnt/CPAN
 echo $HOSTNAME > /etc/hostname
@@ -86,4 +86,4 @@ rm -f $TMPDIR/dockerfile setup.$$ build.$$
 
 echo "run 'socat -u UDP4-RECVFROM:$PORT - | tee >(socat - UDP4:127.0.0.1:$PORT) > /dev/null'"
 echo 'run "./udp-forwarder" if not already running"'
-echo "run 'docker run --hostname=$HOSTNAME.microcenter.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME.microcenter -dt --name perl-$PERL-smoker --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp perl-$PERL-smoker' to start the image"
+echo "run 'docker run --hostname=$HOSTNAME.example.com --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME -dt --name perl-$PERL-smoker --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp perl-$PERL-smoker' to start the image"
