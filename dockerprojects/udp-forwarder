@@ -8,45 +8,54 @@
 use strict;
 use warnings;
 use IO::Socket::INET;
+use autodie qw(:all);
 
 my $sin = IO::Socket::INET->new(LocalPort => 21212, Proto => 'udp')
 	or die "Can't listen on port 21212";
 
-my $sout21213 = IO::Socket::INET->new(PeerPort => 21213,
-		PeerAddr => '127.0.0.1',
-		Proto => 'udp')
-	or die "Can't send to port 21213";
-
-my $sout21214 = IO::Socket::INET->new(PeerPort => 21214,
-		PeerAddr => '127.0.0.1',
-		Proto => 'udp')
-	or die "Can't send to port 21214";
-
-my $sout21215 = IO::Socket::INET->new(PeerPort => 21215,
-		PeerAddr => '127.0.0.1',
-		Proto => 'udp')
-	or die "Can't send to port 21215";
-
-my $sout21216 = IO::Socket::INET->new(PeerPort => 21216,
-		PeerAddr => '127.0.0.1',
-		Proto => 'udp')
-	or die "Can't send to port 21216";
-
-my $sout22000 = IO::Socket::INET->new(PeerPort => 22000,
-		PeerAddr => '127.0.0.1',
-		Proto => 'udp')
-	or die "Can't send to port 22000";
-
 while(1) {
-	my $line;
+	get_dists();
+}
 
-	$sin->recv($line, 256);
+sub get_dists {
+	my $dists;
 
-	print $line;
+	while(1) {
+		my $line;
 
-	$sout21213->send($line);
-	$sout21214->send($line);
-	$sout21215->send($line);
-	$sout21216->send($line);
-	$sout22000->send($line);
+		$sin->recv($line, 256);
+
+		print $line;
+
+		$dists .= $line;
+
+		last if($line eq "\n");
+	}
+
+	open(my $pin, '-|', '/usr/bin/docker ps');
+
+	my @ports;
+	my $line = <$pin>;
+	while($line = <$pin>) {
+		if($line =~ /0.0.0.0:(\d+)->\d+\/udp/) {
+			push @ports, $1;
+		}
+	}
+
+	close($pin);
+
+	die "Couldn't detect any smokers\n" if(scalar(@ports) == 0);
+
+	foreach my $port(@ports) {
+		print "Send to $port:$dists\n";
+		my $sout = IO::Socket::INET->new(PeerPort => $port,
+				PeerAddr => '127.0.0.1',
+				Proto => 'udp')
+			or die "Can't send to port $port";
+
+		# TODO: break up if the dists is a large packet
+		$sout->send($dists);
+
+		close($sout);
+	}
 }
