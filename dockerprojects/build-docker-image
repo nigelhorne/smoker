@@ -11,7 +11,7 @@
 typeset -r PERL=${1:-5.29.3}
 typeset -r PORT=${2:-21212}
 typeset -r TMPDIR=${TMPDIR:-/tmp}
-typeset -r NPROC=$(grep ^cpu\\scores /proc/cpuinfo | uniq |  awk '{print $4}')
+typeset -r NPROC=$(grep ^cpu\\scores /proc/cpuinfo | uniq | awk '{print $4}')
 
 shift
 shift
@@ -42,7 +42,8 @@ set -ex
 export http_proxy="http://zack:3128"
 export https_proxy="http://zack:3128"
 # mount -o remount,rw,hidepid=2 /proc
-apt-get update && apt-get install -y libpam-tmpdir git procps curl build-essential libxml2-dev sqlite3 && apt-get clean && rm -rf /var/lib/apt/lists/*
+# apt-get update && apt-get --no-install-recommends install -y libpam-tmpdir git procps curl build-essential libxml2-dev sqlite3 && apt-get clean && rm -rf /var/lib/apt/lists/*
+apt-get update && apt-get --no-install-recommends install -y libpam-tmpdir git procps curl bzip2 bison byacc patch netbase gcc make ca-certificates autoconf libxml2-dev sqlite3 && apt-get autoremove && apt-get autoclean && apt-get clean && rm -rf /var/lib/apt/lists/*
 # CPAN mount point
 mkdir -p /mnt/CPAN && chmod 0 /mnt/CPAN
 echo $HOSTNAME > /etc/hostname
@@ -61,10 +62,11 @@ export CFLAGS="-O2 -W -Wformat=2 -Wswitch -Wshadow -Wwrite-strings -Wuninitializ
 source ~/perl5/perlbrew/etc/bashrc && $BUILDCMD
 rm -rf perl5/perlbrew/dists perl5/perlbrew/build perl5/perlbrew/*log
 
-# cd /tmp && rm build && git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall1 && ./loadall2 && ./loadall3 && ./loadall5
-perlbrew use $NAME && perl -MCPAN -e 'CPAN::Shell->install("Test::Reporter::Transport::Socket", "CPAN::Reporter")' && git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall2 && ./loadall3 && ./loadall5
+perlbrew use $NAME && perl -MCPAN -e 'CPAN::Shell->install("ExtUtils::MakeMaker", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
+git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall2 && ./loadall3 && ./loadall5
+cd && git clone https://github.com/nigelhorne/li.git && cd li && cc li.c && ./a.out -r0l ../perl5
 
-rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/build
+cd && rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/* li smoker/dockerfiles smoker/bin/loadall? smoker/.git
 # apt-get purge -y git
 EOF
 
