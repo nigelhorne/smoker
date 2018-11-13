@@ -4,17 +4,27 @@
 #	e.g. build-docker-image 5.29.3 21213
 #	build-docker-image 5.18.2 21214 --thread
 
-# FIXME: remove temporary files on error or signal
+# FIXME: remove temporary files on error or signal, and/or use stdin
+
+# TODO: check if the given port is free
 
 typeset -r PERL=${1:-5.29.3}
 typeset -r PORT=${2:-21212}
 typeset -r TMPDIR=${TMPDIR:-/tmp}
-typeset -r NPROC=$(grep -c ^processor /proc/cpuinfo)
-typeset -r HOSTNAME=$(echo smoker-$PERL | sed s/\\./-/g).$(hostname)
+typeset -r NPROC=$(grep ^cpu\\scores /proc/cpuinfo | uniq |  awk '{print $4}')
 
 shift
 shift
 typeset -r ARGS=$@
+typeset -r HOSTNAME=$(echo smoker-${PERL}$ARGS | sed s/\\./-/g | sed s/--/-/g | sed 's/ //g').$(hostname)
+
+if [[ $ARGS != "" ]]; then
+	typeset -r NAME="perl-$PERL$(echo "$ARGS" | sed s/--/-/g | sed 's/ //g')"
+	typeset -r BUILDCMD="source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n perl-$PERL $ARGS --as $NAME"
+else
+	typeset -r NAME="perl-$PERL"
+	typeset -r BUILDCMD="source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n $NAME"
+fi
 
 rm -f config.ini
 ln $HOME/.cpanreporter/config.ini .
@@ -48,11 +58,11 @@ set -ex
 curl -L https://install.perlbrew.pl | bash
 
 export CFLAGS="-O2 -W -Wformat=2 -Wswitch -Wshadow -Wwrite-strings -Wuninitialized -Wall -pipe -fomit-frame-pointer -pedantic -D_FORTIFY_SOURCE=2 -Wpointer-arith -Wstrict-prototypes -fstack-protector -Wstack-protector -Wextra -Wbad-function-cast -Wcast-align -Wcast-qual -Wdisabled-optimization -Wendif-labels -Wfloat-equal -Wformat-nonliteral -Winline -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wpointer-arith -Wundef -Wformat-security -ftree-vectorize -msse -mfpmath=sse -msse2 -mssse3 -msse4.1 -msse4.2 -maes -fdiagnostics-color=auto -mtune=native -march=native"
-source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n perl-$PERL $ARGS
+source ~/perl5/perlbrew/etc/bashrc && $BUILDCMD
 rm -rf perl5/perlbrew/dists perl5/perlbrew/build perl5/perlbrew/*log
 
 # cd /tmp && rm build && git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall1 && ./loadall2 && ./loadall3 && ./loadall5
-perlbrew use perl-$PERL && perl -MCPAN -e 'CPAN::Shell->install("Test::Reporter::Transport::Socket", "CPAN::Reporter")' && git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall2 && ./loadall3 && ./loadall5
+perlbrew use $NAME && perl -MCPAN -e 'CPAN::Shell->install("Test::Reporter::Transport::Socket", "CPAN::Reporter")' && git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall2 && ./loadall3 && ./loadall5
 
 rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/build
 # apt-get purge -y git
@@ -78,12 +88,12 @@ COPY build.$$ build
 RUN bash build && rm build
 
 ENV PATH \$PATH::
-CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use perl-$PERL && cd smoker/bin && PATH=\$PATH:: ./smokerdaemon -p $PORT"]
+CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: ./smokerdaemon -p $PORT"]
 EOF
-docker build -t perl-$PERL-smoker -f $TMPDIR/dockerfile .
+docker build -t smoker-$NAME -f $TMPDIR/dockerfile .
 
 rm -f $TMPDIR/dockerfile setup.$$ build.$$
 
 echo "run 'socat -u UDP4-RECVFROM:$PORT - | tee >(socat - UDP4:127.0.0.1:$PORT) > /dev/null'"
 echo 'run "./udp-forwarder" if not already running"'
-echo "run 'docker run --hostname=$HOSTNAME.example.com --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME -dt --name perl-$PERL-smoker --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp perl-$PERL-smoker' to start the image"
+echo "run 'docker run --restart=always --hostname=$HOSTNAME.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME -dt --name smoker-$NAME --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp smoker-$NAME' to start the image"
