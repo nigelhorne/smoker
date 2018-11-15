@@ -28,7 +28,7 @@ sub get_dists {
 
 		$sin->recv($line, 256);
 
-		print $line;
+		# print $line;
 
 		last if($line eq "\n");
 
@@ -52,7 +52,7 @@ sub get_dists {
 	my $count = $number_of_cpus;;
 
 	foreach my $port(@ports) {
-		print "Send to $port\n";
+		# print "Send to $port\n";
 		my $sout = IO::Socket::INET->new(PeerPort => $port,
 				PeerAddr => '127.0.0.1',
 				Proto => 'udp')
