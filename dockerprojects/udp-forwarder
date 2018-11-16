@@ -11,6 +11,10 @@ use autodie qw(:all);
 use IO::Socket::INET;
 use Unix::Processors;
 
+if(fork > 0) {
+	exit(0);
+}
+
 my $sin = IO::Socket::INET->new(LocalPort => 21212, Proto => 'udp')
 	or die "Can't listen on port 21212";
 
