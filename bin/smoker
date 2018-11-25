@@ -98,7 +98,11 @@ die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'}
 die unless($CPAN::Config->{'urllist'});
 
 my %opts;
-getopts('iv', \%opts);
+getopts('div', \%opts);
+
+if($opts{'d'}) {
+	$opts{'v'} = 1;
+}
 
 print "Mode: $mode\n" if($opts{'v'});
 
@@ -325,6 +329,8 @@ if($opts{'i'}) {
 		close(STDIN);
 		open(STDIN, '<', '/dev/null');
 		timed_system(3300, "testwrapper $list");
+	} elsif($opts{'d'}) {
+		timed_system(3300, "testwrapper $list < /dev/null");
 	} else {
 		# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' >> $logfile.out 2>> $logfile.err < /dev/null");
 		timed_system(3300, "testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
