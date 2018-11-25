@@ -120,8 +120,8 @@ if((-r $lockfile) && (open(my $fin, '<', $lockfile))) {
 	close $fin;
 	chomp $pid;
 	if(kill(0, $pid)) {
-		print "CPAN shell running\n";
-		exit;
+		print STDERR "CPAN shell running\n";
+		exit(1);
 	}
 	unlink $lockfile;
 }
@@ -136,10 +136,10 @@ if($ppf_is_installed) {
 local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	if($ppf_is_installed) {
 		$lock->release();
-	} else {
-		unlink $lockfile;
+	} elsif(-e $lockfile) {
+		unlink($lockfile);
 	}
-	exit 1;
+	exit(1);
 };
 
 if($Config{'osname'} ne 'cygwin') {
@@ -242,7 +242,7 @@ if($ARGV[0]) {
 	}
 }
 
-exit if(scalar(@dists) == 0);	# Won't write the pruned tree
+exit(0) if(scalar(@dists) == 0);	# Won't write the pruned tree
 
 my $count = 0;
 my $logfile = File::Spec->catfile(File::Spec->tmpdir(), basename($0));
@@ -342,9 +342,8 @@ foreach my $dist(@dists) {
 	$prev_tests->{$^V}->{$dist} = $now;
 }
 
-if(-e $json_file) {
-	unlink($json_file);
-}
+unlink $json_file if(-e $json_file);
+
 if(open(my $fout, '>', $json_file)) {
 	print $fout JSON->new()->allow_nonref()->encode($prev_tests);
 	close $fout;
@@ -358,7 +357,7 @@ if($ppf_is_installed) {
 	$lock->release();
 } else {
 	close $lock if(defined($lock));
-	unlink $lockfile if(-r $lockfile);
+	unlink($lockfile) if(-e $lockfile);
 }
 
 # http://www.perlmonks.org/?node_id=324176
