@@ -90,10 +90,10 @@ delete $ENV{'LDFLAGS'};
 $ENV{'AUTOMATED_TESTING'} = 1;
 
 # TODO: read from config files
-$ENV{'PERLBREW_ROOT'} = $ENV{'HOME'} . '/perl5/perlbrew';
-$ENV{'PERLBREW_HOME'} = $ENV{'HOME'} . '/.perlbrew';
+$ENV{'PERLBREW_ROOT'} = File::Spec->catfile($ENV{'HOME'}, 'perl5/perlbrew');
+$ENV{'PERLBREW_HOME'} = File::Spec->catfile($ENV{'HOME'}, '.perlbrew');
 
-openlog 'CPAN', 'cons,pid', 'user';
+openlog('CPAN', 'cons,pid', 'user');
 
 if($^O ne 'cygwin') {
 	setrlimit(RLIMIT_DATA, 128 * 1024 * 1024, 256 * 1024 * 1024) or
@@ -122,6 +122,9 @@ my $number_of_cpus = Unix::Processors->new()->max_physical();
 if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 	$ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
 	$ENV{'TEST_JOBS'} = $number_of_cpus;
+} else {
+	delete $ENV{'HARNESS_OPTIONS'};
+	delete $ENV{'TEST_JOBS'};
 }
 
 my $logfile = File::Spec->catfile(File::Spec->tmpdir(), basename("$0.out"));
@@ -134,7 +137,7 @@ while(1) {
 
 	my @dists;
 
-	syslog 'info', "Waiting to be told on port $port what to smoke";
+	syslog('info', "Waiting to be told on port $port what to smoke");
 	print "Waiting to be told on port $port what to smoke\n" if($opts{'v'});
 
 	# push @dists, 'M/MI/MILSO/Pod-Weaver-Section-CommentString-0.03';
@@ -183,7 +186,7 @@ while(1) {
 		next;
 	}
 
-	syslog 'info', "Smoking $list";
+	syslog('info', "Smoking $list");
 	print 'Smoking ', join("\n", @dists), "\n";
 
 	while(1) {
@@ -276,7 +279,7 @@ sub timed_system {
 			if($opts{'v'}) {
 				print "Killing process family $pid\n";
 			}
-			syslog 'info', "killing process family $pid";
+			syslog('info', "killing process family $pid");
 			killfam 14, $pid;
 			sleep 2;
 			kill 14, $pid;
@@ -284,7 +287,7 @@ sub timed_system {
 			killfam 9, $pid;
 			kill 9, $pid;
 			if(kill(0, $pid)) {
-				syslog 'warn', "$pid won't die";
+				syslog('warn', "$pid won't die");
 				die "Timeout! $pid Won't die";
 			}
 			# die "Timeout!"
