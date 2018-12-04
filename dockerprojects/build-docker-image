@@ -70,7 +70,6 @@ cd && rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/* li smoker/dockerfiles
 # apt-get purge -y git bison byacc
 
 # Stop CPAN modules trying to put stuff in my home directory
-chmod 500 /home/smoker
 EOF
 
 cat > $TMPDIR/dockerfile <<EOF
@@ -90,7 +89,7 @@ RUN mkdir -p .cpanreporter .cpan/CPAN
 COPY config.ini .cpanreporter/config.ini
 COPY MyConfig.pm .cpan/CPAN/MyConfig.pm
 COPY build.$$ build
-RUN bash build && rm build
+RUN bash build && rm build && chmod 500 /home/smoker
 
 ENV PATH \$PATH::
 CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: ./smokerdaemon -p $PORT"]
