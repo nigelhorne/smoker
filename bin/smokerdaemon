@@ -244,9 +244,12 @@ while(1) {
 
 	1 while(waitpid(-1, WNOHANG) >= 0);
 
-	# if(my $build_dir = $CPAN::Config->{'build_dir'}) {
-		# File::Path::rmtree($build_dir);
-	# }
+	if(-r '/proc/1/cgroup') {
+		# Running in a Docker container, so nothing should be living with us
+		if(my $build_dir = $CPAN::Config->{'build_dir'}) {
+			File::Path::rmtree($build_dir);
+		}
+	}
 	if($ppf_is_installed) {
 		$lock->release();
 	} else {

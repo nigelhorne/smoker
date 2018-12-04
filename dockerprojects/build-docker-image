@@ -68,6 +68,9 @@ cd && git clone https://github.com/nigelhorne/li.git && cd li && cc li.c && ./a.
 
 cd && rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/* li smoker/dockerfiles smoker/bin/loadall? smoker/.git
 # apt-get purge -y git bison byacc
+
+# Stop CPAN modules trying to put stuff in my home directory
+chmod 500 /home/smoker
 EOF
 
 cat > $TMPDIR/dockerfile <<EOF
