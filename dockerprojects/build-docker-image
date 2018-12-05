@@ -66,10 +66,9 @@ perlbrew use $NAME && perl -MCPAN -e 'CPAN::Shell->install("ExtUtils::MakeMaker"
 git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall2 && ./loadall3 && ./loadall5
 cd && git clone https://github.com/nigelhorne/li.git && cd li && cc li.c && ./a.out -r0l ../perl5
 
-cd && rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/* li smoker/dockerfiles smoker/bin/loadall? smoker/.git
+cd && rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/* li smoker/dockerprojects smoker/bin/loadall? smoker/.git
 # apt-get purge -y git bison byacc
 
-# Stop CPAN modules trying to put stuff in my home directory
 EOF
 
 cat > $TMPDIR/dockerfile <<EOF
@@ -89,10 +88,11 @@ RUN mkdir -p .cpanreporter .cpan/CPAN
 COPY config.ini .cpanreporter/config.ini
 COPY MyConfig.pm .cpan/CPAN/MyConfig.pm
 COPY build.$$ build
+# Stop CPAN modules trying to put stuff in the home directory
 RUN bash build && rm build && chmod 500 /home/smoker
 
 ENV PATH \$PATH::
-CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: ./smokerdaemon -p $PORT"]
+CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: exec ./smokerdaemon -p $PORT"]
 # CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: /bin/bash"]
 EOF
 docker build -t smoker-$NAME -f $TMPDIR/dockerfile .
