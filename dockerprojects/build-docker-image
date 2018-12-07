@@ -101,4 +101,4 @@ rm -f $TMPDIR/dockerfile setup.$$ build.$$
 
 echo "run 'socat -u UDP4-RECVFROM:$PORT - | tee >(socat - UDP4:127.0.0.1:$PORT) > /dev/null'"
 echo 'run "./udp-forwarder" if not already running"'
-echo "run 'docker run --restart=always --hostname=$HOSTNAME.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME -dt --name smoker-$NAME --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp smoker-$NAME' to start the image"
+echo "run 'docker run --restart=always --hostname=$HOSTNAME.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME --log-opt syslog-format=rfc3164 -dt --name smoker-$NAME --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp smoker-$NAME' to start the image"
