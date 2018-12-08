@@ -12,16 +12,19 @@ if [ -r $HOME/.cpanreporter/$PERLBREW_PERL/config.ini ]; then
 	export PERL_CPAN_REPORTER_DIR=$HOME/.cpanreporter/$PERLBREW_PERL
 fi
 
-kernel=`uname`
-if [[ "$kernel" != 'FreeBSD' && "$kernel" != 'OpenBSD' && "$kernel" != 'CYGWIN_NT-10.0' && `ulimit -d` = unlimited ]]; then
-	ulimit -d 524288
-fi
-if [[ "$kernel" != 'SunOS' && "$kernel" != 'CYGWIN_NT-10.0' && `ulimit -m` = unlimited ]]; then
-	ulimit -m 524288
-	ulimit -u 256
-fi
-if [[ "$kernel" != 'CYGWIN_NT-10.0' ]]; then
-	ulimit -f 300000
+# Docker images have memory limits set elsewhere
+if [[ ! -r /proc/1/cgroup ]]; then
+	kernel=`uname`
+	if [[ "$kernel" != 'FreeBSD' && "$kernel" != 'OpenBSD' && "$kernel" != 'CYGWIN_NT-10.0' && `ulimit -d` = unlimited ]]; then
+		ulimit -d 524288
+	fi
+	if [[ "$kernel" != 'SunOS' && "$kernel" != 'CYGWIN_NT-10.0' && `ulimit -m` = unlimited ]]; then
+		ulimit -m 524288
+		ulimit -u 256
+	fi
+	if [[ "$kernel" != 'CYGWIN_NT-10.0' ]]; then
+		ulimit -f 300000
+	fi
 fi
 
 typeset -r NEWTMPDIR=${TMPDIR-/tmp}/testwrapper.$$
