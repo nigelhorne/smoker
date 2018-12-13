@@ -142,7 +142,11 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	exit(1);
 };
 
-if($Config{'osname'} ne 'cygwin') {
+# Limit resources unless you're in a container,
+#	in which case the container call should do it
+#	e.g. 'docker run -m 1g'
+# This doesn't work on Cygwin
+if(($Config{'osname'} ne 'cygwin') && !(-r '/proc/1/cgroup')) {
 	setrlimit(RLIMIT_DATA, 256 * 1024 * 1024, 512 * 1024 * 1024) or
 		warn ('Can\'t limit the data size - watch for memory usage');
 
