@@ -95,17 +95,23 @@ $ENV{'PERLBREW_HOME'} = File::Spec->catfile($ENV{'HOME'}, '.perlbrew');
 
 openlog('CPAN', 'cons,pid', 'user');
 
-if($^O ne 'cygwin') {
+# Limit resources unless you're in a container,
+#	in which case the container call should do it
+#	e.g. 'docker run -m 1g'
+# This doesn't work on Cygwin
+if(($^O ne 'cygwin') && !(-r '/proc/1/cgroup')) {
 	setrlimit(RLIMIT_DATA, 128 * 1024 * 1024, 256 * 1024 * 1024) or
-		warn ('Can\'t limit the data size - watch for memory usage');
+		warn('Can\'t limit the data size - watch for memory usage');
 
-	setrlimit(RLIMIT_RSS, 128 * 1024 * 1024, 256 * 1024 * 1024) or
-		warn ('Can\'t limit the data size - watch for memory usage');
+	if($^O ne 'solaris') {
+		setrlimit(RLIMIT_RSS, 128 * 1024 * 1024, 256 * 1024 * 1024) or
+			warn('Can\'t limit the data size - watch for memory usage');
+	}
+
+	# Give 5 minutes to tidyup before the next hourly cron job starts
+	setrlimit(RLIMIT_CPU, 3300, 3600) or
+		warn('Can\'t limit the CPU time - watch for long running programs');
 }
-
-# Give 5 minutes to tidyup before the next hourly cron job starts
-setrlimit(RLIMIT_CPU, 3300, 3600) or
-	warn ('Can\'t limit the CPU time - watch for long running programs');
 
 # Eval added to handle RT113898
 # eval {

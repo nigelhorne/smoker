@@ -148,15 +148,15 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 # This doesn't work on Cygwin
 if(($Config{'osname'} ne 'cygwin') && !(-r '/proc/1/cgroup')) {
 	setrlimit(RLIMIT_DATA, 256 * 1024 * 1024, 512 * 1024 * 1024) or
-		warn ('Can\'t limit the data size - watch for memory usage');
+		warn('Can\'t limit the data size - watch for memory usage');
 
 	if($Config{'osname'} ne 'solaris') {
 		setrlimit(RLIMIT_RSS, 32 * 1024 * 1024, 64 * 1024 * 1024) or
-			warn ('Can\'t limit the data size - watch for memory usage');
+			warn('Can\'t limit the data size - watch for memory usage');
 	}
 
 	setrlimit(RLIMIT_CPU, 3300, 3600) or
-		warn ('Can\'t limit the CPU time - watch for long running programs');
+		warn('Can\'t limit the CPU time - watch for long running programs');
 }
 
 # Eval added to handle RT113898
