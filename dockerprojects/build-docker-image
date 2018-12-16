@@ -20,10 +20,10 @@ typeset -r HOSTNAME=$(echo smoker-${PERL}$ARGS | sed s/\\./-/g | sed s/--/-/g | 
 
 if [[ $ARGS != "" ]]; then
 	typeset -r NAME="perl-$PERL$(echo "$ARGS" | sed s/--/-/g | sed 's/ //g')"
-	typeset -r BUILDCMD="source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n perl-$PERL $ARGS --as $NAME"
+	typeset -r BUILDCMD="source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n perl-$PERL -Accflags='-O2 -pipe -Wall -Wextra -mtune=native -march=native' $ARGS --as $NAME"
 else
 	typeset -r NAME="perl-$PERL"
-	typeset -r BUILDCMD="source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n $NAME"
+	typeset -r BUILDCMD="source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n -Accflags='-O2 -pipe -Wall -Wextra -mtune=native -march=native' $NAME"
 fi
 
 rm -f config.ini
@@ -58,7 +58,7 @@ set -ex
 
 curl -L https://install.perlbrew.pl | bash
 
-export CFLAGS="-O2 -W -Wformat=2 -Wswitch -Wshadow -Wwrite-strings -Wuninitialized -Wall -pipe -fomit-frame-pointer -pedantic -D_FORTIFY_SOURCE=2 -Wpointer-arith -Wstrict-prototypes -fstack-protector -Wstack-protector -Wextra -Wbad-function-cast -Wcast-align -Wcast-qual -Wdisabled-optimization -Wendif-labels -Wfloat-equal -Wformat-nonliteral -Winline -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wpointer-arith -Wundef -Wformat-security -ftree-vectorize -msse -mfpmath=sse -msse2 -mssse3 -msse4.1 -msse4.2 -maes -fdiagnostics-color=auto -mtune=native -march=native"
+export CFLAGS="-O2 -pipe -Wall -Wextra -mtune=native -march=native"
 source ~/perl5/perlbrew/etc/bashrc && $BUILDCMD
 rm -rf perl5/perlbrew/dists perl5/perlbrew/build perl5/perlbrew/*log smoker/dockerprojects
 
