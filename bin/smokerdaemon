@@ -52,7 +52,7 @@ if(-r $lockfile && (open(my $fin, '<', $lockfile))) {
 	my $pid = <$fin>;
 	close $fin;
 	chomp $pid;
-	if(kill(0, $pid)) {
+	if(($pid =~ /^\d+$/) && kill(0, $pid)) {
 		die "CPAN shell running\n";
 	}
 	unlink $lockfile;
