@@ -1,6 +1,8 @@
 smoker
 ======
 
+# WITHOUT DOCKER
+
 Yet another mini-smoker for Perl.
 
     smoker - run a Perl smoker on the latest CPAN uploads on the current Perl
@@ -37,11 +39,14 @@ I then ran
 
 This is experimental.
 
-# DOCKER
+# WITH DOCKER
 
 I use Docker images so that I can isolate several smokers running once.
 You'll see that I use /mnt/CPAN as an NFS point for the CPAN modules,
-you'll probably want to change that.
+you'll probably want to change that to your local CPAN mirror.
+If you don't have a local mirror, this option isn't for you since
+there's no other notification method to tell the smokers in the containers
+what's been published and is ready for smoking.
 
 To build an image
 
