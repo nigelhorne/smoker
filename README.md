@@ -51,10 +51,10 @@ the place - a number of test programs create in my home directory for example.
 Here's what I have at the moment in
 /etc/apparmor.d/home.njh.src.njh.smoker.bin:
 
-   #include <tunables/global>
-   /home/njh/src/njh/smoker/bin {
-	audit deny @{HOME}/** rw,
-	audit deny /usr/bin/sudo rwx,
+    #include <tunables/global>
+    /home/njh/src/njh/smoker/bin {
+        audit deny @{HOME}/** rw,
+        audit deny /usr/bin/sudo rwx,
     }
 
 I then ran
