@@ -3,6 +3,8 @@ smoker
 
 # GETTING STARTED
 
+If you've never run a CPAN smoke tester before, read http://cpanwiki.grango.org/wiki/GettingStarted.
+
 On FreeBSD as root:
 
     pkgin install p5-Sys-CpuLoad p5-CPAN-Reporter p5-Proc-ProcessTable p5-JSON p5-LWP-Protocol-https sudo curl wget bash lynx ncftp mozilla-rootcerts git rsync p5-MIME-Lite perl
