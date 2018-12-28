@@ -248,7 +248,10 @@ if($ARGV[0]) {
 	}
 }
 
-exit(0) if(scalar(@dists) == 0);	# Won't write the pruned tree
+if(scalar(@dists) == 0) {	# Won't write the pruned tree
+	print "Nothing to smoke\n" if($opts{'v'});
+	exit(0);
+}
 
 my $count = 0;
 my $logfile = File::Spec->catfile(File::Spec->tmpdir(), basename($0));
