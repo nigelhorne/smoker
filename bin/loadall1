@@ -88,7 +88,7 @@ do
 
 	perlbrew use $i
 
-	perl -MCPAN -e 'CPAN::Shell->install("A/AN/ANDK/CPAN-1.99_51.tar.gz", "ExtUtils::MakeMaker", "File::pushd", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
+	perl -MCPAN -e 'CPAN::Shell->install("A/AN/ANDK/CPAN-2.16.tar.gz", "ExtUtils::MakeMaker", "File::pushd", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
 done
 
 rm -f ${LOCKFILE}
