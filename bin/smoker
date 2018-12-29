@@ -15,6 +15,9 @@
 
 # Takes an optional argument of the number of minutes since the last run
 
+# -v: verbose (logs more of what's going on)
+# -d: debug (logs go to the console instead of /tmp/smoker.out and /tmp/smoker.err
+
 # TODO:  $HOME/.cpan_smoker.rc doesn't get pruned.  Should remove entries older
 #	than a week, for example
 
