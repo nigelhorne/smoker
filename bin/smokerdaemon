@@ -208,15 +208,17 @@ while(1) {
 				sleep(10);
 			}
 			$lock->touch();
-		} elsif((-r $lockfile) && open($lock, '<', $lockfile)) {
-			my $pid = <$lock>;
-			close $lock;
-			if($pid) {
-				chomp $pid;
-				if(kill(0, $pid)) {
-					print "Already running\n" if($opts{'v'});
-					sleep(10);
-					next;
+		} else {
+			if((-r $lockfile) && open($lock, '<', $lockfile)) {
+				my $pid = <$lock>;
+				close $lock;
+				if($pid) {
+					chomp $pid;
+					if(kill(0, $pid)) {
+						print "Already running\n" if($opts{'v'});
+						sleep(10);
+						next;
+					}
 				}
 			}
 			open($lock, '>', $lockfile) or die "$lockfile: $!";
