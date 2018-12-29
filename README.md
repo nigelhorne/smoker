@@ -1,6 +1,8 @@
 smoker
 ======
 
+Yet another mini-smoker for Perl.
+
 # GETTING STARTED
 
 If you've never run a CPAN smoke tester before, read http://cpanwiki.grango.org/wiki/GettingStarted.
@@ -28,11 +30,13 @@ For each version of perl that you wish to smoke test:
 
 Ensure that the .../bin files are in your PATH.
 
-Yet another mini-smoker for Perl.
-
     smoker - run a Perl smoker on the latest CPAN uploads on the current Perl
 
-    -i - interactive, see what's going on
+    -v - output more of what's going on to the logfiles /tmp/smoker.out and /tmp/smoker.err
+
+    -d - as above but output goes to the terminal
+
+    -i - interactive mode: as above but input is taken from the terminal not /dev/null
 
     smokerloop - shell wrapper to run smoker on all perlbrew installations
 
@@ -43,7 +47,7 @@ OR:
     smokerdaemon - listen to smokerupdates and test the updates
 	Start this in the systems where you're going to test CPAN modules
 
-# APPARMOR
+## APPARMOR
 
 I'm testing the use of Apparmor to stop programs from creating files all over
 the place - a number of test programs create in my home directory for example.
