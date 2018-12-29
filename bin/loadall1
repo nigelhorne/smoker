@@ -68,6 +68,8 @@ if [ $SKIPBOOTSTRAP == 'no' ]; then
 			perl -MCPAN -e 'CPAN::Shell->install("E/EW/EWILHELM/Module-Build-0.32.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("A/AD/ADAMK/File-HomeDir-1.00.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("D/DA/DAGOLDEN/CPAN-Reporter-1.1902.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("A/AN/ANDK/CPAN-1.99_51.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("http://backpan.cpantesters.org/authors/id/A/AN/ANDK//CPAN-1.99_51.tar.gz")'
 		fi
 	done
 fi
@@ -88,7 +90,7 @@ do
 
 	perlbrew use $i
 
-	perl -MCPAN -e 'CPAN::Shell->install("A/AN/ANDK/CPAN-1.99_51.tar.gz", "ExtUtils::MakeMaker", "File::pushd", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
+	perl -MCPAN -e 'CPAN::Shell->install("ExtUtils::MakeMaker", "File::pushd", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
 done
 
 rm -f ${LOCKFILE}
