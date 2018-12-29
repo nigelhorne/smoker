@@ -9,7 +9,7 @@ If you've never run a CPAN smoke tester before, read http://cpanwiki.grango.org/
 
 On FreeBSD 12 as root:
 
-    pkg install p5-Sys-CpuLoad p5-CPAN-Reporter p5-Proc-ProcessTable p5-JSON p5-LWP-Protocol-https sudo curl wget bash lynx ncftp ca_root_nss git rsync p5-MIME-Lite perl
+    pkg install p5-Sys-CpuLoad p5-CPAN-Reporter p5-Proc-ProcessTable p5-JSON p5-LWP-Protocol-https sudo curl wget bash lynx ncftp ca_root_nss git rsync p5-MIME-Lite perl5
 
 On all systems:
 
