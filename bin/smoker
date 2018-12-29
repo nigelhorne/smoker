@@ -449,11 +449,13 @@ sub timed_system {
 
 			alarm 0;
 
-			Proc::Killfam::killfam(14, $pid);
-			sleep 2;
-			Proc::Killfam::killfam(15, $pid);
-			sleep 2;
-			Proc::Killfam::killfam(9, $pid);
+			if(kill(0, $pid)) {
+				Proc::Killfam::killfam(14, $pid);
+				sleep 2;
+				Proc::Killfam::killfam(15, $pid);
+				sleep 2;
+				Proc::Killfam::killfam(9, $pid);
+			}
 		};
 		return -1 if $@ && $@ !~ /^Timeout!/;
 
