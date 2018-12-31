@@ -38,6 +38,12 @@ Ensure that the .../bin files are in your PATH.
     -i - interactive mode: as above but input is taken from the terminal not /dev/null
 
     smokerloop - shell wrapper to run smoker on all perlbrew installations
+    
+        while true
+	do
+	    PATH=~/src/njh/smoker/bin:$PATH ~/src/njh/smoker/bin/smokerloop
+	    sleep 600
+	done
 
 OR:
 
