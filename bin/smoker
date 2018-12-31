@@ -340,6 +340,12 @@ if($opts{'i'}) {
 	if($mode eq 'govern') {
 		close(STDIN);
 		open(STDIN, '<', '/dev/null');
+		unless($opts{'d'}) {
+			close(STDOUT);
+			open(STDOUT, '>>', "$logfile.out");
+			close(STDERR);
+			open(STDERR, '>>', "$logfile.err");
+		}
 		timed_system(3300, "testwrapper $list");
 	} elsif($opts{'d'}) {
 		timed_system(3300, "testwrapper $list < /dev/null");
@@ -422,11 +428,11 @@ sub timed_system {
 				if($opts{'v'}) {
 					print "Killing process family $pid\n";
 				}
-				Proc::Killfam::killfam(14, $pid);
+				Proc::Killfam::killfam(14, ($pid));
 				sleep 2;
-				Proc::Killfam::killfam(15, $pid);
+				Proc::Killfam::killfam(15, ($pid));
 				sleep 2;
-				Proc::Killfam::killfam(9, $pid);
+				Proc::Killfam::killfam(9, ($pid));
 				sleep 2;
 				kill 14, $pid;
 				sleep 2;
@@ -450,11 +456,11 @@ sub timed_system {
 			alarm 0;
 
 			if(kill(0, $pid)) {
-				Proc::Killfam::killfam(14, $pid);
+				Proc::Killfam::killfam(14, ($pid));
 				sleep 2;
-				Proc::Killfam::killfam(15, $pid);
+				Proc::Killfam::killfam(15, ($pid));
 				sleep 2;
-				Proc::Killfam::killfam(9, $pid);
+				Proc::Killfam::killfam(9, ($pid));
 			}
 		};
 		return -1 if $@ && $@ !~ /^Timeout!/;

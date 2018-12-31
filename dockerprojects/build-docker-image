@@ -20,10 +20,10 @@ typeset -r HOSTNAME=$(echo smoker-${PERL}$ARGS | sed s/\\./-/g | sed s/--/-/g | 
 
 if [[ $ARGS != "" ]]; then
 	typeset -r NAME="perl-$PERL$(echo "$ARGS" | sed s/--/-/g | sed 's/ //g')"
-	typeset -r BUILDCMD="source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n perl-$PERL -Accflags='-O2 -pipe -Wall -Wextra -mtune=native -march=native' $ARGS --as $NAME"
+	typeset -r BUILDCMD="source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n perl-$PERL -Accflags='-O2 -pipe -Wall -Wextra -mtune=native -march=native' -Dusedevel $ARGS --as $NAME"
 else
 	typeset -r NAME="perl-$PERL"
-	typeset -r BUILDCMD="source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n -Accflags='-O2 -pipe -Wall -Wextra -mtune=native -march=native' $NAME"
+	typeset -r BUILDCMD="source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n $NAME -Accflags='-O2 -pipe -Wall -Wextra -mtune=native -march=native' -Dusedevel"
 fi
 
 rm -f config.ini
