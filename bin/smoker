@@ -428,11 +428,12 @@ sub timed_system {
 				if($opts{'v'}) {
 					print "Killing process family $pid\n";
 				}
-				Proc::Killfam::killfam(14, ($pid));
+				my @pidlist = ($pid);
+				Proc::Killfam::killfam(14, @pidlist);
 				sleep 2;
-				Proc::Killfam::killfam(15, ($pid));
+				Proc::Killfam::killfam(15, @pidlist);
 				sleep 2;
-				Proc::Killfam::killfam(9, ($pid));
+				Proc::Killfam::killfam(9, @pidlist);
 				sleep 2;
 				kill 14, $pid;
 				sleep 2;
@@ -456,11 +457,12 @@ sub timed_system {
 			alarm 0;
 
 			if(kill(0, $pid)) {
-				Proc::Killfam::killfam(14, ($pid));
+				my @pidlist = ($pid);
+				Proc::Killfam::killfam(14, @pidlist);
 				sleep 2;
-				Proc::Killfam::killfam(15, ($pid));
+				Proc::Killfam::killfam(15, @pidlist);
 				sleep 2;
-				Proc::Killfam::killfam(9, ($pid));
+				Proc::Killfam::killfam(9, @pidlist);
 			}
 		};
 		return -1 if $@ && $@ !~ /^Timeout!/;
