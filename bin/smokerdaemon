@@ -291,11 +291,12 @@ sub timed_system {
 				print "Killing process family $pid\n";
 			}
 			syslog('info', "killing process family $pid");
-			killfam 14, $pid;
+			my @pidlist = ($pid);
+			killfam(14, @pidlist);
 			sleep 2;
-			kill 14, $pid;
+			killfam(14, @pidlist);
 			sleep 2;
-			killfam 9, $pid;
+			killfam(9, @pidlist);
 			kill 9, $pid;
 			if(kill(0, $pid)) {
 				syslog('warn', "$pid won't die");
