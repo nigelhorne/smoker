@@ -33,7 +33,8 @@ Ensure that the .../bin files are in your PATH.
 
     -v - output more of what's going on to the logfiles /tmp/smoker.out and /tmp/smoker.err
 
-    -d - as above but output goes to the terminal
+    -d - as above but output goes to the terminal and testwrapper input files
+        are left in $TMPDIR
 
     -i - interactive mode: as above but input is taken from the terminal not /dev/null
 

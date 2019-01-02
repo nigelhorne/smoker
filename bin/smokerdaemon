@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # Author Nigel Horne: njh@bandsman.co.uk
-# Copyright (C) 2016-2018, Nigel Horne
+# Copyright (C) 2016-2019, Nigel Horne
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
@@ -250,7 +250,14 @@ while(1) {
 		my $rc = timed_system(3300, $CPAN::Config->{'shell'}, $filename);
 	}
 
-	unlink $filename unless($opts{'d'});
+	unless($opts{'d'}) {
+		if(-r $filename) {
+			unlink($filename);
+		} else {
+			syslog('warning', "$filename has disappeared");
+			warn "$filename has disappeared";
+		}
+	}
 
 	1 while(waitpid(-1, WNOHANG) >= 0);
 
@@ -304,7 +311,7 @@ sub timed_system {
 			killfam(9, @pidlist);
 			kill 9, $pid;
 			if(kill(0, $pid)) {
-				syslog('warn', "$pid won't die");
+				syslog('err', "$pid won't die");
 				die "Timeout! $pid Won't die";
 			}
 			# die "Timeout!"
