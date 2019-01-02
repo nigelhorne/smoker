@@ -284,6 +284,9 @@ sub timed_system {
 		die "Fork failed: $!" unless defined $pid;
 
 		unless ($pid) {
+			if($opts{'v'}) {
+				print "Running: '", join(' ', @_), "'\n";
+			}
 			exec @_;
 			die "Exec failed: $!";
 		}
