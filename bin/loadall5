@@ -36,6 +36,8 @@ else
 	LIST=$*
 fi
 
+typeset -r kernel=`uname`
+
 for i in $LIST
 do
 	if [ ! -d $PERLBREW_ROOT/perls/$i ]; then
@@ -52,7 +54,13 @@ do
 		unset PERL_CPAN_REPORTER_DIR
 	fi
 	# perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "CPAN::Recent::Uploads", "CPAN::Reporter::Smoker", "Bundle::CPAN::Reporter::Smoker::Tests", "Proc::PID::File", "autodie", "IPC::System::Simple", "File::Spec")'
-	perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "Proc::PID::File", "autodie", "IPC::System::Simple", "File::Spec", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads")'
+
+	if [[ "$kernel" == 'SunOS' ]]; then
+		perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "Proc::PID::File", "autodie", "IPC::System::Simple", "File::Spec", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads")'
+	else
+		perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "Proc::PID::File", "autodie", "IPC::System::Simple", "File::Spec", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads")'
+	fi
+
 	# Try again in different order in case one of the above failed
 	perl -MCPAN -e 'CPAN::Shell->install("IPC::System::Simple", "autodie", "Proc::Killfam", "LWP::Simple", "Unix::Processors", "Proc::PID::File", "Sys::CpuLoad", "BSD::Resource", "Proc::Govern")'
 
