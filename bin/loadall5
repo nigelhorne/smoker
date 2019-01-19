@@ -58,7 +58,7 @@ do
 	if [[ "$kernel" == 'SunOS' ]]; then
 		perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "Proc::PID::File", "autodie", "IPC::System::Simple", "File::Spec", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads")'
 	else
-		perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "Proc::PID::File", "autodie", "IPC::System::Simple", "File::Spec", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads")'
+		perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Proc::Killfam", "Sys::CpuLoad", "Sys::LoadAvg", "BSD::Resource", "JSON", "Proc::PID::File", "Proc::Govern", "autodie", "IPC::System::Simple", "File::Spec", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads")'
 	fi
 
 	# Try again in different order in case one of the above failed
