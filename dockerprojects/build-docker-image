@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
 # Usage: 'install perlversion port'
-#	e.g. build-docker-image 5.29.3 21213
+#	e.g. build-docker-image 5.29.6 21213
 #	build-docker-image 5.18.2 21214 --thread
 
 # FIXME: remove temporary files on error or signal, and/or use stdin
 
 # TODO: check if the given port is free
 
-typeset -r PERL=${1:-5.29.3}
+typeset -r PERL=${1:-5.29.6}
 typeset -r PORT=${2:-21212}
 typeset -r TMPDIR=${TMPDIR:-/tmp}
 typeset -r NPROC=$(grep ^cpu\\scores /proc/cpuinfo | uniq | awk '{print $4}')
