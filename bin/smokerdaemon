@@ -139,7 +139,8 @@ my $errfile = File::Spec->catfile(File::Spec->tmpdir(), basename("$0.err"));
 while(1) {
 	# Not needed, but somehow it seems cleaner to close and reopen
 	my $s = IO::Socket::INET->new(LocalPort => $port, Proto => 'udp')
-		or die "Can't listen on port $port";
+		# or die "Can't listen on port $port";
+		or exit(0);
 
 	my @dists;
 
