@@ -78,7 +78,7 @@ sub get_dists {
 
 		if($count <= 0) {
 			syslog('info', "Throttling to $number_of_cpus active smokers");
-			sleep(30);
+			sleep(180);
 			$count = $number_of_cpus;
 		}
 	}
