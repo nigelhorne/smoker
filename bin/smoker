@@ -393,6 +393,10 @@ sub timed_system {
 			name => 'testwrapper',
 			command => \@command,
 			timeout => $timeout,
+			killfam => 1,
+			load_watch => 1,
+			load_high_limit => $number_of_cpus + 1,
+			load_low_limit => 1,
 		);
 
 		if($opts{'v'} || $opts{'i'}) {
