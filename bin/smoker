@@ -292,7 +292,7 @@ while(1) {
 			sleep(10);
 		}
 		$lock->touch();
-	} elsif((-r $lockfile) && ($lock // open($lock, '<', $lockfile))) {
+	} elsif((-r $lockfile) && ($lock || open($lock, '<', $lockfile))) {
 		my $pid = <$lock>;
 		close $lock;
 		if($pid) {
