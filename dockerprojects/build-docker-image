@@ -73,10 +73,13 @@ EOF
 
 cat > $TMPDIR/dockerfile <<EOF
 FROM debian
+LABEL Maintainer="njh@bandsman.co.uk"
+LABEL Description="CPAN Smoker image"
 COPY setup.$$ /tmp/setup
 RUN bash /tmp/setup && rm /tmp/setup
 
 RUN useradd -ms /bin/bash smoker
+RUN apt-get -y --allow-remove-essential purge adduser e2fsprogs e2fslibs
 USER smoker
 WORKDIR /home/smoker
 
