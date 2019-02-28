@@ -4,6 +4,8 @@
 #	e.g. build-docker-image 5.29.7 21213
 #	build-docker-image 5.18.2 21214 --thread
 
+# You'll need to 'apt install socat'
+
 # FIXME: remove temporary files on error or signal, and/or use stdin
 
 # TODO: check if the given port is free
