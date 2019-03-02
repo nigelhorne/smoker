@@ -262,7 +262,7 @@ while(1) {
 		}
 	}
 
-	1 while(waitpid(-1, WNOHANG) >= 0);
+	sleep(1) while(waitpid(-1, WNOHANG) >= 0);
 
 	if(-r '/proc/1/cgroup') {
 		# Running in a Docker container, so nothing should be living with us
@@ -312,14 +312,20 @@ sub timed_system {
 			killfam(14, @pidlist);
 			sleep 2;
 			killfam(9, @pidlist);
+			sleep 2;
+			kill 14, $pid;
+			sleep 2;
+			kill 15, $pid;
+			sleep 2;
 			kill 9, $pid;
+
 			if(kill(0, $pid)) {
 				syslog('err', "$pid won't die");
 				die "Timeout! $pid Won't die";
 			}
 			# die "Timeout!"
 
-			1 while(waitpid(-1, WNOHANG) >= 0);
+			sleep(1) while(waitpid(-1, WNOHANG) >= 0);
 		};
 
 		alarm $time;

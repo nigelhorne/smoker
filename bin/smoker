@@ -469,6 +469,8 @@ sub timed_system {
 				Proc::Killfam::killfam(15, @pidlist);
 				sleep 2;
 				Proc::Killfam::killfam(9, @pidlist);
+				sleep 2;
+				kill 9, $pid;
 			}
 		};
 		return -1 if $@ && $@ !~ /^Timeout!/;
