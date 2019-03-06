@@ -34,6 +34,7 @@ use Proc::Killfam;
 use Fcntl qw(:flock);
 use Getopt::Std;
 use POSIX ":sys_wait_h";
+use Config;
 use BSD::Resource;
 
 my $ppf_is_installed = 0;
@@ -46,6 +47,50 @@ use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
 
 die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
+die unless($CPAN::Config->{'urllist'});
+
+my $mode;
+
+# Work out the best way to run commands
+# Generally Proc::Killfam is better to use since all children will be killed,
+#	I'm not persuaded that happens with Proc::Govern
+if($Config{'osname'} eq 'solaris') {
+	# Work around /usr/lib being built with Sun's C compiler, so
+	# less is available because of link handshake errors
+	eval {
+		# Needs Proc::ProcessTable which doesn't support DragonflyBSD
+		require Proc::Killfam;
+		Proc::Killfam->import();
+		$mode = 'killfam';
+	};
+	if(!defined($mode)) {
+		eval {
+			# Doesn't needs at least Perl 5.10.0
+			require Proc::Govern;
+			Proc::Govern->import();
+			$mode = 'govern';
+		};
+	}
+	if(!defined($mode)) {
+		require IPC::Cmd;
+		IPC::Cmd->import();
+		$mode = 'cmd';
+	}
+} elsif(defined($^V) && ($^V ge 'v5.10.1')) {
+	# Doesn't needs at least Perl 5.10.1
+	require Proc::Govern;
+	Proc::Govern->import();
+	$mode = 'govern';
+} elsif($Config{'osname'} eq 'dragonfly') {
+	require IPC::Cmd;
+	IPC::Cmd->import();
+	$mode = 'cmd';
+} else {
+	# Needs Proc::ProcessTable which doesn't support DragonflyBSD
+	require Proc::Killfam;
+	Proc::Killfam->import();
+	$mode = 'killfam';
+}
 
 my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
 if(-r $lockfile && (open(my $fin, '<', $lockfile))) {
@@ -283,6 +328,112 @@ closelog;
 
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {
+	my $timeout = shift;
+	my @command;
+
+	my $shell = $ENV{'SHELL'} || 'bash';
+
+	if($mode eq 'govern') {
+		@command = ($shell, '-c', shift);
+		my %args = (
+			name => $CPAN::Config->{'shell'},
+			command => \@command,
+			timeout => $timeout,
+			killfam => 1,
+			load_watch => 1,
+			load_high_limit => $number_of_cpus + 1,
+			load_low_limit => 1,
+		);
+
+		if($opts{'v'} || $opts{'i'}) {
+			$args{show_stdout} = 1;
+			$args{show_stderr} = 1;
+			$args{log_stderr}->{'dir'} = File::Spec->tmpdir();
+			$args{log_stderr}->{'size'} = '1M';
+			$args{log_stderr}->{'histories'} = '100';
+		} else {
+			$args{show_stdout} = 0;
+			$args{show_stderr} = 0;
+		}
+
+		return Proc::Govern::govern_process(%args);
+	}
+
+	my $command = join(' ', @_);
+
+	if($mode eq 'killfam') {
+		my $pid;
+
+		my $rc = -1;
+		eval {
+			$pid = fork;
+
+			die "Fork failed: $!" unless defined $pid;
+
+			unless ($pid) {
+				print "$command\n" if($opts{'v'});
+				exec $command;
+				die "Exec failed: $!";
+			}
+
+			local $SIG{ALRM} = sub {
+				if($opts{'v'}) {
+					print "Killing process family $pid\n";
+				}
+				my @pidlist = ($pid);
+				Proc::Killfam::killfam(14, @pidlist);
+				sleep 2;
+				Proc::Killfam::killfam(15, @pidlist);
+				sleep 2;
+				Proc::Killfam::killfam(9, @pidlist);
+				sleep 2;
+				kill 14, $pid;
+				sleep 2;
+				kill 15, $pid;
+				sleep 2;
+				kill 9, $pid;
+
+				if(kill(0, $pid)) {
+					# syslog 'warn', "$pid won't die";
+					die "Timeout! $pid Won't die";
+				}
+				# die "Timeout!"
+
+				sleep(1) while(waitpid(-1, WNOHANG) >= 0);
+			}; # Just SIGTERM.
+
+			alarm $timeout;
+
+			$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
+
+			alarm 0;
+
+			if(kill(0, $pid)) {
+				my @pidlist = ($pid);
+				Proc::Killfam::killfam(14, @pidlist);
+				sleep 2;
+				Proc::Killfam::killfam(15, @pidlist);
+				sleep 2;
+				Proc::Killfam::killfam(9, @pidlist);
+				sleep 2;
+				kill 9, $pid;
+			}
+		};
+		return -1 if $@ && $@ !~ /^Timeout!/;
+
+		return $rc;
+	}
+
+	if($opts{'v'}) {
+		@command = ($shell, '-xc', $command);
+	} else {
+		@command = ($shell, '-c', $command);
+	}
+	return IPC::Cmd::run(command => \@command, timeout => $timeout, verbose => $opts{'v'});
+}
+
+# http://www.perlmonks.org/?node_id=324176
+sub old_timed_system {
 	my $time = shift;
 
 	my $pid;
@@ -338,3 +489,4 @@ sub timed_system {
 
 	return $rc;
 }
+

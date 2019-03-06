@@ -54,6 +54,7 @@ use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
 
 die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
+die unless($CPAN::Config->{'urllist'});
 
 my $mode;
 
@@ -97,9 +98,6 @@ if($Config{'osname'} eq 'solaris') {
 	Proc::Killfam->import();
 	$mode = 'killfam';
 }
-
-die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
-die unless($CPAN::Config->{'urllist'});
 
 my %opts;
 getopts('div', \%opts);
