@@ -331,12 +331,12 @@ sub timed_system {
 	my $timeout = shift;
 	my @command;
 
-	my $shell = $ENV{'SHELL'} || 'bash';
+	my $shell = $ENV{'SHELL'} || $CPAN::Config->{'shell'} || 'bash';
 
 	if($mode eq 'govern') {
-		@command = ($shell, '-c', shift);
+		@command = ($shell, '-c', @_);
 		my %args = (
-			name => $CPAN::Config->{'shell'},
+			name => $shell,
 			command => \@command,
 			timeout => $timeout,
 			killfam => 1,

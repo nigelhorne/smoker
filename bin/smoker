@@ -331,7 +331,7 @@ foreach my $dist(@dists) {
 if($opts{'i'}) {
 	# system("perl -MCPAN -e 'CPAN::Shell->test($list)'");
 	if($opts{'v'}) {
-		my $shell = $ENV{'SHELL'} || 'bash';
+		my $shell = $ENV{'SHELL'} || $CPAN::Config->{'shell'} || 'bash';
 		system("$shell -x testwrapper $list");
 	} else {
 		system("testwrapper $list");
@@ -383,10 +383,10 @@ sub timed_system {
 	my $timeout = shift;
 	my @command;
 
-	my $shell = $ENV{'SHELL'} || 'bash';
+	my $shell = $ENV{'SHELL'} || $CPAN::Config->{'shell'} || 'bash';
 
 	if($mode eq 'govern') {
-		@command = ($shell, '-c', shift);
+		@command = ($shell, '-c', @_);
 		my %args = (
 			name => 'testwrapper',
 			command => \@command,
