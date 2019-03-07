@@ -336,7 +336,7 @@ sub timed_system {
 	if($mode eq 'govern') {
 		@command = ($shell, '-c', @_);
 		my %args = (
-			name => $shell,
+			name => 'testwrapper',
 			command => \@command,
 			timeout => $timeout,
 			killfam => 1,
