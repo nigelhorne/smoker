@@ -489,4 +489,3 @@ sub old_timed_system {
 
 	return $rc;
 }
-
