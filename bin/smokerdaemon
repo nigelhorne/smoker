@@ -392,6 +392,7 @@ sub timed_system {
 				kill 15, $pid;
 				sleep 2;
 				kill 9, $pid;
+				sleep 2;
 
 				if(kill(0, $pid)) {
 					# syslog 'warn', "$pid won't die";
