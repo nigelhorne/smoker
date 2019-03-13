@@ -34,11 +34,11 @@ do
 		exit 0
 	fi
 
-	loadavg=`uptime | awk '{print $10}'`
+	loadavg=`uptime | awk '{ print $10; }'`
 	# bash doesn't understand floating point
 	# so convert the number to an interger
-	thisloadavg=`echo $loadavg|awk -F \. '{print $1}'`
-	if [ "$thisloadavg" -ge "2" ]; then
+	thisloadavg=`echo $loadavg|awk -F \. '{ print $1; }'`
+	if [[ "$thisloadavg" -ge "2" ]]; then
 		echo "Busy - Load Average $loadavg ($thisloadavg) "
 		sleep 120
 		# Will miss this Perl - catch it next time
