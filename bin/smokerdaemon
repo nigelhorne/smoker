@@ -307,7 +307,11 @@ while(1) {
 		}
 	}
 
-	sleep(1) while(waitpid(-1, WNOHANG) >= 0);
+	my $count = 0;
+	while(waitpid(-1, WNOHANG) >= 0) {
+		last if($count++ >= 60);
+		sleep(1);
+	}
 
 	if(-r '/proc/1/cgroup') {
 		# Running in a Docker container, so nothing should be living with us
@@ -400,7 +404,11 @@ sub timed_system {
 				}
 				# die "Timeout!"
 
-				sleep(1) while(waitpid(-1, WNOHANG) >= 0);
+				my $count = 0;
+				while(waitpid(-1, WNOHANG) >= 0) {
+					last if($count++ >= 60);
+					sleep(1);
+				}
 			}; # Just SIGTERM.
 
 			alarm $timeout;
@@ -477,7 +485,11 @@ sub old_timed_system {
 			}
 			# die "Timeout!"
 
-			sleep(1) while(waitpid(-1, WNOHANG) >= 0);
+			my $count = 0;
+			while(waitpid(-1, WNOHANG) >= 0) {
+				last if($count++ >= 60);
+				sleep(1);
+			}
 		};
 
 		alarm $time;

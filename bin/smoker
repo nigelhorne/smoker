@@ -368,7 +368,11 @@ if(open(my $fout, '>', $json_file)) {
 }
 
 if($mode) {
-	sleep(1) while(waitpid(-1, WNOHANG) >= 0);
+	my $count = 0;
+	while(waitpid(-1, WNOHANG) >= 0) {
+		last if($count++ >= 60);
+		sleep(1);
+	}
 }
 
 if($ppf_is_installed) {
@@ -452,7 +456,11 @@ sub timed_system {
 				}
 				# die "Timeout!"
 
-				sleep(1) while(waitpid(-1, WNOHANG) >= 0);
+				my $count = 0;
+				while(waitpid(-1, WNOHANG) >= 0) {
+					last if($count++ >= 60);
+					sleep(1);
+				}
 			}; # Just SIGTERM.
 
 			alarm $timeout;
