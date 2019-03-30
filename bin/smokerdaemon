@@ -307,12 +307,7 @@ while(1) {
 		}
 	}
 
-	my $count = 0;
-	while(waitpid(-1, WNOHANG) >= 0) {
-		last if($count++ >= 60);
-		sleep(1);
-	}
-
+	nohang();
 	if(-r '/proc/1/cgroup') {
 		# Running in a Docker container, so nothing should be living with us
 		if(my $build_dir = $CPAN::Config->{'build_dir'}) {
@@ -404,11 +399,7 @@ sub timed_system {
 				}
 				# die "Timeout!"
 
-				my $count = 0;
-				while(waitpid(-1, WNOHANG) >= 0) {
-					last if($count++ >= 60);
-					sleep(1);
-				}
+				nohang();
 			}; # Just SIGTERM.
 
 			alarm $timeout;
@@ -485,11 +476,7 @@ sub old_timed_system {
 			}
 			# die "Timeout!"
 
-			my $count = 0;
-			while(waitpid(-1, WNOHANG) >= 0) {
-				last if($count++ >= 60);
-				sleep(1);
-			}
+			nohang();
 		};
 
 		alarm $time;
@@ -501,4 +488,16 @@ sub old_timed_system {
 	return -1 if $@ && $@ !~ /^Timeout!/;
 
 	return $rc;
+}
+
+sub nohang {
+	my $count = 0;
+
+	while(waitpid(-1, WNOHANG) >= 0) {
+		if($count++ >= 60) {
+			syslog('warning', 'Stopped waiting for child after 60 seconds');
+			last;
+		}
+		sleep(1);
+	}
 }
