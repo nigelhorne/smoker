@@ -28,9 +28,8 @@ rm -rf $HOME/.cpan/build/*&
 export CPAN_SQLITE_NO_LOG_FILES=1
 unset CC CFLAGS LDFLAGS
 
-perlbrew switch-off
-
 if [ $1x == x ]; then
+	perlbrew switch-off
 	LIST=`perlbrew list | awk '{ print $1; }'`
 else
 	LIST=$*
