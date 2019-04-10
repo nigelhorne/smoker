@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 # Are the images smoking?
+# docker exec -it a4e33ebd3bde /bin/bash
 for i in `docker ps | tail +2 | awk '{ print $1; }'`
 do
-	docker exec -it $i /bin/ls -l .cpanreporter
+	echo $i:
+	docker exec -it $i /bin/ls -l .cpanreporter/reports-sent.db /tmp/smokerdaemon.err
 done

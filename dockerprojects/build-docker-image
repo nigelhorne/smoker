@@ -105,8 +105,9 @@ docker build -t smoker-$NAME -f $TMPDIR/dockerfile .
 rm -f $TMPDIR/dockerfile setup.$$ build.$$
 
 # echo "run 'socat -u UDP4-RECVFROM:$PORT - | tee >(socat - UDP4:127.0.0.1:$PORT) > /dev/null'"
-echo "iptables -I DOCKER-USER -d 192.168.0.0/24 -j ACCEPT"
-echo "iptables -I DOCKER-USER -s 192.168.0.0/24 -j ACCEPT"
+echo "iptables -F DOCKER-USER"
+echo "iptables -I DOCKER-USER -d 192.168.0.0/16 -j ACCEPT"
+echo "iptables -I DOCKER-USER -j RETURN"
 echo "iptables -I DOCKER-USER -j DROP"
 echo 'run "./udp-forwarder" if not already running"'
 echo "run 'docker run --restart=always --hostname=$HOSTNAME.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME --log-opt syslog-format=rfc3164 -dt --name smoker-$NAME --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp -m 1g --memory-swap=1g smoker-$NAME' to start the image"
