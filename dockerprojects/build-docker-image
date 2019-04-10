@@ -45,7 +45,7 @@ export http_proxy="http://zack:3128"
 export https_proxy="http://zack:3128"
 # mount -o remount,rw,hidepid=2 /proc
 # apt-get update && apt-get --no-install-recommends install -y libpam-tmpdir git procps curl build-essential libxml2-dev sqlite3 && apt-get clean && rm -rf /var/lib/apt/lists/*
-apt-get update && apt-get --no-install-recommends install -y libpam-tmpdir git procps curl bzip2 bison byacc patch netbase gcc make ca-certificates autoconf libxml2-dev sqlite3 && apt-get autoremove && apt-get autoclean && apt-get clean && rm -rf /var/lib/apt/lists/*
+apt-get update && apt-get --no-install-recommends install -y libpam-tmpdir git procps curl bzip2 bison byacc patch netbase gcc make ca-certificates autoconf libxml2-dev sqlite3 libterm-readline-perl-perl && apt-get autoremove && apt-get autoclean && apt-get clean && rm -rf /var/lib/apt/lists/*
 # CPAN mount point
 mkdir -p /mnt/CPAN && chmod 0 /mnt/CPAN
 echo $HOSTNAME > /etc/hostname
@@ -105,9 +105,10 @@ docker build -t smoker-$NAME -f $TMPDIR/dockerfile .
 rm -f $TMPDIR/dockerfile setup.$$ build.$$
 
 # echo "run 'socat -u UDP4-RECVFROM:$PORT - | tee >(socat - UDP4:127.0.0.1:$PORT) > /dev/null'"
-echo "iptables -F DOCKER-USER"
-echo "iptables -I DOCKER-USER -d 192.168.0.0/16 -j ACCEPT"
-echo "iptables -I DOCKER-USER -j RETURN"
-echo "iptables -I DOCKER-USER -j DROP"
+echo 'iptables -F DOCKER-USER'
+echo 'iptables -A DOCKER-USER -s 192.168.0.0/16 -j ACCEPT'
+echo 'iptables -A DOCKER-USER -d 127.0.0.0/24 -j ACCEPT'
+# TODO: log blocked packets
+echo 'iptables -A DOCKER-USER -j RETURN'
 echo 'run "./udp-forwarder" if not already running"'
 echo "run 'docker run --restart=always --hostname=$HOSTNAME.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME --log-opt syslog-format=rfc3164 -dt --name smoker-$NAME --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp -m 1g --memory-swap=1g smoker-$NAME' to start the image"

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-# Are the images smoking?
 # docker exec -it a4e33ebd3bde /bin/bash
+
+# Are the images smoking?
 for i in `docker ps | tail +2 | awk '{ print $1; }'`
 do
 	echo $i:
