@@ -28,6 +28,7 @@ use File::Spec;
 use File::Basename;
 use Sys::Syslog;
 use File::Temp;
+use FindBin qw($Bin);
 use Unix::Processors;
 use Sys::CpuLoad;
 use Proc::Killfam;
@@ -283,11 +284,11 @@ while(1) {
 	if($opts{'v'}) {
 		# print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null\n";
 		# print "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null\n";
-		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list < /dev/null\n";
-		print "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list < /dev/null\n";
+		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec $Bin/testwrapper $list < /dev/null\n";
+		print "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec $Bin/testwrapper $list < /dev/null\n";
 	} else {
 		# print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' > $logfile 2> $errfile < /dev/null\n";
-		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec testwrapper $list > $logfile 2> $errfile < /dev/null\n";
+		print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec $Bin/testwrapper $list > $logfile 2> $errfile < /dev/null\n";
 	}
 	my $filename = $tmp->filename();
 	close $tmp;

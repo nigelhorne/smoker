@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # Author Nigel Horne: njh@bandsman.co.uk
-# Copyright (C) 2015-2018, Nigel Horne
+# Copyright (C) 2015-2019, Nigel Horne
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
@@ -33,6 +33,7 @@ use File::HomeDir;
 use File::Path;
 use File::Spec;
 use File::Basename;
+use FindBin qw($Bin);
 use Fcntl qw(:flock);
 use BSD::Resource;
 use Unix::Processors;
@@ -332,9 +333,9 @@ if($opts{'i'}) {
 	# system("perl -MCPAN -e 'CPAN::Shell->test($list)'");
 	if($opts{'v'}) {
 		my $shell = $ENV{'SHELL'} || $CPAN::Config->{'shell'} || 'bash';
-		system("$shell -x testwrapper $list");
+		system("$shell -x $Bin/testwrapper $list");
 	} else {
-		system("testwrapper $list");
+		system("$Bin/testwrapper $list");
 	}
 } else {
 	if($mode eq 'govern') {
@@ -346,12 +347,12 @@ if($opts{'i'}) {
 			close(STDERR);
 			open(STDERR, '>>', "$logfile.err");
 		}
-		timed_system(3300, "testwrapper $list");
+		timed_system(3300, "$Bin/testwrapper $list");
 	} elsif($opts{'d'}) {
-		timed_system(3300, "testwrapper $list < /dev/null");
+		timed_system(3300, "$Bin/testwrapper $list < /dev/null");
 	} else {
 		# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' >> $logfile.out 2>> $logfile.err < /dev/null");
-		timed_system(3300, "testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
+		timed_system(3300, "$Bin/testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
 	}
 }
 
