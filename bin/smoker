@@ -39,6 +39,7 @@ use BSD::Resource;
 use Unix::Processors;
 # use Sys::LoadAvg;	# Core dumps because the array isn't big enough. Bug report has been ignored
 use Sys::CpuLoad;
+use Sys::Syslog;
 use POSIX ":sys_wait_h";
 use IO::Handle;
 use IPC::Cmd;
@@ -116,6 +117,8 @@ delete $ENV{'LDFLAGS'};
 if(!$opts{'i'}) {
 	$ENV{'AUTOMATED_TESTING'} = 1;
 }
+
+openlog('CPAN', 'cons,pid', 'user');
 
 my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
 if((-r $lockfile) && (open(my $fin, '<', $lockfile))) {
@@ -448,7 +451,7 @@ sub timed_system {
 				sleep 2;
 
 				if(kill(0, $pid)) {
-					# syslog 'warn', "$pid won't die";
+					syslog 'warn', "$pid won't die";
 					die "Timeout! $pid Won't die";
 				}
 				# die "Timeout!"
