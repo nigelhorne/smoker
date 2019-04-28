@@ -248,7 +248,7 @@ while(1) {
 
 	while(1) {
 		my @lav = Sys::CpuLoad::load();
-		if($lav[0] > 3) {
+		if(defined($lav[0]) && ($lav[0] > 3)) {
 			sleep(10);
 			next;
 		}
