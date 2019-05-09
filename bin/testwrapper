@@ -49,7 +49,7 @@ chmod 700 $NEWTMPDIR
 # make sure the lockfile is removed when we exit and then claim it
 trap "rm -fr ${LOCKFILE} ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
 
-TMPDIR=$NEWTMPDIR perl -MCPAN -e "CPAN::Shell->test($*)"
+TMPDIR=$NEWTMPDIR timeout -k 5m 50m perl -MCPAN -e "CPAN::Shell->test($*)"
 TMPDIR=$NEWTMPDIR perl -MCPAN -e "CPAN::Shell->clean($*)"
 
 exec rm -rf ${NEWTMPDIR} ${LOCKFILE}
