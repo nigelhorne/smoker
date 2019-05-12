@@ -229,7 +229,7 @@ while(1) {
 			}
 			$lastdist = $module;
 		} else {
-			print "Didn't match regex\n" if($opts{'v'});
+			print "$dist: didn't match regex\n" if($opts{'v'});
 		}
 		if($list) {
 			$list .= ',';
