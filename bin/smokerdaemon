@@ -54,7 +54,9 @@ my $mode;
 # Work out the best way to run commands
 # Generally Proc::Killfam is better to use since all children will be killed,
 #	I'm not persuaded that happens with Proc::Govern
-if(($Config{'osname'} eq 'solaris') || ($Config{'osname'} eq 'gnukfreebsd')) {
+if(($Config{'osname'} eq 'solaris') ||
+   ($Config{'osname'} eq 'gnukfreebsd') ||
+   ($Config{'osname'} eq 'cygwin')) {
 	# Work around /usr/lib being built with Sun's C compiler, so
 	# less is available because of link handshake errors
 	eval {
@@ -155,6 +157,8 @@ print "Mode: $mode\n" if($opts{'v'});
 
 # On first startup run a few tests that we may have missed
 if($opts{'v'}) {
+	require Data::Dumper;
+	Data::Dumper->import();
 	my $rc = timed_system(300, 'perlbrew', 'exec', "$Bin/smoker", '-v');
 } else {
 	my $rc = timed_system(300, 'perlbrew', 'exec', "$Bin/smoker");
@@ -356,6 +360,8 @@ sub timed_system {
 			load_high_limit => $number_of_cpus + 1,
 			load_low_limit => 1,
 		);
+
+		print Data::Dumper->new([\%args])->Dump() if($opts{'v'});
 
 		if($opts{'v'} || $opts{'i'}) {
 			$args{show_stdout} = 1;
