@@ -151,11 +151,13 @@ if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 	delete $ENV{'TEST_JOBS'};
 }
 
+print "Mode: $mode\n" if($opts{'v'});
+
 # On first startup run a few tests that we may have missed
 if($opts{'v'}) {
-	my $rc = timed_system(300, $CPAN::Config->{'shell'}, '-x', 'perlbrew', 'exec', "$Bin/smoker", '-v');
+	my $rc = timed_system(300, 'perlbrew', 'exec', "$Bin/smoker", '-v');
 } else {
-	my $rc = timed_system(300, $CPAN::Config->{'shell'}, 'perlbrew', 'exec', "$Bin/smoker");
+	my $rc = timed_system(300, 'perlbrew', 'exec', "$Bin/smoker");
 }
 
 # FIXME - should be argument
@@ -303,11 +305,7 @@ while(1) {
 	my $filename = $tmp->filename();
 	close $tmp;
 
-	if($opts{'v'}) {
-		my $rc = timed_system(3300, $CPAN::Config->{'shell'}, '-x', $filename);
-	} else {
-		my $rc = timed_system(3300, $CPAN::Config->{'shell'}, $filename);
-	}
+	my $rc = timed_system(3300, $filename);
 
 	unless($opts{'d'}) {
 		if(-r $filename) {
@@ -344,7 +342,11 @@ sub timed_system {
 	my $shell = $ENV{'SHELL'} || $CPAN::Config->{'shell'} || 'bash';
 
 	if($mode eq 'govern') {
-		@command = ($shell, '-c', @_);
+		if($opts{'v'}) {
+			@command = ($shell, '-xc', @_);
+		} else {
+			@command = ($shell, '-c', @_);
+		}
 		my %args = (
 			name => 'testwrapper',
 			command => \@command,
