@@ -344,13 +344,15 @@ sub timed_system {
 
 	my $shell = $ENV{'SHELL'} || $CPAN::Config->{'shell'} || 'bash';
 
+	my $command = join(' ', @_);
+
+	if($opts{'v'}) {
+		@command = ($shell, '-xc', $command);
+	} else {
+		@command = ($shell, '-c', $command);
+	}
+
 	if($mode eq 'govern') {
-		my $cmd = join(' ', @_);
-		if($opts{'v'}) {
-			@command = ($shell, '-xc', $cmd);
-		} else {
-			@command = ($shell, '-c', $cmd);
-		}
 		my %args = (
 			name => 'testwrapper',
 			command => \@command,
@@ -377,8 +379,6 @@ sub timed_system {
 		return Proc::Govern::govern_process(%args);
 	}
 
-	my $command = join(' ', @_);
-
 	if($mode eq 'killfam') {
 		my $pid;
 
@@ -389,8 +389,13 @@ sub timed_system {
 			die "Fork failed: $!" unless defined $pid;
 
 			unless ($pid) {
-				print "$command\n" if($opts{'v'});
-				exec $command;
+				if($opts{'v'}) {
+					print "$shell -xc $command\n";
+					exec $shell, '-xc', $command;
+				} else {
+					print "$shell -c $command\n";
+					exec $shell, '-c', $command;
+				}
 				die "Exec failed: $!";
 			}
 
@@ -413,7 +418,7 @@ sub timed_system {
 				sleep 2;
 
 				if(kill(0, $pid)) {
-					# syslog 'warn', "$pid won't die";
+					syslog 'warn', "$pid won't die";
 					die "Timeout! $pid Won't die";
 				}
 				# die "Timeout!"
@@ -442,73 +447,19 @@ sub timed_system {
 
 		return $rc;
 	}
-
-	if($opts{'d'}) {
-		@command = ($shell, '-xce', $command);
-	} elsif($opts{'v'}) {
-		@command = ($shell, '-xc', $command);
-	} else {
-		@command = ($shell, '-c', $command);
-	}
 	return IPC::Cmd::run(command => \@command, timeout => $timeout, verbose => $opts{'v'});
 }
 
-# http://www.perlmonks.org/?node_id=324176
-sub old_timed_system {
-	my $time = shift;
+sub nohang {
+	my $count = 0;
 
-	my $pid;
-
-	my $rc = -1;
-	eval {
-		$pid = fork;
-
-		die "Fork failed: $!" unless defined $pid;
-
-		unless ($pid) {
-			if($opts{'v'}) {
-				print "Running: '", join(' ', @_), "'\n";
-			}
-			exec @_;
-			die "Exec failed: $!";
+	while(waitpid(-1, WNOHANG) >= 0) {
+		if($count++ >= 60) {
+			syslog('warning', 'Stopped waiting for child after 60 seconds');
+			last;
 		}
-
-		local $SIG{ALRM} = sub {
-			if($opts{'v'}) {
-				print "Killing process family $pid\n";
-			}
-			syslog('info', "killing process family $pid");
-			my @pidlist = ($pid);
-			killfam(14, @pidlist);
-			sleep 2;
-			killfam(14, @pidlist);
-			sleep 2;
-			killfam(9, @pidlist);
-			sleep 2;
-			kill 14, $pid;
-			sleep 2;
-			kill 15, $pid;
-			sleep 2;
-			kill 9, $pid;
-
-			if(kill(0, $pid)) {
-				syslog('err', "$pid won't die");
-				die "Timeout! $pid Won't die";
-			}
-			# die "Timeout!"
-
-			nohang();
-		};
-
-		alarm $time;
-
-		$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
-
-		alarm 0;
-	};
-	return -1 if $@ && $@ !~ /^Timeout!/;
-
-	return $rc;
+		sleep(1);
+	}
 }
 
 sub nohang {

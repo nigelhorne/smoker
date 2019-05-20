@@ -389,8 +389,15 @@ sub timed_system {
 
 	my $shell = $ENV{'SHELL'} || $CPAN::Config->{'shell'} || 'bash';
 
+	my $command = join(' ', @_);
+
+	if($opts{'v'}) {
+		@command = ($shell, '-xc', $command);
+	} else {
+		@command = ($shell, '-c', $command);
+	}
+
 	if($mode eq 'govern') {
-		@command = ($shell, '-c', @_);
 		my %args = (
 			name => 'testwrapper',
 			command => \@command,
@@ -400,6 +407,8 @@ sub timed_system {
 			load_high_limit => $number_of_cpus + 1,
 			load_low_limit => 1,
 		);
+
+		print Data::Dumper->new([\%args])->Dump() if($opts{'v'});
 
 		if($opts{'v'} || $opts{'i'}) {
 			$args{show_stdout} = 1;
@@ -415,8 +424,6 @@ sub timed_system {
 		return Proc::Govern::govern_process(%args);
 	}
 
-	my $command = join(' ', @_);
-
 	if($mode eq 'killfam') {
 		my $pid;
 
@@ -427,8 +434,13 @@ sub timed_system {
 			die "Fork failed: $!" unless defined $pid;
 
 			unless ($pid) {
-				print "$command\n" if($opts{'v'});
-				exec $command;
+				if($opts{'v'}) {
+					print "$shell -xc $command\n";
+					exec $shell, '-xc', $command;
+				} else {
+					print "$shell -c $command\n";
+					exec $shell, '-c', $command;
+				}
 				die "Exec failed: $!";
 			}
 
@@ -479,12 +491,6 @@ sub timed_system {
 		return -1 if $@ && $@ !~ /^Timeout!/;
 
 		return $rc;
-	}
-
-	if($opts{'v'}) {
-		@command = ($shell, '-xc', $command);
-	} else {
-		@command = ($shell, '-c', $command);
 	}
 	return IPC::Cmd::run(command => \@command, timeout => $timeout, verbose => $opts{'v'});
 }
