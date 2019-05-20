@@ -131,6 +131,33 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	exit 1;
 };
 
+# Eval added to handle RT113898
+# eval {
+	# my $number_of_cpus = Sys::Info->new()->device('CPU')->count();
+#
+	# if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
+		# $ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
+		# $ENV{'TEST_JOBS'} = $number_of_cpus;
+	# }
+# }
+# };
+
+my $number_of_cpus = Unix::Processors->new()->max_physical();
+if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
+	$ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
+	$ENV{'TEST_JOBS'} = $number_of_cpus;
+} else {
+	delete $ENV{'HARNESS_OPTIONS'};
+	delete $ENV{'TEST_JOBS'};
+}
+
+# On first startup run a few tests that we may have missed
+if($opts{'v'}) {
+	my $rc = timed_system(300, $CPAN::Config->{'shell'}, '-x', 'perlbrew', 'exec', "$Bin/smoker", '-v');
+} else {
+	my $rc = timed_system(300, $CPAN::Config->{'shell'}, 'perlbrew', 'exec', "$Bin/smoker");
+}
+
 # FIXME - should be argument
 my $port = $opts{'p'} || 21212;
 
@@ -162,26 +189,6 @@ if(($^O ne 'cygwin') && !(-r '/proc/1/cgroup')) {
 	# Give 5 minutes to tidyup before the next hourly cron job starts
 	setrlimit(RLIMIT_CPU, 3300, 3600) or
 		warn('Can\'t limit the CPU time - watch for long running programs');
-}
-
-# Eval added to handle RT113898
-# eval {
-	# my $number_of_cpus = Sys::Info->new()->device('CPU')->count();
-#
-	# if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
-		# $ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
-		# $ENV{'TEST_JOBS'} = $number_of_cpus;
-	# }
-# }
-# };
-
-my $number_of_cpus = Unix::Processors->new()->max_physical();
-if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
-	$ENV{'HARNESS_OPTIONS'} = "j$number_of_cpus";
-	$ENV{'TEST_JOBS'} = $number_of_cpus;
-} else {
-	delete $ENV{'HARNESS_OPTIONS'};
-	delete $ENV{'TEST_JOBS'};
 }
 
 my $logfile = File::Spec->catfile(File::Spec->tmpdir(), basename("$0.out"));
@@ -297,7 +304,7 @@ while(1) {
 	close $tmp;
 
 	if($opts{'v'}) {
-		my $rc = timed_system(3300, $CPAN::Config->{'shell'}, '-v', $filename);
+		my $rc = timed_system(3300, $CPAN::Config->{'shell'}, '-x', $filename);
 	} else {
 		my $rc = timed_system(3300, $CPAN::Config->{'shell'}, $filename);
 	}
@@ -428,7 +435,9 @@ sub timed_system {
 		return $rc;
 	}
 
-	if($opts{'v'}) {
+	if($opts{'d'}) {
+		@command = ($shell, '-xce', $command);
+	} elsif($opts{'v'}) {
 		@command = ($shell, '-xc', $command);
 	} else {
 		@command = ($shell, '-c', $command);
