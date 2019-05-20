@@ -346,10 +346,11 @@ sub timed_system {
 	my $shell = $ENV{'SHELL'} || $CPAN::Config->{'shell'} || 'bash';
 
 	if($mode eq 'govern') {
+		my $cmd = join(' ', @_);
 		if($opts{'v'}) {
-			@command = ($shell, '-xc', @_);
+			@command = ($shell, '-xc', $cmd);
 		} else {
-			@command = ($shell, '-c', @_);
+			@command = ($shell, '-c', $cmd);
 		}
 		my %args = (
 			name => 'testwrapper',
