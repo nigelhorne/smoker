@@ -46,6 +46,18 @@ use IPC::Cmd;
 use Config;
 use JSON;
 
+eval 'require Test::Reporter::Transport';
+
+if($@) {
+	die 'Test::Reporter::Transport has not been installed';
+}
+
+eval 'require CPAN::Reporter';
+
+if($@) {
+	die 'CPAN::Reporter has not been installed';
+}
+
 my $ppf_is_installed = 0;
 if(eval { require Proc::PID::File; } ) {
 	Proc::Pid::File->import();

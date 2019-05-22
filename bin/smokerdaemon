@@ -46,7 +46,7 @@ if(eval { require Proc::PID::File; } ) {
 use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
 use MyConfig;
 
-die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
+die 'Configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
 die unless($CPAN::Config->{'urllist'});
 
 my $mode;
