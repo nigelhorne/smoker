@@ -461,15 +461,3 @@ sub nohang {
 		sleep(1);
 	}
 }
-
-sub nohang {
-	my $count = 0;
-
-	while(waitpid(-1, WNOHANG) >= 0) {
-		if($count++ >= 60) {
-			syslog('warning', 'Stopped waiting for child after 60 seconds');
-			last;
-		}
-		sleep(1);
-	}
-}
