@@ -133,6 +133,7 @@ if(!$opts{'i'}) {
 openlog('CPAN', 'cons,pid', 'user');
 
 my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
+print "Lockfile: $lockfile\n" if($opts{'v'});
 if((-r $lockfile) && (open(my $fin, '<', $lockfile))) {
 	my $pid = <$fin>;
 	close $fin;
@@ -146,14 +147,19 @@ if((-r $lockfile) && (open(my $fin, '<', $lockfile))) {
 
 my $lock;
 if($ppf_is_installed) {
+	print 'Creating lock ',
+		File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck'),
+		"...\n"
+		if($opts{'v'});
 	$lock = Proc::PID::File->new(dir => File::Spec->tmpdir(), name => 'cpan-test.lck', verify => 1);
 } else {
 	$lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck.pid');
 }
 
 local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
+	print "Quitting...\n" if($opts{'v'});
 	if($ppf_is_installed) {
-		$lock->release();
+		# $lock->release();
 	} elsif(-e $lockfile) {
 		unlink($lockfile);
 	}
@@ -297,6 +303,7 @@ while(1) {
 	}
 
 	if($ppf_is_installed) {
+		print "Checking lock\n" if($opts{'v'});
 		while($lock->alive()) {
 			if(++$count >= 6) {
 				die "Already running" if($opts{'v'});
@@ -305,6 +312,7 @@ while(1) {
 			print "Already running\n" if($opts{'v'});
 			sleep(10);
 		}
+		print "Locking\n" if($opts{'v'});
 		$lock->touch();
 	} elsif((-r $lockfile) && ($lock || open($lock, '<', $lockfile))) {
 		my $pid = <$lock>;
@@ -353,6 +361,11 @@ if($opts{'i'}) {
 		system("$Bin/testwrapper $list");
 	}
 } else {
+	if($opts{'v'}) {
+		require Data::Dumper;
+		Data::Dumper->import();
+	}
+
 	if($mode eq 'govern') {
 		close(STDIN);
 		open(STDIN, '<', '/dev/null');
@@ -426,7 +439,8 @@ sub timed_system {
 			$args{show_stdout} = 1;
 			$args{show_stderr} = 1;
 			$args{log_stderr}->{'dir'} = File::Spec->tmpdir();
-			$args{log_stderr}->{'size'} = '1M';
+			# $args{log_stderr}->{'size'} = '1M';
+			$args{log_stderr}->{'size'} = 1024 * 1024;
 			$args{log_stderr}->{'histories'} = '100';
 		} else {
 			$args{show_stdout} = 0;
@@ -456,7 +470,7 @@ sub timed_system {
 				die "Exec failed: $!";
 			}
 
-			local $SIG{ALRM} = sub {
+			local $SIG{ALRM} = $SIG{TERM} = $SIG{INT} = sub {
 				if($opts{'v'}) {
 					print "Killing process family $pid\n";
 				}

@@ -66,6 +66,7 @@ rm -rf perl5/perlbrew/dists perl5/perlbrew/build perl5/perlbrew/*log smoker/dock
 
 perlbrew use $NAME && perl -MCPAN -e 'CPAN::Shell->install("ExtUtils::MakeMaker", "Test::Reporter::Transport::Socket", "CPAN::Reporter", "Data::Dumper")'
 git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall2 && ./loadall3 && ./loadall5
+cpan -fi IPC::System::Simple
 cd && git clone https://github.com/nigelhorne/li.git && cd li && cc li.c && ./a.out -r0l ../perl5
 
 cd && rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/* li smoker/dockerprojects smoker/bin/loadall? smoker/.git
@@ -97,7 +98,7 @@ COPY build.$$ build
 RUN bash build && rm build && chmod 500 /home/smoker
 
 ENV PATH \$PATH::
-CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: exec ./smokerdaemon -p $PORT"]
+CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: exec ./smokerdaemon -p $PORT -v"]
 # CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: /bin/bash"]
 EOF
 docker build -t smoker-$NAME -f $TMPDIR/dockerfile .
