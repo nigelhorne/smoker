@@ -369,7 +369,8 @@ sub timed_system {
 			$args{show_stdout} = 1;
 			$args{show_stderr} = 1;
 			$args{log_stderr}->{'dir'} = File::Spec->tmpdir();
-			$args{log_stderr}->{'size'} = '1M';
+			# $args{log_stderr}->{'size'} = '1M';
+			$args{log_stderr}->{'size'} = 1024 * 1024;
 			$args{log_stderr}->{'histories'} = '100';
 		} else {
 			$args{show_stdout} = 0;
