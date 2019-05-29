@@ -98,7 +98,7 @@ COPY build.$$ build
 RUN bash build && rm build && chmod 500 /home/smoker
 
 ENV PATH \$PATH::
-CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: exec ./smokerdaemon -p $PORT -v"]
+CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: exec ./smokerdaemon -p $PORT -v > /tmp/out 2> /tmp/err"]
 # CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: /bin/bash"]
 EOF
 docker build -t smoker-$NAME -f $TMPDIR/dockerfile .
