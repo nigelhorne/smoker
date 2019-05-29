@@ -27,13 +27,13 @@ if [[ ! -r /proc/1/cgroup ]]; then
 	fi
 fi
 
-typeset -r NEWTMPDIR=${TMPDIR-/tmp}/testwrapper.$$
+typeset -r NEWTMPDIR=${TMPDIR:-/tmp}/testwrapper.$$
 typeset -r ID=`id -u`
 
 if [[ -d /run/user/$ID ]]; then
 	typeset -r LOCKFILE=/run/user/$ID/testwrapper.lck
 else
-	typeset -r LOCKFILE=${TMPDIR-/tmp}/testwrapper.lck
+	typeset -r LOCKFILE=${TMPDIR:-/tmp}/testwrapper.lck
 fi
 
 if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
