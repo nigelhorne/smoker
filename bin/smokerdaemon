@@ -295,7 +295,7 @@ while(1) {
 		last;
 	}
 
-	my $tmp = File::Temp->new(UNLINK => 0);
+	my ($tmp = File::Temp->new(UNLINK => 0);
 	if($opts{'v'}) {
 		# print $tmp "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null\n";
 		# print "source \$PERLBREW_ROOT/etc/bashrc\nexec perlbrew exec perl -MCPAN -e 'CPAN::Shell->test($list)' < /dev/null\n";
@@ -308,6 +308,7 @@ while(1) {
 	my $filename = $tmp->filename();
 	close $tmp;
 
+	chmod 0700, $filename;
 	my $rc = timed_system(3300, $filename);
 
 	unless($opts{'d'}) {
