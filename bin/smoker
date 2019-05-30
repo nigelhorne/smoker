@@ -204,7 +204,8 @@ my @dists;
 my $prev_tests;
 
 my $json_file = File::Spec->catfile(File::HomeDir->my_home(), '/.cpan_smoker.rc');
-if((-e $json_file) && open(my $fin, '<', $json_file)) {
+print "Checking $json_file\n" if($opts{'v'});
+if((-r $json_file) && open(my $fin, '<', $json_file)) {
 	my $json = JSON->new()->allow_nonref();
 	local $/ = undef;
 	eval {
@@ -220,8 +221,8 @@ if($ARGV[0]) {
 } else {
 	my $recent;
 	foreach my $url(@{$CPAN::Config->{'urllist'}}) {
+		print "Fetching $url/RECENT\n" if($opts{'v'});
 		if($recent = get("$url/RECENT")) {
-			print "Fetching from $url\n" if($opts{'v'});
 			last;
 		}
 	}
