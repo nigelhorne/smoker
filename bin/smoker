@@ -64,7 +64,7 @@ if(eval { require Proc::PID::File; } ) {
 	$ppf_is_installed = 1;
 }
 
-use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
+use lib File::Spec->catfile(File::HomeDir->my_home(), '.cpan', 'CPAN');
 use MyConfig;
 
 die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
@@ -203,7 +203,7 @@ if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 my @dists;
 my $prev_tests;
 
-my $json_file = File::Spec->catfile(File::HomeDir->my_home(), '/.cpan_smoker.rc');
+my $json_file = File::Spec->catfile(File::HomeDir->my_home(), '.cpan_smoker.rc');
 print "Checking $json_file\n" if($opts{'v'});
 if((-r $json_file) && open(my $fin, '<', $json_file)) {
 	my $json = JSON->new()->allow_nonref();
