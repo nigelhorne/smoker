@@ -103,7 +103,8 @@ if(-r $lockfile && (open(my $fin, '<', $lockfile))) {
 	close $fin;
 	if($pid) {
 		chomp $pid;
-		if(($pid =~ /^\d+$/) && kill(0, $pid)) {
+		# Workaround for RT#86238
+		if(($pid =~ /^\d+$/) && CORE::kill(0, $pid)) {
 			die "CPAN shell running\n";
 		}
 	}
