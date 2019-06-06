@@ -75,7 +75,9 @@ my $mode;
 # Work out the best way to run commands
 # Generally Proc::Killfam is better to use since all children will be killed,
 #	I'm not persuaded that happens with Proc::Govern
-if(($Config{'osname'} eq 'solaris') || ($Config{'osname'} eq 'gnukfreebsd')) {
+if(($Config{'osname'} eq 'solaris') ||
+   ($Config{'osname'} eq 'cygwin') ||
+   ($Config{'osname'} eq 'gnukfreebsd')) {
 	# Work around /usr/lib being built with Sun's C compiler, so
 	# less is available because of link handshake errors
 	eval {
