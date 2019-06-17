@@ -156,6 +156,10 @@ if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 
 print "Mode: $mode\n" if($opts{'v'});
 
+# TODO: read from config files
+$ENV{'PERLBREW_ROOT'} = File::Spec->catfile($ENV{'HOME'}, 'perl5/perlbrew');
+$ENV{'PERLBREW_HOME'} = File::Spec->catfile($ENV{'HOME'}, '.perlbrew');
+
 # On first startup run a few tests that we may have missed
 if($opts{'v'}) {
 	require Data::Dumper;
@@ -173,10 +177,6 @@ delete $ENV{'CC'};
 delete $ENV{'CFLAGS'};
 delete $ENV{'LDFLAGS'};
 $ENV{'AUTOMATED_TESTING'} = 1;
-
-# TODO: read from config files
-$ENV{'PERLBREW_ROOT'} = File::Spec->catfile($ENV{'HOME'}, 'perl5/perlbrew');
-$ENV{'PERLBREW_HOME'} = File::Spec->catfile($ENV{'HOME'}, '.perlbrew');
 
 openlog('CPAN', 'cons,pid', 'user');
 
