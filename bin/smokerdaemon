@@ -122,6 +122,18 @@ if($ppf_is_installed) {
 my %opts;
 getopts('dp:v', \%opts);
 
+my $port = $opts{'p'} || 21212;
+
+openlog('CPAN', 'cons,pid', 'user');
+
+if(my $s = IO::Socket::INET->new(LocalPort => $port, Proto => 'udp')) {
+	$s->close();
+} else {
+	syslog('warning', "Can't listen on port $port: $!");
+	closelog();
+	exit(0);
+}
+
 $opts{'v'} = 1 if($opts{'d'});
 
 local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
@@ -160,6 +172,12 @@ print "Mode: $mode\n" if($opts{'v'});
 $ENV{'PERLBREW_ROOT'} = File::Spec->catfile($ENV{'HOME'}, 'perl5/perlbrew');
 $ENV{'PERLBREW_HOME'} = File::Spec->catfile($ENV{'HOME'}, '.perlbrew');
 
+$ENV{'CPAN_SQLITE_NO_LOG_FILES'} = 1;
+delete $ENV{'CC'};
+delete $ENV{'CFLAGS'};
+delete $ENV{'LDFLAGS'};
+$ENV{'AUTOMATED_TESTING'} = 1;
+
 # On first startup run a few tests that we may have missed
 if($opts{'v'}) {
 	require Data::Dumper;
@@ -168,17 +186,6 @@ if($opts{'v'}) {
 } else {
 	my $rc = timed_system(300, 'perlbrew', 'exec', "$Bin/smoker");
 }
-
-# FIXME - should be argument
-my $port = $opts{'p'} || 21212;
-
-$ENV{'CPAN_SQLITE_NO_LOG_FILES'} = 1;
-delete $ENV{'CC'};
-delete $ENV{'CFLAGS'};
-delete $ENV{'LDFLAGS'};
-$ENV{'AUTOMATED_TESTING'} = 1;
-
-openlog('CPAN', 'cons,pid', 'user');
 
 # Limit resources unless you're in a container,
 #	in which case the container call should do it
@@ -338,7 +345,7 @@ while(1) {
 }
 
 $lock->release();
-closelog;
+closelog();
 
 # http://www.perlmonks.org/?node_id=324176
 sub timed_system {
