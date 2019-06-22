@@ -43,7 +43,7 @@ if(eval { require Proc::PID::File; } ) {
 	$ppf_is_installed = 1;
 }
 
-use lib File::Spec->catfile(File::HomeDir->my_home(), '/.cpan/CPAN');
+use lib File::Spec->catfile(File::HomeDir->my_home(), '.cpan', 'CPAN');
 use MyConfig;
 
 die 'Configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
@@ -168,9 +168,15 @@ if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 
 print "Mode: $mode\n" if($opts{'v'});
 
-# TODO: read from config files
-$ENV{'PERLBREW_ROOT'} = File::Spec->catfile($ENV{'HOME'}, 'perl5/perlbrew');
-$ENV{'PERLBREW_HOME'} = File::Spec->catfile($ENV{'HOME'}, '.perlbrew');
+if((!defined($ENV{'PERLBREW_ROOT'})) && (my $home = $ENV{'HOME'})) {
+	# This is needed if smokerdaemon is started from a crontab, so that the first
+	#	startup call to smoker finds perlbrew
+	# TODO: read from config files
+	$ENV{'PERLBREW_ROOT'} = File::Spec->catfile($home, 'perl5', 'perlbrew');
+	$ENV{'PERLBREW_PATH'} = File::Spec->catfile($home, 'perl5', 'perlbrew', 'bin');
+	$ENV{'PERLBREW_HOME'} = File::Spec->catfile($home, '.perlbrew');
+	$ENV{'PATH'} .= File::Spec->catfile($home, 'perl5', 'perlbrew', 'bin');
+}
 
 $ENV{'CPAN_SQLITE_NO_LOG_FILES'} = 1;
 delete $ENV{'CC'};
