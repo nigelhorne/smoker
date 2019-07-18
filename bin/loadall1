@@ -53,6 +53,8 @@ if [ $SKIPBOOTSTRAP == 'no' ]; then
 		if [ -d $PERLBREW_ROOT/perls/perl-5.$i ]; then
 			perlbrew use perl-5.$i
 
+			perl -MCPAN -e 'CPAN::Shell->install("R/RA/RAM/Storable-1.0.14.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("A/AD/ADAMK/Test-Script-1.07.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("A/AD/ADAMK/File-Which-1.09.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("K/KW/KWILLIAMS/PathTools-3.2701.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("G/GA/GAAS/Digest-MD5-2.40.tar.gz")'
@@ -60,13 +62,15 @@ if [ $SKIPBOOTSTRAP == 'no' ]; then
 			perl -MCPAN -e 'CPAN::Shell->install("G/GA/GAAS/URI-1.10.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("G/GA/GAAS/HTML-Parser-3.33.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("G/GA/GAAS/libwww-perl-5.837.tar.gz")'
-			perl -MCPAN -e 'CPAN::Shell->install("R/RA/RAM/Storable-1.0.14.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("A/AD/ADAMK/Config-Tiny-2.10.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("D/DA/DAGOLDEN/Capture-Tiny-0.21.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("D/DA/DAGOLDEN/File-pushd-0.32.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("B/BI/BINGOS/IPC-Cmd-0.76.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("E/EW/EWILHELM/Module-Build-0.32.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("A/AD/ADAMK/File-HomeDir-1.00.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("B/BD/BDFOY/Test-Manifest-1.23")'
+			perl -MCPAN -e 'CPAN::Shell->install("B/BA/BAREFOOT/Test-File-1.36.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("D/DA/DAGOLDEN/CPAN-Meta-2.101090.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("D/DA/DAGOLDEN/CPAN-Reporter-1.1902.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("A/AN/ANDK/CPAN-1.99_51.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("http://backpan.cpantesters.org/authors/id/A/AN/ANDK//CPAN-1.99_51.tar.gz")'
