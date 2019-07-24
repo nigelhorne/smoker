@@ -36,6 +36,7 @@ use File::Basename;
 use FindBin qw($Bin);
 use Fcntl qw(:flock);
 use BSD::Resource;
+use HTTP::Cache::Transparent;
 use Unix::Processors;
 # use Sys::LoadAvg;	# Core dumps because the array isn't big enough. Bug report has been ignored
 use Sys::CpuLoad;
@@ -207,6 +208,22 @@ my $prev_tests;
 
 my $json_file = File::Spec->catfile(File::HomeDir->my_home(), '.cpan_smoker.rc');
 print "Checking $json_file\n" if($opts{'v'});
+my $cachedir;
+if(my $e = $ENV{'CACHEDIR'}) {
+	$cachedir = File::Spec->catfile($e, 'http-cache-transparent');
+} else {
+	$cachedir = File::Spec->catfile(File::Spec->tmpdir(), 'cache', 'http-cache-transparent');
+}
+
+if(!-d $cachedir) {
+	mkdir $cachedir || die "$cachedir: $!";
+}
+HTTP::Cache::Transparent::init({
+	BasePath => $cachedir,
+	Verbose => $opts{'v'} ? 1 : 0,
+	NoUpdate => 24 * 60 * 60,
+});
+
 if((-r $json_file) && open(my $fin, '<', $json_file)) {
 	my $json = JSON->new()->allow_nonref();
 	local $/ = undef;
