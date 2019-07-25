@@ -221,7 +221,7 @@ if(!-d $cachedir) {
 HTTP::Cache::Transparent::init({
 	BasePath => $cachedir,
 	Verbose => $opts{'v'} ? 1 : 0,
-	NoUpdate => 24 * 60 * 60,
+	NoUpdate => 30 * 60,
 });
 
 if((-r $json_file) && open(my $fin, '<', $json_file)) {
