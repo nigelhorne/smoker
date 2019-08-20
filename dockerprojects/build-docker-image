@@ -28,8 +28,9 @@ else
 	typeset -r BUILDCMD="source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n $NAME -Accflags='-O2 -pipe -Wall -Wextra -mtune=native -march=native' -Dusedevel"
 fi
 
-rm -f config.ini
+rm -f config.ini smokerdaemon.config
 ln $HOME/.cpanreporter/config.ini .
+ln ../bin/smokerdaemon.config .
 # rm -f MyConfig.pm
 # ln $HOME/.cpan/CPAN/MyConfig.pm .
 
@@ -92,6 +93,7 @@ EXPOSE $PORT:$PORT/udp
 
 RUN mkdir -p .cpanreporter .cpan/CPAN
 COPY config.ini .cpanreporter/config.ini
+COPY smokerdaemon.config .
 COPY MyConfig.pm .cpan/CPAN/MyConfig.pm
 COPY build.$$ build
 # Stop CPAN modules trying to put stuff in the home directory
