@@ -52,6 +52,8 @@ OR:
 	Run this out of cron
     smokerdaemon - listen to smokerupdates and test the updates
 	Start this in the systems where you're going to test CPAN modules
+	Reads ~/.smokerdaemonrc, if clean_after_test is set to one the
+		build tree will be removed after each smoking cycle
 
 ## APPARMOR
 

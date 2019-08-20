@@ -21,6 +21,7 @@ use warnings;
 use strict;
 use autodie qw(:all);
 
+use Config::Auto;
 use IO::Socket::INET;
 use File::HomeDir;
 use File::Path;
@@ -137,6 +138,7 @@ if(my $s = IO::Socket::INET->new(LocalPort => $port, Proto => 'udp')) {
 $opts{'v'} = 1 if($opts{'d'});
 
 local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
+	print "quitting\n" if($opts{'v'});
 	if($ppf_is_installed) {
 		# FIXME:  causes unlink error in P:P:F if we're not currently running
 		$lock->release();
@@ -336,12 +338,21 @@ while(1) {
 	}
 
 	nohang();
-	if(-r '/proc/1/cgroup') {
+
+	my $config;
+	eval { $config = Config::Auto::parse() };
+
+	my $clean_after_test = 0;
+	if($config && defined($config->{'clean_after_test'})) {
+		$clean_after_test = $config->{'clean_after_test'};
+	} elsif(-r '/proc/1/cgroup') {
 		# Running in a Docker container, so nothing should be living with us
-		if(my $build_dir = $CPAN::Config->{'build_dir'}) {
-			File::Path::rmtree($build_dir);
-		}
+		$clean_after_test = 1;
 	}
+	if($clean_after_test && (my $build_dir = $CPAN::Config->{'build_dir'})) {
+		File::Path::rmtree($build_dir);
+	}
+
 	if($ppf_is_installed) {
 		$lock->release();
 	} else {
