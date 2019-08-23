@@ -10,7 +10,7 @@
 
 # TODO: check if the given port is free
 
-typeset -r PERL=${1:-5.29.7}
+typeset -r PERL=${1:-5.30.0}
 typeset -r PORT=${2:-21212}
 typeset -r TMPDIR=${TMPDIR:-/tmp}
 typeset -r NPROC=$(grep ^cpu\\scores /proc/cpuinfo | uniq | awk '{print $4}')
