@@ -27,6 +27,7 @@ use warnings;
 use strict;
 # use autodie qw(:all);	# Don't enable, since the kill failing isn't caught
 
+use Config::Auto;
 use Getopt::Std;
 use LWP::Simple;
 use File::HomeDir;
@@ -418,6 +419,20 @@ if(open(my $fout, '>', $json_file)) {
 
 if($mode) {
 	nohang();
+}
+
+my $config;
+eval { $config = Config::Auto::parse() };
+
+my $clean_after_test = 0;
+if($config && defined($config->{'clean_after_test'})) {
+	$clean_after_test = $config->{'clean_after_test'};
+} elsif(-r '/proc/1/cgroup') {
+	# Running in a Docker container, so nothing should be living with us
+	$clean_after_test = 1;
+}
+if($clean_after_test && (my $build_dir = $CPAN::Config->{'build_dir'})) {
+	File::Path::rmtree($build_dir);
 }
 
 if($ppf_is_installed) {
