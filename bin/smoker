@@ -432,6 +432,7 @@ if($config && defined($config->{'clean_after_test'})) {
 	$clean_after_test = 1;
 }
 if($clean_after_test && (my $build_dir = $CPAN::Config->{'build_dir'})) {
+	print "Emptying $build_dir\n" if($opts{'v'});
 	File::Path::rmtree($build_dir);
 }
 
