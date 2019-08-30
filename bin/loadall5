@@ -52,16 +52,16 @@ do
 	else
 		unset PERL_CPAN_REPORTER_DIR
 	fi
-	# perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple",, "HTTP::Cache::Transparent",  "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "CPAN::Recent::Uploads", "CPAN::Reporter::Smoker", "Bundle::CPAN::Reporter::Smoker::Tests", "Proc::PID::File", "autodie", "IPC::System::Simple", "File::Spec", "FindBin", "IPC::Run")'
+	# perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Config::Auto", "HTTP::Cache::Transparent", "Proc::Govern", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "CPAN::Recent::Uploads", "CPAN::Reporter::Smoker", "Bundle::CPAN::Reporter::Smoker::Tests", "Proc::PID::File", "autodie", "IPC::System::Simple", "File::Spec", "FindBin", "IPC::Run")'
 
 	if [[ "$kernel" == 'SunOS' ]]; then
-		perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "HTTP::Cache::Transparent", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "Proc::PID::File", "autodie", "IPC::System::Simple", "File::Spec", "FindBin", "IPC::Run", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads")'
+		perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "File::HomeDir", "Unix::Processors", "LWP::Simple", "Config::Auto", "HTTP::Cache::Transparent", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON", "Proc::PID::File", "autodie", "IPC::System::Simple", "File::Spec", "FindBin", "IPC::Run", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads")'
 	else
-		perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "Unix::Processors", "LWP::Simple", "HTTP::Cache::Transparent", "Proc::Killfam", "Sys::CpuLoad", "Sys::LoadAvg", "BSD::Resource", "JSON", "Proc::PID::File", "File::HomeDir", "Proc::Govern", "autodie", "IPC::System::Simple", "File::Spec", "FindBin", "IPC::Run", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads")'
+		perl -MCPAN -e 'CPAN::Shell->install("CPAN::Reporter", "Unix::Processors", "LWP::Simple", "Config::Auto", "HTTP::Cache::Transparent", "Proc::Killfam", "Sys::CpuLoad", "Sys::LoadAvg", "BSD::Resource", "JSON", "Proc::PID::File", "File::HomeDir", "Proc::Govern", "autodie", "IPC::System::Simple", "File::Spec", "FindBin", "IPC::Run", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads")'
 	fi
 
 	# Try again in different order in case one of the above failed
-	perl -MCPAN -e 'CPAN::Shell->install("IPC::System::Simple", "autodie", "Proc::Killfam", "LWP::Simple", "HTTP::Cache::Transparent", "Unix::Processors", "Proc::PID::File", "Sys::CpuLoad", "BSD::Resource", "Proc::Govern")'
+	perl -MCPAN -e 'CPAN::Shell->install("IPC::System::Simple", "autodie", "Proc::Killfam", "LWP::Simple", "Config::Auto", "HTTP::Cache::Transparent", "Unix::Processors", "Proc::PID::File", "Sys::CpuLoad", "BSD::Resource", "Proc::Govern")'
 
 	# Create a baseline
 	# PERL_CR_SMOKER_RUNONCE=1 perl -MCPAN::Reporter::Smoker -e start
