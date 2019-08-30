@@ -27,7 +27,6 @@ use warnings;
 use strict;
 # use autodie qw(:all);	# Don't enable, since the kill failing isn't caught
 
-use Config::Auto;
 use Getopt::Std;
 use LWP::Simple;
 use File::HomeDir;
@@ -422,7 +421,10 @@ if($mode) {
 }
 
 my $config;
-eval { $config = Config::Auto::parse() };
+if(eval { require Config::Auto; } ) {
+	Config::Auto->import();
+	eval { $config = Config::Auto::parse() };
+}
 
 my $clean_after_test = 0;
 if($config && defined($config->{'clean_after_test'})) {

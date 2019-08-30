@@ -21,7 +21,6 @@ use warnings;
 use strict;
 use autodie qw(:all);
 
-use Config::Auto;
 use IO::Socket::INET;
 use File::HomeDir;
 use File::Path;
@@ -340,7 +339,10 @@ while(1) {
 	nohang();
 
 	my $config;
-	eval { $config = Config::Auto::parse() };
+	if(eval { require Config::Auto; } ) {
+		Config::Auto->import();
+		eval { $config = Config::Auto::parse() };
+	}
 
 	my $clean_after_test = 0;
 	if($config && defined($config->{'clean_after_test'})) {
