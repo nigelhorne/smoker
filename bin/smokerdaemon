@@ -275,7 +275,7 @@ while(1) {
 	}
 
 	syslog('info', "Smoking $list");
-	print 'Smoking ', join("\n", @dists), "\n";
+	print 'Smoking ', join("\n", @dists), "\n" if($opts{'v']);
 
 	while(1) {
 		my @lav = Sys::CpuLoad::load();
@@ -424,7 +424,7 @@ sub timed_system {
 					print "$shell -xc $command\n";
 					exec $shell, '-xc', $command;
 				} else {
-					print "$shell -c $command\n";
+					# print "$shell -c $command\n";
 					exec $shell, '-c', $command;
 				}
 				die "Exec failed: $!";
