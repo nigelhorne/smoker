@@ -159,6 +159,20 @@ if($ppf_is_installed) {
 	$lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck.pid');
 }
 
+my $config;
+if(eval { require Config::Auto; } ) {
+	Config::Auto->import();
+	eval { $config = Config::Auto::parse() };
+}
+
+my $clean_after_test = 0;
+if($config && defined($config->{'clean_after_test'})) {
+	$clean_after_test = $config->{'clean_after_test'};
+} elsif(-r '/proc/1/cgroup') {
+	# Running in a Docker container, so nothing should be living with us
+	$clean_after_test = 1;
+}
+
 local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	print "Quitting...\n" if($opts{'v'});
 	if($ppf_is_installed) {
@@ -166,6 +180,7 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	} elsif(-e $lockfile) {
 		unlink($lockfile);
 	}
+	clean($clean_after_test);
 	exit(1);
 };
 
@@ -294,6 +309,7 @@ if($ARGV[0]) {
 
 if(scalar(@dists) == 0) {	# Won't write the pruned tree
 	print "Nothing to smoke\n" if($opts{'v'});
+	clean($clean_after_test);
 	exit(0);
 }
 
@@ -420,24 +436,7 @@ if($mode) {
 	nohang();
 }
 
-my $config;
-if(eval { require Config::Auto; } ) {
-	Config::Auto->import();
-	eval { $config = Config::Auto::parse() };
-}
-
-my $clean_after_test = 0;
-if($config && defined($config->{'clean_after_test'})) {
-	$clean_after_test = $config->{'clean_after_test'};
-} elsif(-r '/proc/1/cgroup') {
-	# Running in a Docker container, so nothing should be living with us
-	$clean_after_test = 1;
-}
-if($clean_after_test && (my $build_dir = $CPAN::Config->{'build_dir'})) {
-	print "Emptying $build_dir\n" if($opts{'v'});
-	File::Path::rmtree($build_dir);
-}
-
+rmtree($clean_after_test);
 if($ppf_is_installed) {
 	$lock->release();
 } else {
@@ -568,5 +567,14 @@ sub nohang {
 			last;
 		}
 		sleep(1);
+	}
+}
+
+sub clean {
+	my $clean_after_test = shift;
+
+	if($clean_after_test && (my $build_dir = $CPAN::Config->{'build_dir'})) {
+		print "Emptying $build_dir\n" if($opts{'v'});
+		File::Path::rmtree($build_dir);
 	}
 }

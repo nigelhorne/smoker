@@ -46,6 +46,9 @@ Ensure that the .../bin files are in your PATH.
 	    sleep 600
 	done
 
+    Reads ~/.smokerrc, if clean_after_test is set to one the
+	build tree will be removed after each smoking cycle
+
 OR:
 
     smokerupdate - update a local minicpan repositary and broadcast the updates
