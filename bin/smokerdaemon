@@ -185,6 +185,20 @@ delete $ENV{'CFLAGS'};
 delete $ENV{'LDFLAGS'};
 $ENV{'AUTOMATED_TESTING'} = 1;
 
+my $clean_after_test = 0;
+my $config;
+if(eval { require Config::Auto; } ) {
+	Config::Auto->import();
+	eval { $config = Config::Auto::parse() };
+}
+
+if($config && defined($config->{'clean_after_test'})) {
+	$clean_after_test = $config->{'clean_after_test'};
+} elsif(-r '/proc/1/cgroup') {
+	# Running in a Docker container, so nothing should be living with us
+	$clean_after_test = 1;
+}
+
 # On first startup run a few tests that we may have missed
 if($opts{'v'}) {
 	require Data::Dumper;
@@ -193,6 +207,8 @@ if($opts{'v'}) {
 } else {
 	my $rc = timed_system(300, 'perlbrew', 'exec', "$Bin/smoker");
 }
+
+clean($clean_after_test);
 
 # Limit resources unless you're in a container,
 #	in which case the container call should do it
@@ -338,23 +354,7 @@ while(1) {
 
 	nohang();
 
-	my $config;
-	if(eval { require Config::Auto; } ) {
-		Config::Auto->import();
-		eval { $config = Config::Auto::parse() };
-	}
-
-	my $clean_after_test = 0;
-	if($config && defined($config->{'clean_after_test'})) {
-		$clean_after_test = $config->{'clean_after_test'};
-	} elsif(-r '/proc/1/cgroup') {
-		# Running in a Docker container, so nothing should be living with us
-		$clean_after_test = 1;
-	}
-	if($clean_after_test && (my $build_dir = $CPAN::Config->{'build_dir'})) {
-		print "Emptying $build_dir\n" if($opts{'v'});
-		File::Path::rmtree($build_dir);
-	}
+	clean($clean_after_test);
 
 	if($ppf_is_installed) {
 		$lock->release();
@@ -490,5 +490,14 @@ sub nohang {
 			last;
 		}
 		sleep(1);
+	}
+}
+
+sub clean {
+	my $clean_after_test = shift;
+
+	if($clean_after_test && (my $build_dir = $CPAN::Config->{'build_dir'})) {
+		print "Emptying $build_dir\n" if($opts{'v'});
+		File::Path::rmtree($build_dir);
 	}
 }
