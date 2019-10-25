@@ -21,7 +21,7 @@
 # TODO:  $HOME/.cpan_smoker.rc doesn't get pruned.  Should remove entries older
 #	than a week, for example
 
-# 19 * * * * [ -r .perlbrew/init ] && /bin/bash bin/perlbrew-cron bin/smoker 60
+# 19 * * * * [ -r .perlbrew/init ] && /bin/bash /usr/bin/timeout -s SIGALARM -k 300 3300 bin/perlbrew-cron bin/smoker 60
 
 use warnings;
 use strict;
@@ -402,9 +402,9 @@ if($opts{'i'}) {
 		Data::Dumper->import();
 	}
 
-	# Since this is the lowest level of the call chain
-	#	smokerdaemon->testwrapper->smoker
-	#	this should time out first
+	# Since this is the second level of the call chain
+	#	smokerdaemon or /usr/bin/timeout->smoker->testwrapper
+	#	this should timeout second
 	if($mode eq 'govern') {
 		close(STDIN);
 		open(STDIN, '<', '/dev/null');
@@ -414,12 +414,12 @@ if($opts{'i'}) {
 			close(STDERR);
 			open(STDERR, '>>', "$logfile.err");
 		}
-		timed_system(2700, "$Bin/testwrapper $list");
+		timed_system(3000, "$Bin/testwrapper $list");
 	} elsif($opts{'d'}) {
-		timed_system(2700, "$Bin/testwrapper $list < /dev/null");
+		timed_system(3000, "$Bin/testwrapper $list < /dev/null");
 	} else {
-		# timed_system(2700, "perl -MCPAN -e 'CPAN::Shell->test($list)' >> $logfile.out 2>> $logfile.err < /dev/null");
-		timed_system(2700, "$Bin/testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
+		# timed_system(3000, "perl -MCPAN -e 'CPAN::Shell->test($list)' >> $logfile.out 2>> $logfile.err < /dev/null");
+		timed_system(3000, "$Bin/testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
 	}
 }
 

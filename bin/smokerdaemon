@@ -342,7 +342,7 @@ while(1) {
 
 	chmod 0700, $filename;
 	# Since this is the top level of the call chain
-	#	smokerdaemon->testwrapper->smoker
+	#	smokerdaemon or /usr/bin/timeout->smoker->testwrapper
 	#	this should time out last
 	my $rc = timed_system(3300, $filename);
 
