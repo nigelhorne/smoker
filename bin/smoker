@@ -402,6 +402,9 @@ if($opts{'i'}) {
 		Data::Dumper->import();
 	}
 
+	# Since this is the lowest level of the call chain
+	#	smokerdaemon->testwrapper->smoker
+	#	this should time out first
 	if($mode eq 'govern') {
 		close(STDIN);
 		open(STDIN, '<', '/dev/null');
@@ -411,12 +414,12 @@ if($opts{'i'}) {
 			close(STDERR);
 			open(STDERR, '>>', "$logfile.err");
 		}
-		timed_system(3300, "$Bin/testwrapper $list");
+		timed_system(2700, "$Bin/testwrapper $list");
 	} elsif($opts{'d'}) {
-		timed_system(3300, "$Bin/testwrapper $list < /dev/null");
+		timed_system(2700, "$Bin/testwrapper $list < /dev/null");
 	} else {
-		# timed_system(3300, "perl -MCPAN -e 'CPAN::Shell->test($list)' >> $logfile.out 2>> $logfile.err < /dev/null");
-		timed_system(3300, "$Bin/testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
+		# timed_system(2700, "perl -MCPAN -e 'CPAN::Shell->test($list)' >> $logfile.out 2>> $logfile.err < /dev/null");
+		timed_system(2700, "$Bin/testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
 	}
 }
 

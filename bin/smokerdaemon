@@ -341,6 +341,9 @@ while(1) {
 	close $tmp;
 
 	chmod 0700, $filename;
+	# Since this is the top level of the call chain
+	#	smokerdaemon->testwrapper->smoker
+	#	this should time out last
 	my $rc = timed_system(3300, $filename);
 
 	unless($opts{'d'}) {
