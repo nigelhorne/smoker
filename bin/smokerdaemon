@@ -477,6 +477,8 @@ sub timed_system {
 				sleep 2;
 				kill 9, $pid;
 			}
+			# TODO
+			# Elsif $rc != -1 - insert code like System module
 		};
 		return -1 if $@ && $@ !~ /^Timeout!/;
 
