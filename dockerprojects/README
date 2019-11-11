@@ -1,8 +1,8 @@
-Run 'install <perl-version> <port>' for each perl version,
+Run 'build-docker-image <perl-version> <port>' for each perl version,
 
 For example:
 
-    install 5.28.1 21213
+    build-docker-image 5.28.1 21213
 
 Then modify 'udp-forwarder', adding <port> and start the program.
 
