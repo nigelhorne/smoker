@@ -516,11 +516,15 @@ sub timed_system {
 					print "Killing process family $pid\n";
 				}
 				my @pidlist = ($pid);
+				Proc::Killfam::killfam(18, @pidlist);
+				sleep 2;
 				Proc::Killfam::killfam(14, @pidlist);
 				sleep 2;
 				Proc::Killfam::killfam(15, @pidlist);
 				sleep 2;
 				Proc::Killfam::killfam(9, @pidlist);
+				sleep 2;
+				kill 18, $pid;
 				sleep 2;
 				kill 14, $pid;
 				sleep 2;
@@ -546,6 +550,8 @@ sub timed_system {
 
 			if(kill(0, $pid)) {
 				my @pidlist = ($pid);
+				Proc::Killfam::killfam(18, @pidlist);
+				sleep 2;
 				Proc::Killfam::killfam(14, @pidlist);
 				sleep 2;
 				Proc::Killfam::killfam(15, @pidlist);
