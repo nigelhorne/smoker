@@ -27,6 +27,46 @@ use warnings;
 use strict;
 # use autodie qw(:all);	# Don't enable, since the kill failing isn't caught
 
+my @modules;
+
+# Install Pre-requisites
+BEGIN {
+	@modules = (
+		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
+		'CPAN::Reporter',
+	);
+	my @needfull;
+	foreach my $module(@modules) {
+		eval "use $module";
+		if($@) {
+			push @needfull, $module;
+		}
+	}
+	if(scalar(@needfull)) {
+		system('cpan -i ' . join(' ', @needfull));
+	}
+
+}
+
+foreach my $module(@modules) {
+	my $version;
+	if($module =~ /(.+)\s(.+)$/) {
+		$module = $1;
+		$version = $2;
+	}
+	if($module =~ /.+\/(.+)/) {
+		$module = $1;
+	}
+	eval "require $module";
+	if($@) {
+		die $@;
+	}
+	$module->import();
+	# if($version && ($module::VERSION < $version)) {
+		# die "$module: need $version got ", $module::VERSIOn;
+	# }
+}
+
 use Getopt::Std;
 use LWP::Simple;
 use File::HomeDir;
@@ -36,7 +76,6 @@ use File::Basename;
 use FindBin qw($Bin);
 use Fcntl qw(:flock);
 use BSD::Resource;
-use HTTP::Cache::Transparent;
 use Unix::Processors;
 # use Sys::LoadAvg;	# Core dumps because the array isn't big enough. Bug report has been ignored
 use Sys::CpuLoad;
@@ -46,18 +85,6 @@ use IO::Handle;
 use IPC::Cmd;
 use Config;
 use JSON;
-
-eval 'require Test::Reporter::Transport';
-
-if($@) {
-	die 'Test::Reporter::Transport has not been installed';
-}
-
-eval 'require CPAN::Reporter';
-
-if($@) {
-	die 'CPAN::Reporter has not been installed';
-}
 
 my $ppf_is_installed = 0;
 if(eval { require Proc::PID::File; } ) {
