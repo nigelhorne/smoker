@@ -33,7 +33,7 @@ my @modules;
 BEGIN {
 	@modules = (
 		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
-		'CPAN::Reporter',
+		'CPAN::Reporter', 'LWP::Simple', 'JSON',
 	);
 	my @needfull;
 	foreach my $module(@modules) {
@@ -68,7 +68,6 @@ foreach my $module(@modules) {
 }
 
 use Getopt::Std;
-use LWP::Simple;
 use File::HomeDir;
 use File::Path;
 use File::Spec;
@@ -84,7 +83,6 @@ use POSIX ":sys_wait_h";
 use IO::Handle;
 use IPC::Cmd;
 use Config;
-use JSON;
 
 my $ppf_is_installed = 0;
 if(eval { require Proc::PID::File; } ) {
