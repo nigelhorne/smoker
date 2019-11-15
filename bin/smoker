@@ -33,7 +33,8 @@ my @modules;
 BEGIN {
 	@modules = (
 		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
-		'CPAN::Reporter', 'LWP::Simple', 'JSON',
+		'CPAN::Reporter', 'LWP::Simple', 'JSON', 'Proc::PID::File',
+		'Unix::Processors', 'Sys::CpuLoad',
 	);
 	my @needfull;
 	foreach my $module(@modules) {
@@ -75,20 +76,13 @@ use File::Basename;
 use FindBin qw($Bin);
 use Fcntl qw(:flock);
 use BSD::Resource;
-use Unix::Processors;
 # use Sys::LoadAvg;	# Core dumps because the array isn't big enough. Bug report has been ignored
-use Sys::CpuLoad;
 use Sys::Syslog;
 use POSIX ":sys_wait_h";
 use IO::Handle;
-use IPC::Cmd;
 use Config;
 
-my $ppf_is_installed = 0;
-if(eval { require Proc::PID::File; } ) {
-	Proc::Pid::File->import();
-	$ppf_is_installed = 1;
-}
+my $ppf_is_installed = 1;
 
 use lib File::Spec->catfile(File::HomeDir->my_home(), '.cpan', 'CPAN');
 use MyConfig;
@@ -113,32 +107,58 @@ if(($Config{'osname'} eq 'solaris') ||
 		$mode = 'killfam';
 	};
 	if(!defined($mode)) {
-		eval {
-			# Doesn't needs at least Perl 5.10.0
-			require Proc::Govern;
-			Proc::Govern->import();
-			$mode = 'govern';
-		};
+		# Doesn't needs at least Perl 5.10.0
+		$mode = 'govern';
 	}
 	if(!defined($mode)) {
-		require IPC::Cmd;
-		IPC::Cmd->import();
 		$mode = 'cmd';
 	}
 } elsif(defined($^V) && ($^V ge 'v5.10.1')) {
 	# Doesn't needs at least Perl 5.10.1
-	require Proc::Govern;
-	Proc::Govern->import();
 	$mode = 'govern';
 } elsif($Config{'osname'} eq 'dragonfly') {
-	require IPC::Cmd;
-	IPC::Cmd->import();
 	$mode = 'cmd';
 } else {
 	# Needs Proc::ProcessTable which doesn't support DragonflyBSD
-	require Proc::Killfam;
-	Proc::Killfam->import();
 	$mode = 'killfam';
+}
+
+if($mode eq 'cmd') {
+	@modules = ( 'IPC::Cmd' );
+} elsif($mode eq 'govern') {
+	@modules = ( 'Proc::Govern' );
+) elsif($mode eq 'killfam') {
+	@modules = ( 'Proc::Killfam' );
+}
+
+my @needfull;
+foreach my $module(@modules) {
+	eval "use $module";
+	if($@) {
+		push @needfull, $module;
+	}
+}
+if(scalar(@needfull)) {
+	system('cpan -i ' . join(' ', @needfull));
+}
+
+foreach my $module(@modules) {
+	my $version;
+	if($module =~ /(.+)\s(.+)$/) {
+		$module = $1;
+		$version = $2;
+	}
+	if($module =~ /.+\/(.+)/) {
+		$module = $1;
+	}
+	eval "require $module";
+	if($@) {
+		die $@;
+	}
+	$module->import();
+	# if($version && ($module::VERSION < $version)) {
+		# die "$module: need $version got ", $module::VERSIOn;
+	# }
 }
 
 my %opts;
