@@ -19,10 +19,51 @@
 
 use warnings;
 use strict;
-use autodie qw(:all);
 
+my @modules;
+
+# Install Pre-requisites
+BEGIN {
+	@modules = (
+		'File::HomeDir', 'IPC::System::Simple', 'Proc::PID::File',
+		'Sys::CpuLoad', 'BSD::Resource',
+	);
+
+	my @needfull;
+	foreach my $module(@modules) {
+		eval "use $module";
+		if($@) {
+			push @needfull, $module;
+		}
+	}
+	if(scalar(@needfull)) {
+		system('cpan -i ' . join(' ', @needfull));
+	}
+
+}
+
+foreach my $module(@modules) {
+	my $version;
+	if($module =~ /(.+)\s(.+)$/) {
+		$module = $1;
+		$version = $2;
+	}
+	if($module =~ /.+\/(.+)/) {
+		$module = $1;
+	}
+	eval "require $module";
+	if($@) {
+		die $@;
+	}
+	$module->import();
+	# if($version && ($module::VERSION < $version)) {
+		# die "$module: need $version got ", $module::VERSIOn;
+	# }
+}
+
+use autodie qw(:all);
+use Config;
 use IO::Socket::INET;
-use File::HomeDir;
 use File::Path;
 use File::Spec;
 use File::Basename;
@@ -30,24 +71,12 @@ use Sys::Syslog;
 use File::Temp;
 use FindBin qw($Bin);
 use Unix::Processors;
-use Sys::CpuLoad;
 use Fcntl qw(:flock);
 use Getopt::Std;
 use POSIX ":sys_wait_h";
-use Config;
 use BSD::Resource;
 
-my $ppf_is_installed = 0;
-if(eval { require Proc::PID::File; } ) {
-	Proc::Pid::File->import();
-	$ppf_is_installed = 1;
-}
-
-use lib File::Spec->catfile(File::HomeDir->my_home(), '.cpan', 'CPAN');
-use MyConfig;
-
-die 'Configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
-die unless($CPAN::Config->{'urllist'});
+my $ppf_is_installed = 1;
 
 my $mode;
 
@@ -61,42 +90,68 @@ if(($Config{'osname'} eq 'solaris') ||
 	# less is available because of link handshake errors
 	eval {
 		# Needs Proc::ProcessTable which doesn't support DragonflyBSD
-		require Proc::Killfam;
-		Proc::Killfam->import();
 		$mode = 'killfam';
 	};
 	if(!defined($mode)) {
-		eval {
-			# Doesn't needs at least Perl 5.10.0
-			require Proc::Govern;
-			Proc::Govern->import();
-			require Proc::Killfam;
-			Proc::Killfam->import();
-			$mode = 'govern';
-		};
+		# Doesn't needs at least Perl 5.10.0
+		$mode = 'govern';
 	}
 	if(!defined($mode)) {
-		require IPC::Cmd;
-		IPC::Cmd->import();
 		$mode = 'cmd';
 	}
 } elsif(defined($^V) && ($^V ge 'v5.10.1')) {
 	# Doesn't needs at least Perl 5.10.1
-	require Proc::Govern;
-	Proc::Govern->import();
-	require Proc::Killfam;
-	Proc::Killfam->import();
 	$mode = 'govern';
 } elsif(($Config{'osname'} eq 'dragonfly') || ($Config{'osname'} eq 'haiku')) {
-	require IPC::Cmd;
-	IPC::Cmd->import();
 	$mode = 'cmd';
 } else {
 	# Needs Proc::ProcessTable which doesn't support DragonflyBSD
-	require Proc::Killfam;
-	Proc::Killfam->import();
 	$mode = 'killfam';
 }
+
+if($mode eq 'cmd') {
+	@modules = ( 'IPC::Cmd' );
+} elsif($mode eq 'govern') {
+	@modules = ( 'Proc::Govern', 'Proc::Killfam' );
+} elsif($mode eq 'killfam') {
+	@modules = ( 'Proc::Killfam' );
+}
+
+my @needfull;
+foreach my $module(@modules) {
+	eval "use $module";
+	if($@) {
+		push @needfull, $module;
+	}
+}
+if(scalar(@needfull)) {
+	system('cpan -i ' . join(' ', @needfull));
+}
+
+foreach my $module(@modules) {
+	my $version;
+	if($module =~ /(.+)\s(.+)$/) {
+		$module = $1;
+		$version = $2;
+	}
+	if($module =~ /.+\/(.+)/) {
+		$module = $1;
+	}
+	eval "require $module";
+	if($@) {
+		die $@;
+	}
+	$module->import();
+	# if($version && ($module::VERSION < $version)) {
+		# die "$module: need $version got ", $module::VERSIOn;
+	# }
+}
+
+use lib File::Spec->catfile(File::HomeDir->my_home(), '.cpan', 'CPAN');
+use MyConfig;
+
+die 'Configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
+die unless($CPAN::Config->{'urllist'});
 
 my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
 if(-r $lockfile && (open(my $fin, '<', $lockfile))) {
