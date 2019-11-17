@@ -26,7 +26,7 @@ my @modules;
 BEGIN {
 	@modules = (
 		'File::HomeDir', 'IPC::System::Simple', 'Proc::PID::File',
-		'Sys::CpuLoad', 'BSD::Resource',
+		'Sys::CpuLoad', 'BSD::Resource', 'Unix::Processors',
 	);
 
 	my @needfull;
@@ -70,7 +70,6 @@ use File::Basename;
 use Sys::Syslog;
 use File::Temp;
 use FindBin qw($Bin);
-use Unix::Processors;
 use Fcntl qw(:flock);
 use Getopt::Std;
 use POSIX ":sys_wait_h";
