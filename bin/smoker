@@ -34,7 +34,7 @@ BEGIN {
 	@modules = (
 		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
 		'CPAN::Reporter', 'LWP::Simple', 'JSON', 'Proc::PID::File',
-		'Unix::Processors', 'Sys::CpuLoad',
+		'Unix::Processors', 'Sys::CpuLoad', 'BSD::Resource',
 	);
 	my @needfull;
 	foreach my $module(@modules) {
@@ -75,7 +75,6 @@ use File::Spec;
 use File::Basename;
 use FindBin qw($Bin);
 use Fcntl qw(:flock);
-use BSD::Resource;
 # use Sys::LoadAvg;	# Core dumps because the array isn't big enough. Bug report has been ignored
 use Sys::Syslog;
 use POSIX ":sys_wait_h";
