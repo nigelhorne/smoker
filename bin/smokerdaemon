@@ -29,7 +29,13 @@ BEGIN {
 		'Sys::CpuLoad', 'Unix::Processors',
 	);
 
-	if($^O ne 'MSWin32') {
+	if($^O eq 'MSWin32') {
+		use constant {
+			RLIMIT_DATA => -1,
+			RLIMIT_RSS => -1,
+			RLIMIT_CPU => -1,
+		};
+	} else {
 		push @modules, 'BSD::Resource';
 	}
 	my @needfull;
