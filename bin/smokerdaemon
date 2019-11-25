@@ -26,9 +26,12 @@ my @modules;
 BEGIN {
 	@modules = (
 		'File::HomeDir', 'IPC::System::Simple', 'Proc::PID::File',
-		'Sys::CpuLoad', 'BSD::Resource', 'Unix::Processors',
+		'Sys::CpuLoad', 'Unix::Processors',
 	);
 
+	if($^O ne 'MSWin32') {
+		push @modules, 'BSD::Resource';
+	}
 	my @needfull;
 	foreach my $module(@modules) {
 		eval "use $module";
@@ -73,7 +76,6 @@ use FindBin qw($Bin);
 use Fcntl qw(:flock);
 use Getopt::Std;
 use POSIX ":sys_wait_h";
-use BSD::Resource;
 
 my $ppf_is_installed = 1;
 
@@ -268,7 +270,7 @@ clean($clean_after_test);
 #	in which case the container call should do it
 #	e.g. 'docker run -m 1g'
 # This doesn't work on Cygwin
-if(($^O ne 'cygwin') && !(-r '/proc/1/cgroup')) {
+if(($^O ne 'cygwin') && ($^O ne 'MSWin32') && !(-r '/proc/1/cgroup')) {
 	setrlimit(RLIMIT_DATA, 128 * 1024 * 1024, 256 * 1024 * 1024) or
 		warn('Can\'t limit the data size - watch for memory usage');
 
