@@ -36,13 +36,7 @@ BEGIN {
 		'CPAN::Reporter', 'LWP::Simple', 'JSON', 'Proc::PID::File',
 		'Unix::Processors', 'Sys::CpuLoad',
 	);
-	if($^O eq 'MSWin32') {
-		use constant {
-			RLIMIT_DATA => -1,
-			RLIMIT_RSS => -1,
-			RLIMIT_CPU => -1,
-		};
-	} else {
+	if($^O ne 'MSWin32') {
 		push @modules, 'BSD::Resource';
 	}
 	my @needfull;
@@ -92,6 +86,20 @@ use Config;
 
 my $ppf_is_installed = 1;
 
+my $rlimit_data;
+my $rlimit_rss;
+my $rlimit_cpu;
+
+if(($^O eq 'MSWin32') || ($^O eq 'cygwin')) {
+	$rlimit_data = -1;
+	$rlimit_rss = -1;
+	$rlimit_cpu = -1;
+} else {
+	$rlimit_data = $BSD::Resource::RLIMIT_DATA;
+	$rlimit_rss = $BSD::Resource::RLIMIT_RSS;
+	$rlimit_cpu = $BSD::Resource::RLIMIT_CPU;
+}
+
 use lib File::Spec->catfile(File::HomeDir->my_home(), '.cpan', 'CPAN');
 use MyConfig;
 
@@ -104,28 +112,16 @@ my $mode;
 # Generally Proc::Killfam is better to use since all children will be killed,
 #	I'm not persuaded that happens with Proc::Govern
 if(($Config{'osname'} eq 'solaris') ||
-   ($Config{'osname'} eq 'cygwin') ||
+   # ($Config{'osname'} eq 'cygwin') ||
+   ($Config{'osname'} eq 'MSWin32') ||
+   ($Config{'osname'} eq 'dragonfly') ||
+   ($Config{'osname'} eq 'haiku') ||
    ($Config{'osname'} eq 'gnukfreebsd')) {
-	# Work around /usr/lib being built with Sun's C compiler, so
-	# less is available because of link handshake errors
-	eval {
-		# Needs Proc::ProcessTable which doesn't support DragonflyBSD
-		$mode = 'killfam';
-	};
-	if(!defined($mode)) {
-		# Doesn't needs at least Perl 5.10.0
-		$mode = 'govern';
-	}
-	if(!defined($mode)) {
-		$mode = 'cmd';
-	}
-} elsif(defined($^V) && ($^V ge 'v5.10.1')) {
+	$mode = 'cmd';
+} elsif(($Config{'osname'} ne 'cygwin') && defined($^V) && ($^V ge 'v5.10.1')) {
 	# Doesn't needs at least Perl 5.10.1
 	$mode = 'govern';
-} elsif(($Config{'osname'} eq 'dragonfly') || ($Config{'osname'} eq 'haiku')) {
-	$mode = 'cmd';
 } else {
-	# Needs Proc::ProcessTable which doesn't support DragonflyBSD
 	$mode = 'killfam';
 }
 
@@ -240,15 +236,15 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 #	e.g. 'docker run -m 1g'
 # This doesn't work on Cygwin
 if(($^O ne 'cygwin') && ($^O ne 'MSWin32') && !(-r '/proc/1/cgroup')) {
-	setrlimit(RLIMIT_DATA, 256 * 1024 * 1024, 512 * 1024 * 1024) or
+	setrlimit($rlimit_data, 256 * 1024 * 1024, 512 * 1024 * 1024) or
 		warn('Can\'t limit the data size - watch for memory usage');
 
 	if($Config{'osname'} ne 'solaris') {
-		setrlimit(RLIMIT_RSS, 32 * 1024 * 1024, 64 * 1024 * 1024) or
+		setrlimit($rlimit_rss, 32 * 1024 * 1024, 64 * 1024 * 1024) or
 			warn('Can\'t limit the data size - watch for memory usage');
 	}
 
-	setrlimit(RLIMIT_CPU, 3300, 3600) or
+	setrlimit($rlimit_cpu, 3300, 3600) or
 		warn('Can\'t limit the CPU time - watch for long running programs');
 }
 
