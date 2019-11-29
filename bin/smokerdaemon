@@ -272,11 +272,11 @@ if($opts{'v'}) {
 
 clean($clean_after_test);
 
-# Limit resources unless you're in a container,
-#	in which case the container call should do it
-#	e.g. 'docker run -m 1g'
-# This doesn't work on Cygwin
-if(($^O ne 'cygwin') && ($^O ne 'MSWin32') && !(-r '/proc/1/cgroup')) {
+# Limit resources
+# If you're in a container you should also limit it there, e.g.:
+#	'docker run -m 1g'
+# This doesn't work on Cygwin or Windows
+if(($^O ne 'cygwin') && ($^O ne 'MSWin32')) {
 	setrlimit(RLIMIT_DATA, 128 * 1024 * 1024, 256 * 1024 * 1024) or
 		warn('Can\'t limit the data size - watch for memory usage');
 
