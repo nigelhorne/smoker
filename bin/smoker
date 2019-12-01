@@ -34,11 +34,8 @@ BEGIN {
 	@modules = (
 		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
 		'CPAN::Reporter', 'LWP::Simple', 'JSON', 'Proc::PID::File',
-		'Unix::Processors', 'Sys::CpuLoad',
+		'Unix::Processors', 'Sys::CpuLoad', 'BSD::Resource',
 	);
-	if($^O ne 'MSWin32') {
-		push @modules, 'BSD::Resource';
-	}
 	my @needfull;
 	foreach my $module(@modules) {
 		eval "use $module";
@@ -85,20 +82,6 @@ use IO::Handle;
 use Config;
 
 my $ppf_is_installed = 1;
-
-my $rlimit_data;
-my $rlimit_rss;
-my $rlimit_cpu;
-
-if(($^O eq 'MSWin32') || ($^O eq 'cygwin')) {
-	$rlimit_data = -1;
-	$rlimit_rss = -1;
-	$rlimit_cpu = -1;
-} else {
-	$rlimit_data = $BSD::Resource::RLIMIT_DATA;
-	$rlimit_rss = $BSD::Resource::RLIMIT_RSS;
-	$rlimit_cpu = $BSD::Resource::RLIMIT_CPU;
-}
 
 use lib File::Spec->catfile(File::HomeDir->my_home(), '.cpan', 'CPAN');
 use MyConfig;
@@ -236,15 +219,15 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 #	'docker run -m 1g'
 # This doesn't work on Cygwin or Windows
 if(($^O ne 'cygwin') && ($^O ne 'MSWin32')) {
-	setrlimit($rlimit_data, 256 * 1024 * 1024, 512 * 1024 * 1024) or
+	setrlimit(RLIMIT_DATA, 256 * 1024 * 1024, 512 * 1024 * 1024) or
 		warn('Can\'t limit the data size - watch for memory usage');
 
 	if($Config{'osname'} ne 'solaris') {
-		setrlimit($rlimit_rss, 32 * 1024 * 1024, 64 * 1024 * 1024) or
+		setrlimit(RLIMIT_RSS, 32 * 1024 * 1024, 64 * 1024 * 1024) or
 			warn('Can\'t limit the data size - watch for memory usage');
 	}
 
-	setrlimit($rlimit_cpu, 3300, 3600) or
+	setrlimit(RLIMIT_CPU, 3300, 3600) or
 		warn('Can\'t limit the CPU time - watch for long running programs');
 }
 
