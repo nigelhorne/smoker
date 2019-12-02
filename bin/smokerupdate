@@ -1,0 +1,59 @@
+#!/usr/bin/env perl
+
+# Author Nigel Horne: njh@bandsman.co.uk
+# Copyright (C) 2016-2018, Nigel Horne
+
+# Usage is subject to licence terms.
+# The licence terms of this software are as follows:
+# Personal single user, single computer use: GPL2
+# All other users (including Commercial, Charity, Educational, Government)
+#	must apply in writing for a licence for use from Nigel Horne at the
+#	above e-mail.
+
+use strict;
+use warnings;
+use Sys::Syslog;
+use IO::Socket::INET;
+
+# Update the minicpan repository, and tell the smokers what to test
+
+# FIXME - should be arguments
+my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://www.cpan.org/ -C ~njh/.minicpanrc';
+# my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://cpan.mirror.constant.com/ -C ~njh/.minicpanrc';
+
+umask(022);
+
+open(my $pin, '-|', $minicpan_command);
+
+my $port = 21212;
+my $count = 0;
+my $s = IO::Socket::INET->new(PeerPort => $port,
+		PeerAddr => inet_ntoa(INADDR_BROADCAST),
+		Proto => 'udp',
+		Broadcast => 1)
+	or die "Can't broadcast to port $port";
+
+while(my $line = <$pin>) {
+	next if($line =~ /\/perl-?[56][\.\/]/i);
+	next unless(($line =~ /^authors\/id\/(.+)\.tar\.gz/) || ($line =~ /^authors\/id\.(.+)\.tgz/));
+	my $dist = $1;
+	$dist .= "\n" if($dist !~ /\n$/);
+	$s->send($dist);
+	sleep(1);	# Give the clients a chance to do something so they don't miss the message
+	$count++;
+}
+
+close $pin;
+
+$s->send("\n") if($count);
+
+openlog 'CPAN', 'cons,pid', 'user';
+my $msg;
+if($count == 1) {
+	$msg = "Updated 1 module\n";
+} else {
+	$msg = "Updated $count modules";
+}
+# print "$msg\n";
+syslog 'info', $msg;
+closelog;
