@@ -276,6 +276,9 @@ if(($^O ne 'cygwin') && ($^O ne 'MSWin32')) {
 			warn('Can\'t limit the data size - watch for memory usage');
 	}
 
+	setrlimit(RLIMIT_FSIZE, 10 * 1024 * 1024, 10 * 1024 * 1024) or
+		warn('Can\'t limit the file size - watch for large temporary files');
+
 	# Give 5 minutes to tidyup before the next hourly cron job starts
 	setrlimit(RLIMIT_CPU, 3300, 3600) or
 		warn('Can\'t limit the CPU time - watch for long running programs');

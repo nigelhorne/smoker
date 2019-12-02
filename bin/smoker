@@ -234,6 +234,10 @@ if(($^O ne 'cygwin') && ($^O ne 'MSWin32')) {
 			warn('Can\'t limit the data size - watch for memory usage');
 	}
 
+	setrlimit(RLIMIT_FSIZE, 10 * 1024 * 1024, 10 * 1024 * 1024) or
+		warn('Can\'t limit the file size - watch for large temporary files');
+
+	# Give 5 minutes to tidyup before the next hourly cron job starts
 	setrlimit(RLIMIT_CPU, 3300, 3600) or
 		warn('Can\'t limit the CPU time - watch for long running programs');
 }
@@ -639,10 +643,11 @@ package BSD_Resource_NULL;
 use base 'Exporter';
 use vars qw(@ISA @EXPORT);
 @ISA = qw(Exporter);
-@EXPORT = qw(RLIMIT_DATA RLIMIT_CSS RLIMIT_CPU);
+@EXPORT = qw(RLIMIT_DATA RLIMIT_CSS RLIMIT_CPU RLIMIT_FSIZE);
 
 use constant {
 	RLIMIT_DATA => -1,
 	RLIMIT_RSS => -1,
 	RLIMIT_CPU => -1,
+	RLIMIT_FSIZE => -1,
 };
