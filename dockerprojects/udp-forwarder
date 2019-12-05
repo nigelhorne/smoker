@@ -50,6 +50,9 @@ sub get_dists {
 		if($line =~ /0.0.0.0:(\d+)->\d+\/udp/) {
 			push @ports, $1;
 		}
+		# if($line =~ /^([0-9a-f]{12})/) {
+			# system("/usr/bin/docker unpause $1");
+		# }
 	}
 
 	close($pin);
@@ -78,7 +81,7 @@ sub get_dists {
 
 		if($count <= 0) {
 			syslog('info', "Throttling for 5 minutes to $number_of_cpus active smokers");
-			sleep(180);
+			sleep(300);
 			$count = $number_of_cpus;
 		}
 	}
