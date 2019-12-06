@@ -1,0 +1,10 @@
+# Prevent modules being tested from reaching out to the Internet
+iptables -F DOCKER-USER
+iptables -A DOCKER-USER -s 192.168.0.0/16 -j ACCEPT
+iptables -A DOCKER-USER -d 192.168.0.0/16 -j ACCEPT
+iptables -A DOCKER-USER -d 127.0.0.0/24 -j ACCEPT
+iptables -A DOCKER-USER -s 127.0.0.0/24 -j ACCEPT
+# Allow connections to the loghost machine
+iptables -A DOCKER-USER -d 51.15.142.52 -j ACCEPT
+iptables -A DOCKER-USER -j LOG --log-prefix "Blocked traffic:" --log-level 7
+iptables -A DOCKER-USER -j RETURN
