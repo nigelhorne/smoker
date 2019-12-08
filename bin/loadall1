@@ -73,7 +73,7 @@ if [ $SKIPBOOTSTRAP == 'no' ]; then
 			perl -MCPAN -e 'CPAN::Shell->install("D/DA/DAGOLDEN/CPAN-Meta-2.101090.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("D/DA/DAGOLDEN/CPAN-Reporter-1.1902.tar.gz")'
 			perl -MCPAN -e 'CPAN::Shell->install("A/AN/ANDK/CPAN-1.99_51.tar.gz")'
-			perl -MCPAN -e 'CPAN::Shell->install("http://backpan.cpantesters.org/authors/id/A/AN/ANDK//CPAN-1.99_51.tar.gz")'
+			perl -MCPAN -e 'CPAN::Shell->install("http://backpan.cpantesters.org/authors/id/A/AN/ANDK/CPAN-1.99_51.tar.gz")'
 		fi
 	done
 fi
