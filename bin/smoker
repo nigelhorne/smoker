@@ -481,7 +481,8 @@ if($mode) {
 	nohang();
 }
 
-rmtree($clean_after_test);
+clean($clean_after_test);
+
 if($ppf_is_installed) {
 	$lock->release();
 } else {
