@@ -94,6 +94,8 @@ do
 	perlbrew use $i
 
 	# perl -MCPAN -e 'CPAN::Shell->install("ExtUtils::MakeMaker", "File::pushd", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
+
+	# Don't test as the tests won't go anywhere yet
 	perl -MCPAN -e 'CPAN::Shell->install("App::cpanminus")'
 	cpanm -iqn ExtUtils::MakeMaker File::pushd Test::Reporter::Transport::Socket CPAN::Reporter
 done
