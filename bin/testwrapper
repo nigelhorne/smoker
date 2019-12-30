@@ -22,7 +22,7 @@ if [[ ! -r /proc/1/cgroup ]]; then
 		ulimit -m 524288
 		ulimit -u 256
 	fi
-	if [[ "$kernel" != 'CYGWIN_NT-10.0' ]]; then
+	if [[ "$kernel" != 'CYGWIN_NT-10.0' && "$kernel" != 'DragonFly' ]]; then
 		ulimit -f 300000
 	fi
 fi
