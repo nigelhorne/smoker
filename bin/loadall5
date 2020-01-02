@@ -60,7 +60,7 @@ do
 	fi
 
 	# Try again in different order in case one of the above failed
-	perl -MCPAN -e 'CPAN::Shell->install("IPC::System::Simple", "autodie", "Proc::Killfam", "LWP::Simple", "Config::Auto", "HTTP::Cache::Transparent", "Unix::Processors", "Proc::PID::File", "Sys::CpuLoad", "BSD::Resource", "Proc::Govern")'
+	perl -MCPAN -e 'CPAN::Shell->install("IPC::System::Simple", "autodie", "Proc::Killfam", "LWP::Simple", "Config::Auto", "HTTP::Cache::Transparent", "Unix::Processors", "Proc::PID::File", "Sys::CpuLoad", "BSD::Resource", "Proc::Govern", "CPAN::DistnameInfo")'
 
 	# Create a baseline
 	# PERL_CR_SMOKER_RUNONCE=1 perl -MCPAN::Reporter::Smoker -e start
