@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # Author Nigel Horne: njh@bandsman.co.uk
-# Copyright (C) 2015-2019, Nigel Horne
+# Copyright (C) 2015-2020, Nigel Horne
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
@@ -32,6 +32,8 @@ my @modules;
 # Install Pre-requisites
 BEGIN {
 	@modules = (
+		'File::HomeDir',
+		'Getopt::Std',
 		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
 		'CPAN::Reporter', 'LWP::Simple', 'JSON', 'Proc::PID::File',
 		'Unix::Processors', 'Sys::CpuLoad',
@@ -49,7 +51,6 @@ BEGIN {
 	if(scalar(@needfull)) {
 		system('cpan -i ' . join(' ', @needfull));
 	}
-
 }
 
 if($^O eq 'MSWin32') {
@@ -75,8 +76,18 @@ foreach my $module(@modules) {
 	# }
 }
 
-use Getopt::Std;
-use File::HomeDir;
+my $child;
+
+END {
+	if($child) {
+		kill 'CONT', -$child;
+		sleep 2;
+		kill 'TERM', -$child;
+		sleep 2;
+		kill 'KILL', -$child;
+	}
+}
+
 use File::Path;
 use File::Spec;
 use File::Basename;
@@ -539,74 +550,76 @@ sub timed_system {
 	}
 
 	if($mode eq 'killfam') {
-		my $pid;
-
 		my $rc = -1;
 		eval {
-			$pid = fork;
+			$child = fork;
 
-			die "Fork failed: $!" unless defined $pid;
+			die "Fork failed: $!" unless defined $child;
 
-			unless ($pid) {
+			unless ($child) {
 				if($opts{'v'}) {
 					print "$shell -xc $command\n";
 					exec $shell, '-xc', $command;
 				} else {
 					print "$shell -c $command\n";
-					exec $shell, '-c', $command;
+				exec $shell, '-c', $command;
 				}
 				die "Exec failed: $!";
 			}
 
 			local $SIG{ALRM} = $SIG{TERM} = $SIG{INT} = sub {
+				syslog 'warn', "smoker: timeout killing child $child";
 				if($opts{'v'}) {
-					print "Killing process family $pid\n";
+					print "Killing process family $child\n";
 				}
-				my @pidlist = ($pid);
-				Proc::Killfam::killfam(18, @pidlist);
+				my @pidlist = ($child);
+				Proc::Killfam::killfam('CONT', @pidlist);
 				sleep 2;
-				Proc::Killfam::killfam(14, @pidlist);
+				Proc::Killfam::killfam('ALRM', @pidlist);
 				sleep 2;
-				Proc::Killfam::killfam(15, @pidlist);
+				Proc::Killfam::killfam('TERM', @pidlist);
 				sleep 2;
-				Proc::Killfam::killfam(9, @pidlist);
+				Proc::Killfam::killfam('KILL', @pidlist);
 				sleep 2;
-				kill 18, $pid;
+				kill 'CONT', -$child;
 				sleep 2;
-				kill 14, $pid;
+				kill 'CONT', $child;
 				sleep 2;
-				kill 15, $pid;
+				kill 'ALRM', $child;
 				sleep 2;
-				kill 9, $pid;
+				kill 'TERM', $child;
+				sleep 2;
+				kill 'KILL', $child;
 				sleep 2;
 
-				if(kill(0, $pid)) {
-					syslog 'warn', "$pid won't die";
-					die "Timeout! $pid Won't die";
+				if(kill(0, $child)) {
+					syslog 'warn', "$child won't die";
+					die "Timeout! $child Won't die";
 				}
 				# die "Timeout!"
 
 				nohang();
-			}; # Just SIGTERM.
+			}; # Just TERM.
 
 			alarm $timeout;
 
-			$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
+			$rc = (waitpid($child, 0) == $child) ? $? : -1;
 
 			alarm 0;
 
-			if(kill(0, $pid)) {
-				my @pidlist = ($pid);
-				Proc::Killfam::killfam(18, @pidlist);
+			if(kill(0, $child)) {
+				my @pidlist = ($child);
+				Proc::Killfam::killfam('CONT', @pidlist);
 				sleep 2;
-				Proc::Killfam::killfam(14, @pidlist);
+				Proc::Killfam::killfam('ALRM', @pidlist);
 				sleep 2;
-				Proc::Killfam::killfam(15, @pidlist);
+				Proc::Killfam::killfam('TERM', @pidlist);
 				sleep 2;
-				Proc::Killfam::killfam(9, @pidlist);
+				Proc::Killfam::killfam('KILL', @pidlist);
 				sleep 2;
-				kill 9, $pid;
+				kill 9, $child;
 			}
+			$child = 0;
 			# TODO
 			# Elsif $rc != -1 - insert code like System module
 		};
