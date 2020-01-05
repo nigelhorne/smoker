@@ -32,7 +32,7 @@ my @modules;
 # Install Pre-requisites
 BEGIN {
 	@modules = (
-		'File::HomeDir',
+		'File::HomeDir', 'File::Path',
 		'Getopt::Std',
 		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
 		'CPAN::Reporter', 'LWP::Simple', 'JSON', 'Proc::PID::File',
@@ -81,6 +81,7 @@ my $child;
 END {
 	if($child) {
 		kill 'CONT', -$child;
+		closelog();
 		sleep 2;
 		kill 'TERM', -$child;
 		sleep 2;
@@ -88,7 +89,6 @@ END {
 	}
 }
 
-use File::Path;
 use File::Spec;
 use File::Basename;
 use FindBin qw($Bin);
