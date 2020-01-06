@@ -81,6 +81,7 @@ my $child;
 END {
 	if($child) {
 		kill 'CONT', -$child;
+		syslog 'warn', "smoker: killing dangling child $child";
 		closelog();
 		sleep 2;
 		kill 'TERM', -$child;
