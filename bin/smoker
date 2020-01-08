@@ -250,8 +250,8 @@ if(($^O ne 'cygwin') && ($^O ne 'MSWin32')) {
 			# warn('Can\'t limit the file size - watch for large temporary files');
 	}
 
-	# Give 5 minutes to tidyup before the next hourly cron job starts
-	setrlimit(RLIMIT_CPU, 3300, 3600) or
+	# 5 minutes is more than enough CPU time
+	setrlimit(RLIMIT_CPU, 300, 600) or
 		warn('Can\'t limit the CPU time - watch for long running programs');
 }
 
