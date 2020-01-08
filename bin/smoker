@@ -594,7 +594,7 @@ sub timed_system {
 				sleep 2;
 
 				if(kill(0, $child)) {
-					syslog 'warn', "$child won't die";
+					syslog 'warn', "smoker: $child won't die";
 					die "Timeout! $child Won't die";
 				}
 				# die "Timeout!"
@@ -636,7 +636,7 @@ sub nohang {
 
 	while(waitpid(-1, WNOHANG) >= 0) {
 		if($count++ >= 60) {
-			syslog('warning', 'Stopped waiting for child after 60 seconds');
+			syslog('warning', 'smoker: Stopped waiting for child after 60 seconds');
 			last;
 		}
 		sleep(1);
