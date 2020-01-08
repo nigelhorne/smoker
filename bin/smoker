@@ -234,6 +234,7 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 };
 
 # Limit resources
+# Note that counter-intuitively these are not inherited through an exec()
 # If you're in a container you should also limit it there, e.g.:
 #	'docker run -m 1g'
 # This doesn't work on Cygwin or Windows
