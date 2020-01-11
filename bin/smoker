@@ -36,7 +36,7 @@ BEGIN {
 		'Getopt::Std',
 		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
 		'CPAN::Reporter', 'LWP::Simple', 'JSON', 'Proc::PID::File',
-		'Unix::Processors', 'Sys::CpuLoad',
+		'Unix::Processors', 'Sys::CpuLoad', 'Sys::Syslog',
 	);
 	if($^O ne 'MSWin32') {
 		push @modules, 'BSD::Resource',
@@ -81,8 +81,8 @@ my $child;
 END {
 	if($child) {
 		kill 'CONT', -$child;
-		syslog 'warn', "smoker: killing dangling child $child";
-		closelog();
+		Sys::Syslog::syslog('warn', "smoker: killing dangling child $child");
+		Sys::Syslog::closelog();
 		sleep 2;
 		kill 'TERM', -$child;
 		sleep 2;
@@ -95,7 +95,6 @@ use File::Basename;
 use FindBin qw($Bin);
 use Fcntl qw(:flock);
 # use Sys::LoadAvg;	# Core dumps because the array isn't big enough. Bug report has been ignored
-use Sys::Syslog;
 use POSIX ":sys_wait_h";
 use IO::Handle;
 use Config;
