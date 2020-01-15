@@ -32,7 +32,7 @@ fi
 
 rm -f config.ini smokerdaemon.config.sample
 ln $HOME/.cpanreporter/config.ini .
-ln ../bin/smokerdaemon.config.sample .
+echo 'clean_after_test=1' > smokerdaemon.config.sample
 # rm -f MyConfig.pm
 # ln $HOME/.cpan/CPAN/MyConfig.pm .
 
