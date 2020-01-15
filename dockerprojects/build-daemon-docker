@@ -90,6 +90,7 @@ RUN bash /tmp/setup && rm /tmp/setup
 
 RUN useradd -ms /bin/bash smoker
 RUN apt-get -y --allow-remove-essential purge adduser e2fsprogs e2fslibs
+RUN chown -R smoker /home/smoker
 USER smoker
 WORKDIR /home/smoker
 
@@ -103,7 +104,7 @@ COPY smoker.config.sample .
 COPY MyConfig.pm .cpan/CPAN/MyConfig.pm
 COPY build.$$ build
 # Stop CPAN modules trying to put stuff in the home directory
-RUN bash build && rm build && chmod 500 /home/smoker && chmod 400 /home/smoker/.metabase/nhorne.json
+RUN bash build && rm build && chmod 500 /home/smoker && chmod 444 /home/smoker/.metabase/nhorne.json
 
 ENV PATH \$PATH::
 # CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: /bin/bash"]
