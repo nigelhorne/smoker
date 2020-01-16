@@ -32,7 +32,7 @@ fi
 # ln $HOME/.cpanreporter/config.ini .
 rm -f smoker.config.sample nhorne.json
 echo 'clean_after_test=1' > smoker.config.sample
-ln $HOME/.metabase/nhorne.json .
+cp $HOME/.metabase/nhorne.json .
 # rm -f MyConfig.pm
 # ln $HOME/.cpan/CPAN/MyConfig.pm .
 
@@ -47,10 +47,9 @@ set -ex
 # export http_proxy="http://zack:3128"
 # export https_proxy="http://zack:3128"
 # mount -o remount,rw,hidepid=2 /proc
-# yum update && yum install git curl bzip2 bison byacc patch gcc make autoconf sqlite3 cron
-apt-get update && apt-get --no-install-recommends install -y libpam-tmpdir git procps curl bzip2 bison byacc patch netbase gcc make ca-certificates autoconf libxml2-dev sqlite3 libterm-readline-perl-perl cron && apt-get autoremove && apt-get autoclean && apt-get clean && rm -rf /var/lib/apt/lists/*
+# yum update && yum install git curl bzip2 bison byacc patch gcc make autoconf sqlite3
+apt-get update && DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends install -y libpam-tmpdir git procps curl bzip2 bison byacc patch netbase gcc make ca-certificates autoconf libxml2-dev sqlite3 libterm-readline-perl-perl && apt-get autoremove && apt-get autoclean && apt-get clean && rm -rf /var/lib/apt/lists/*
 echo $HOSTNAME > /etc/hostname
-echo '19 * * * * [ -r .perlbrew/init ] && PATH=$HOME/src/smoker/smoker/bin:$PATH SHELL=/usr/bin/bash /usr/bin/timeout -s SIGALRM -k 300 3300 bin/perlbrew-cron perl src/smoker/smoker/bin/smoker >> ~/smoker-cron.out 2>> ~/smoker-cron.err' | crontab
 EOF
 
 cat > build.$$ <<EOF
@@ -90,7 +89,6 @@ RUN bash /tmp/setup && rm /tmp/setup
 
 RUN useradd -ms /bin/bash smoker
 RUN apt-get -y --allow-remove-essential purge adduser e2fsprogs e2fslibs
-RUN chown -R smoker /home/smoker
 USER smoker
 WORKDIR /home/smoker
 
@@ -98,16 +96,16 @@ ENV TEST_JOBS $NPROC
 ENV HARNESS_OPTIONS c:j$NPROC
 
 RUN mkdir -p .cpanreporter .cpan/CPAN .metabase
-COPY config.ini .cpanreporter/config.ini
-COPY nhorne.json .metabase/nhorne.json
-COPY smoker.config.sample .
-COPY MyConfig.pm .cpan/CPAN/MyConfig.pm
-COPY build.$$ build
+COPY --chown=smoker config.ini .cpanreporter/config.ini
+COPY --chown=smoker nhorne.json .metabase/nhorne.json
+COPY --chown=smoker smoker.config.sample .smokerrc
+COPY --chown=smoker MyConfig.pm .cpan/CPAN/MyConfig.pm
+COPY --chown=smoker build.$$ build
 # Stop CPAN modules trying to put stuff in the home directory
-RUN bash build && rm build && chmod 500 /home/smoker && chmod 444 /home/smoker/.metabase/nhorne.json
+RUN bash build && rm build && chmod 500 /home/smoker && chmod 400 /home/smoker/.metabase/nhorne.json
 
 ENV PATH \$PATH::
-# CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: /bin/bash"]
+CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: /bin/bash"]
 EOF
 docker build -t smoker-$NAME -f $TMPDIR/dockerfile .
 
@@ -123,3 +121,4 @@ echo 'iptables -A DOCKER-USER -j LOG --log-prefix "Blocked traffic: " --log-leve
 echo 'iptables -A DOCKER-USER -j RETURN'
 echo 'run "./udp-forwarder" if not already running"'
 echo "run 'docker run --restart=always --hostname=$HOSTNAME.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME --log-opt syslog-format=rfc3164 -dt --name smoker-$NAME --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp -m 1g --memory-swap=1g smoker-$NAME' to start the image"
+echo "add '19 * * * * docker run xxxxxxx to crontab'
