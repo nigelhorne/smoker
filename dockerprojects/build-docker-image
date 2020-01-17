@@ -121,4 +121,4 @@ echo 'iptables -A DOCKER-USER -j LOG --log-prefix "Blocked traffic: " --log-leve
 echo 'iptables -A DOCKER-USER -j RETURN'
 echo 'run "./udp-forwarder" if not already running"'
 echo "run 'docker run --restart=always --hostname=$HOSTNAME.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME --log-opt syslog-format=rfc3164 -dt --name smoker-$NAME --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp -m 1g --memory-swap=1g smoker-$NAME' to start the image"
-echo "add '19 * * * * docker run xxxxxxx to crontab'
+echo "add '19 * * * * docker run xxxxxxx to crontab'"
