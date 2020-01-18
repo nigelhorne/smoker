@@ -112,4 +112,5 @@ docker build -t smoker-$NAME -f $TMPDIR/dockerfile .
 
 rm -f $TMPDIR/dockerfile setup.$$ build.$$
 
-echo "add '19 0,6,12,18 * * * /usr/bin/timeout 5h /usr/bin/docker run --restart=always --hostname=$HOSTNAME.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME --log-opt syslog-format=rfc3164 -dt --name smoker-$NAME -m 1g --memory-swap=1g smoker-$NAME' to crontab"
+# Run a smoker every 6 hours, ensure the previous one dies in case it is hung
+echo "add '19 0,6,12,18 * * * /usr/bin/timeout 6h /usr/bin/docker run --hostname=$HOSTNAME.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME --log-opt syslog-format=rfc3164 -dt --name smoker-$NAME -m 1g --memory-swap=1g smoker-$NAME' to crontab"
