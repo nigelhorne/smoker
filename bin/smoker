@@ -22,6 +22,8 @@
 #	than a week, for example
 
 # 19 * * * * [ -r .perlbrew/init ] && /bin/bash /usr/bin/timeout -s SIGALARM -k 300 3300 bin/perlbrew-cron bin/smoker 60
+# or
+# 19 * * * * docker run perl-5.30.1
 
 use warnings;
 use strict;
@@ -563,9 +565,9 @@ sub timed_system {
 					exec $shell, '-xc', $command;
 				} else {
 					print "$shell -c $command\n";
-				exec $shell, '-c', $command;
+					exec $shell, '-c', $command;
 				}
-				die "Exec failed: $!";
+				die "$command: exec failed: $!";
 			}
 
 			local $SIG{ALRM} = $SIG{TERM} = $SIG{INT} = sub {
