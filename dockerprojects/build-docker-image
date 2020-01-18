@@ -120,4 +120,4 @@ echo 'iptables -A DOCKER-USER -d 127.0.0.0/24 -j ACCEPT'
 echo 'iptables -A DOCKER-USER -s 127.0.0.0/24 -j ACCEPT'
 echo 'iptables -A DOCKER-USER -j LOG --log-prefix "Blocked traffic: " --log-level 7'
 echo 'iptables -A DOCKER-USER -j RETURN'
-echo "add '19 0,6,12,18 * * * docker run smoker-$NAME --restart=always --hostname=$HOSTNAME.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME --log-opt syslog-format=rfc3164 -dt --name smoker-$NAME -m 1g --memory-swap=1g' to crontab"
+echo "add '19 0,6,12,18 * * * /usr/bin/timeout 5h /usr/bin/docker run smoker-$NAME --restart=always --hostname=$HOSTNAME.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME --log-opt syslog-format=rfc3164 -dt --name smoker-$NAME -m 1g --memory-swap=1g' to crontab"
