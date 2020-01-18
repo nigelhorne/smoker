@@ -68,7 +68,7 @@ rm -rf perl5/perlbrew/dists perl5/perlbrew/build perl5/perlbrew/*log smoker/dock
 # perlbrew use $NAME && perl -MCPAN -e 'CPAN::Shell->install("ExtUtils::MakeMaker", "Test::Reporter::Transport::Metabase", "CPAN::Reporter", "Data::Dumper")'
 perlbrew use $NAME && cpan -iT ExtUtils::MakeMaker CPAN::Reporter Data::Dumper Test::Reporter::Transport::Metabase
 git clone https://github.com/nigelhorne/smoker.git && cd smoker/bin && ./loadall2 && ./loadall3 && ./loadall5
-cpan -fi IPC::System::Simple
+cpan -fiT IPC::System::Simple
 cd && git clone https://github.com/nigelhorne/li.git && cd li && cc li.c && ./a.out -r0l ../perl5
 
 # TODO
@@ -105,7 +105,8 @@ COPY --chown=smoker build.$$ build
 RUN bash build && rm build && chmod 500 /home/smoker && chmod 400 /home/smoker/.metabase/nhorne.json
 
 ENV PATH \$PATH::
-CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: /bin/bash"]
+# CMD ["/bin/bash"]
+CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: ./smoker"]
 EOF
 docker build -t smoker-$NAME -f $TMPDIR/dockerfile .
 
@@ -121,4 +122,4 @@ echo 'iptables -A DOCKER-USER -j LOG --log-prefix "Blocked traffic: " --log-leve
 echo 'iptables -A DOCKER-USER -j RETURN'
 echo 'run "./udp-forwarder" if not already running"'
 echo "run 'docker run --restart=always --hostname=$HOSTNAME.bandsman.co.uk --log-driver syslog --log-opt syslog-address=udp://loghost:42185 --log-opt tag=$HOSTNAME --log-opt syslog-format=rfc3164 -dt --name smoker-$NAME --mount type=bind,src=/mnt/CPAN,dst=/mnt/CPAN,readonly -p 0.0.0.0:$PORT:$PORT/udp -m 1g --memory-swap=1g smoker-$NAME' to start the image"
-echo "add '19 * * * * docker run xxxxxxx to crontab'"
+echo "add '19 * * * * docker run $NAME to crontab'"
