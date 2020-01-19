@@ -15,7 +15,9 @@ set -e
 typeset -r PERL=${1:-5.30.1}
 typeset -r PORT=${2:-21212}
 typeset -r TMPDIR=${TMPDIR:-/tmp}
-typeset -r NPROC=$(grep ^cpu\\scores /proc/cpuinfo | uniq | awk '{print $4}')
+# Doesn't work on ARM
+# typeset -r NPROC=$(grep ^cpu\\scores /proc/cpuinfo | uniq | awk '{print $4}')
+typeset -r NPROC=$(grep -c ^processor /proc/cpuinfo)
 
 shift
 shift
