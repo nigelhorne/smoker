@@ -12,6 +12,12 @@
 
 set -e
 
+if [[ ! -r MyConfig.pm ]]; then
+	echo 'Create MyConfig.pm. Use ~/.cpan/CPAN/MyConfig.pm as a possible template' 1>&2
+	echo 'Use /home/smoker as the home directory in MyConfig.pm' 1>&2
+	exit 1
+fi
+
 typeset -r PERL=${1:-5.30.1}
 typeset -r PORT=${2:-21212}
 typeset -r TMPDIR=${TMPDIR:-/tmp}
