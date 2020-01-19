@@ -107,7 +107,7 @@ EXPOSE $PORT:$PORT/udp
 
 RUN mkdir -p .cpanreporter .cpan/CPAN
 COPY --chown=smoker config.ini .cpanreporter/config.ini
-COPY --chown=smoker smokerdaemon.config.sample .
+COPY --chown=smoker smokerdaemon.config.sample .smokerdaemonrc
 COPY --chown=smoker MyConfig.pm .cpan/CPAN/MyConfig.pm
 COPY --chown=smoker build.$$ build
 # Stop CPAN modules trying to put stuff in the home directory
