@@ -19,7 +19,7 @@ typeset -r TMPDIR=${TMPDIR:-/tmp}
 typeset -r NPROC=$(grep -c ^processor /proc/cpuinfo)
 
 shift
-typeset -r ARGS=$@
+typeset -r ARGS="$@"
 typeset -r HOSTNAME=$(echo smoker-${PERL}$ARGS | sed s/\\./-/g | sed s/--/-/g | sed 's/ //g').$(hostname)
 
 if [[ $ARGS != "" ]]; then
@@ -31,12 +31,12 @@ else
 fi
 
 # rm -f config.ini smoker.config.sample nhorne.json
-# ln $HOME/.cpanreporter/config.ini .
+# ln "$HOME/.cpanreporter/config.ini" .
 rm -f smoker.config.sample nhorne.json
 echo 'clean_after_test=1' > smoker.config.sample
-cp $HOME/.metabase/nhorne.json .
+cp "$HOME/.metabase/nhorne.json" .
 # rm -f MyConfig.pm
-# ln $HOME/.cpan/CPAN/MyConfig.pm .
+# ln "$HOME/.cpan/CPAN/MyConfig.pm" .
 
 cat > setup.$$ <<EOF
 #!/usr/bin/env bash
@@ -82,7 +82,7 @@ cd && rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/* li smoker/dockerproje
 
 EOF
 
-cat > $TMPDIR/dockerfile <<EOF
+cat > "$TMPDIR/dockerfile" <<EOF
 FROM debian
 LABEL Maintainer="njh@bandsman.co.uk"
 LABEL Description="CPAN Smoker image"
@@ -110,9 +110,9 @@ ENV PATH \$PATH::
 # CMD ["/bin/bash"]
 CMD ["/bin/bash", "-c", "source perl5/perlbrew/etc/bashrc && perlbrew use $NAME && cd smoker/bin && PATH=\$PATH:: ./smoker"]
 EOF
-docker build -t smoker-$NAME -f $TMPDIR/dockerfile .
+docker build -t smoker-$NAME -f "$TMPDIR/dockerfile" .
 
-rm -f $TMPDIR/dockerfile setup.$$ build.$$
+rm -f "$TMPDIR/dockerfile" setup.$$ build.$$
 
 # Run a smoker every 6 hours, ensure the previous one dies in case it is hung
 echo "add '18 * * * * /usr/bin/docker container prune -f>/dev/null' to crontab if not already there"
