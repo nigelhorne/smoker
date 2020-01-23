@@ -19,11 +19,12 @@ typeset -r TMPDIR=${TMPDIR:-/tmp}
 typeset -r NPROC=$(grep -c ^processor /proc/cpuinfo)
 
 shift
-typeset -r ARGS="$@"
-typeset -r HOSTNAME=$(echo smoker-${PERL}$ARGS | sed s/\\./-/g | sed s/--/-/g | sed 's/ //g').$(hostname)
+# Use $* instead of $@ as the array is being assigned to a string
+typeset -r ARGS="$*"
+typeset -r HOSTNAME=$(echo "smoker-${PERL}$ARGS" | sed s/\\./-/g | sed s/--/-/g | sed 's/ //g').$(hostname)
 
 if [[ $ARGS != "" ]]; then
-	typeset -r NAME="perl-$PERL$(echo "$ARGS" | sed s/--/-/g | sed 's/ //g')"
+	typeset -r NAME=perl-"$PERL"$(echo "$ARGS" | sed s/--/-/g | sed 's/ //g')
 	typeset -r BUILDCMD="source ~/perl5/perlbrew/etc/bashrc && perlbrew install -j$NPROC -n perl-$PERL -Accflags='-O2 -pipe -Wall -Wextra -mtune=native -march=native' -Dusedevel $ARGS --as $NAME"
 else
 	typeset -r NAME="perl-$PERL"
