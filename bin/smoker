@@ -240,11 +240,11 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 #	'docker run -m 1g'
 # This doesn't work on Cygwin or Windows
 if(($^O ne 'cygwin') && ($^O ne 'MSWin32')) {
-	setrlimit(RLIMIT_DATA, 256 * 1024 * 1024, 512 * 1024 * 1024) or
+	setrlimit(RLIMIT_DATA, 512 * 1024 * 1024, 512 * 1024 * 1024) or
 		warn('Can\'t limit the data size - watch for memory usage');
 
 	if($Config{'osname'} ne 'solaris') {
-		setrlimit(RLIMIT_RSS, 32 * 1024 * 1024, 64 * 1024 * 1024) or
+		setrlimit(RLIMIT_RSS, 512 * 1024 * 1024, 64 * 1024 * 1024) or
 			warn('Can\'t limit the data size - watch for memory usage');
 		# Big enough for the Metadata file
 		setrlimit(RLIMIT_FSIZE, 40 * 1024 * 1024, 10 * 1024 * 1024);
