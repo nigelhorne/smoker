@@ -83,7 +83,7 @@ my $child;
 END {
 	if($child) {
 		kill 'CONT', -$child;
-		Sys::Syslog::syslog('warn', "smoker: killing dangling child $child");
+		Sys::Syslog::syslog('warning', "smoker: killing dangling child $child");
 		Sys::Syslog::closelog();
 		sleep 2;
 		kill 'TERM', -$child;
@@ -571,7 +571,7 @@ sub timed_system {
 			}
 
 			local $SIG{ALRM} = $SIG{TERM} = $SIG{INT} = sub {
-				syslog 'warn', "smoker: timeout killing child $child";
+				syslog 'warning', "smoker: timeout killing child $child";
 				if($opts{'v'}) {
 					print "Killing process family $child\n";
 				}
@@ -596,7 +596,7 @@ sub timed_system {
 				sleep 2;
 
 				if(kill(0, $child)) {
-					syslog 'warn', "smoker: $child won't die";
+					syslog 'warning', "smoker: $child won't die";
 					die "Timeout! $child Won't die";
 				}
 				# die "Timeout!"
