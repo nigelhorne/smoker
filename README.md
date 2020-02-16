@@ -13,11 +13,12 @@ On FreeBSD 12 as root:
 
 On all systems:
 
-Download and install perlbrew from http://perlbrew.pl.
+Download and install Perlbrew from http://perlbrew.pl.
 
 # WITHOUT DOCKER
 
-For each version of perl that you wish to smoke test:
+For each version of Perl that you wish to smoke test on each machine in your
+testing cluster:
 
     perlbrew install -j4 perl-5.28.1
     perlbrew use perl-5.28.1
@@ -38,6 +39,21 @@ Ensure that the .../bin files are in your PATH.
 
     -i - interactive mode: as above but input is taken from the terminal not /dev/null
 
+Now choose one of these architectures
+
+## A central machine model
+
+Set up a machine as a minicpan repository.
+
+    smokerupdate - update the minicpan repository and broadcast the updates
+	Run this out of cron
+    smokerdaemon - listen to smokerupdates and test the updates
+	Start this on the machines that you're going to test CPAN modules
+	Reads ~/.smokerdaemonrc, if clean_after_test is set to one the
+		build tree will be removed after each smoking cycle
+
+## Each machine runs its own testing
+
     smokerloop - shell wrapper to run smoker on all perlbrew installations
     
         while true
@@ -48,15 +64,6 @@ Ensure that the .../bin files are in your PATH.
 
     Reads ~/.smokerrc, if clean_after_test is set to one the
 	build tree will be removed after each smoking cycle
-
-OR:
-
-    smokerupdate - update a local minicpan repositary and broadcast the updates
-	Run this out of cron
-    smokerdaemon - listen to smokerupdates and test the updates
-	Start this in the systems where you're going to test CPAN modules
-	Reads ~/.smokerdaemonrc, if clean_after_test is set to one the
-		build tree will be removed after each smoking cycle
 
 ## APPARMOR
 
