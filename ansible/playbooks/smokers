@@ -11,12 +11,13 @@
   - name: install CPAN smoking stuff
     dnf:
       name:
-        - gcc
+        - gcc-c++
         - curl
         - wget
         - perl-Proc-ProcessTable
         - autoconf
         - automake
+        - expat-devel
         - git
         - rsync
         - tar
@@ -30,10 +31,13 @@
         - libattr-devel
         - flex
         - bison
+        - lynx
         - ncurses-devel
         - perl-autodie
         - perl-CPAN
         - perl-version
+        - perl-Pod-Perldoc
+        - perlbrew
         - yum-utils
         # - deltarpm
       state: present
