@@ -3,13 +3,13 @@
   remote_user: njh
   tasks:
   - name: upgrade all packages
-    yum:
+    dnf:
       name: '*'
       state: latest
     become: yes
     become_method: sudo
   - name: install CPAN smoking stuff
-    yum:
+    dnf:
       name:
         - gcc
         - curl
