@@ -1,0 +1,41 @@
+---
+- hosts: smokers
+  remote_user: njh
+  tasks:
+  - name: upgrade all packages
+    yum:
+      name: '*'
+      state: latest
+    become: yes
+    become_method: sudo
+  - name: install CPAN smoking stuff
+    yum:
+      name:
+        - gcc
+        - curl
+        - wget
+        - perl-Proc-ProcessTable
+        - autoconf
+        - automake
+        - git
+        - rsync
+        - tar
+        - patch
+        - cpan
+        - bzip2
+        - openssl-devel
+        - gtk2-devel
+        - libaio-devel
+        - libcap-devel
+        - libattr-devel
+        - flex
+        - bison
+        - ncurses-devel
+        - perl-autodie
+        - perl-CPAN
+        - perl-version
+        - yum-utils
+        # - deltarpm
+      state: present
+    become: yes
+    become_method: sudo
