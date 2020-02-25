@@ -51,7 +51,8 @@ set -ex
 # export https_proxy="http://zack:3128"
 # mount -o remount,rw,hidepid=2 /proc
 # yum update && yum install git curl bzip2 bison byacc patch gcc make autoconf sqlite3
-apt-get update && DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends install -y libpam-tmpdir git procps curl bzip2 bison byacc patch netbase gcc make ca-certificates autoconf libxml2-dev sqlite3 libterm-readline-perl-perl && apt-get autoremove && apt-get autoclean && apt-get clean && rm -rf /var/lib/apt/lists/*
+export DEBIAN_FRONTEND=noninteractive
+apt-get update && apt-get upgrade && apt-get --no-install-recommends install -y libpam-tmpdir git procps curl bzip2 bison byacc patch netbase gcc make ca-certificates autoconf libxml2-dev sqlite3 libterm-readline-perl-perl && apt-get autoremove && apt-get autoclean && apt-get clean && rm -rf /var/lib/apt/lists/*
 echo $HOSTNAME > /etc/hostname
 EOF
 
