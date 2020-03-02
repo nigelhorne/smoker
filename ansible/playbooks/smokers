@@ -38,6 +38,7 @@
         - perl-version
         - perl-Pod-Perldoc
         - perlbrew
+        - sqlite
         - yum-utils
         # - deltarpm
       state: present
