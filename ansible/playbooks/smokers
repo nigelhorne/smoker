@@ -50,12 +50,8 @@
         - perl-CPAN
         - perl-version
         - perl-Pod-Perldoc
-<<<<<<< HEAD
         # - perlbrew
-=======
-        - perlbrew
         - sqlite
->>>>>>> cb4c478e5939d4399f81be378ffa98a30c5bfb6b
         - yum-utils
         # - deltarpm
       state: present
