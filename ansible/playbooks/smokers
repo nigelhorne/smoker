@@ -8,19 +8,13 @@
       msg: Only runs on RedHat
     when:
       ansible_facts['os_family'] != "RedHat"
-  # - name: set installer
-    # set_fact:
-      # dnf: "{{ 'yum' if ansible_facts['distribution_major_version'] <= '7' else 'dnf' }}"
 
   tasks:
-  # - name: what
-    # debug: msg="{{ dnf }}"
   - name: upgrade all packages
     package:
       name: '*'
       state: latest
     become: yes
-    become_method: sudo
   - name: install CPAN smoking stuff
     package:
       state: present
@@ -56,4 +50,3 @@
         - yum-utils
         # - deltarpm
     become: yes
-    become_method: sudo
