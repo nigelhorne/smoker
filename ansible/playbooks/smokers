@@ -23,6 +23,7 @@
     become_method: sudo
   - name: install CPAN smoking stuff
     package:
+      state: present
       name:
         - gcc-c++
         - curl
@@ -54,6 +55,5 @@
         - sqlite
         - yum-utils
         # - deltarpm
-      state: present
-      # become: yes
-      # become_method: sudo
+    become: yes
+    become_method: sudo
