@@ -240,10 +240,12 @@ local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 #	'docker run -m 1g'
 # This doesn't work on Cygwin or Windows
 if(($^O ne 'cygwin') && ($^O ne 'MSWin32')) {
-	setrlimit(RLIMIT_DATA, 512 * 1024 * 1024, 512 * 1024 * 1024) or
-		warn('Can\'t limit the data size - watch for memory usage');
-
 	if($Config{'osname'} ne 'solaris') {
+		if($^O ne 'darwin') {
+			setrlimit(RLIMIT_DATA, 512 * 1024 * 1024, 512 * 1024 * 1024) or
+				warn('Can\'t limit the data size - watch for memory usage');
+		}
+
 		# setrlimit(RLIMIT_RSS, 512 * 1024 * 1024, 64 * 1024 * 1024) or
 			# warn('Can\'t limit the data size - watch for memory usage');
 		setrlimit(RLIMIT_RSS, 512 * 1024 * 1024, 64 * 1024 * 1024);

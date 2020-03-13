@@ -1,15 +1,23 @@
 ---
 - hosts: smokers
   remote_user: njh
+
+  pre_tasks:
+  - name: Only runs on RedHat
+    fail:
+      msg: Only runs on RedHat
+    when:
+      ansible_facts['os_family'] != "RedHat"
+
   tasks:
   - name: upgrade all packages
-    dnf:
+    package:
       name: '*'
       state: latest
     become: yes
-    become_method: sudo
   - name: install CPAN smoking stuff
-    dnf:
+    package:
+      state: present
       name:
         - gcc-c++
         - curl
@@ -31,15 +39,14 @@
         - libattr-devel
         - flex
         - bison
-        - lynx
+        # - lynx
         - ncurses-devel
         - perl-autodie
         - perl-CPAN
         - perl-version
         - perl-Pod-Perldoc
-        - perlbrew
+        # - perlbrew
+        - sqlite
         - yum-utils
         # - deltarpm
-      state: present
     become: yes
-    become_method: sudo
