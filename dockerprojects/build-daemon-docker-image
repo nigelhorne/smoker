@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Usage: 'install perlversion port'
-#	e.g. build-docker-image 5.29.7 21213
+#	e.g. build-docker-image 5.30.2 21213
 #	build-docker-image 5.18.2 21214 --thread
 
 # You'll need to 'apt install socat'
@@ -18,7 +18,7 @@ if [[ ! -r MyConfig.pm ]]; then
 	exit 1
 fi
 
-typeset -r PERL=${1:-5.30.1}
+typeset -r PERL=${1:-5.30.2}
 typeset -r PORT=${2:-21212}
 typeset -r TMPDIR=${TMPDIR:-/tmp}
 # Doesn't work on ARM
