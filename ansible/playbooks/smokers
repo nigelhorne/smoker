@@ -1,13 +1,15 @@
 ---
+# Probably a few too many modules here as it may include stuff not needed
+# for CPAN testing that I need to take out
 - hosts: smokers
   remote_user: njh
 
-  pre_tasks:
-  - name: Only runs on RedHat
-    fail:
-      msg: Only runs on RedHat
-    when:
-      ansible_facts['os_family'] != "RedHat"
+  # pre_tasks:
+  # - name: Only runs on RedHat
+    # fail:
+      # msg: Only runs on RedHat
+    # when:
+      # ansible_facts['os_family'] != "RedHat"
 
   tasks:
   - name: upgrade all packages
@@ -15,38 +17,62 @@
       name: '*'
       state: latest
     become: yes
-  - name: install CPAN smoking stuff
+  - name: install CPAN smoking stuff on all machines
     package:
       state: present
       name:
-        - gcc-c++
         - curl
         - wget
-        - perl-Proc-ProcessTable
         - autoconf
         - automake
-        - expat-devel
         - git
         - rsync
         - tar
         - patch
-        - cpan
         - bzip2
-        - openssl-devel
-        - gtk2-devel
-        - libaio-devel
-        - libcap-devel
-        - libattr-devel
         - flex
         - bison
         # - lynx
-        - ncurses-devel
-        - perl-autodie
-        - perl-CPAN
-        - perl-version
-        - perl-Pod-Perldoc
         # - perlbrew
         - sqlite
+    become: yes
+  - name: install CPAN smoking stuff on RedHat
+    package:
+      state: present
+      name:
+        - cpan
+        - expat-devel
+        - gcc-c++
+        - gtk2-devel
+        - libaio-devel
+        - libattr-devel
+        - libcap-devel
+        - ncurses-devel
+        - openssl-devel
         - yum-utils
         # - deltarpm
+        - perl-autodie
+        - perl-CPAN
+        - perl-Pod-Perldoc
+        - perl-Proc-ProcessTable
+        - perl-version
+    when:
+      ansible_facts['os_family'] == 'RedHat'
+    become: yes
+  - name: install CPAN smoking stuff on Debian
+    package:
+      state: present
+      name:
+        - gcc
+        - libaio-dev
+        - libattr1-dev
+        - libcap-dev
+        - libexpat1-dev
+        - libgtk2.0-dev
+        - libncurses-dev
+        - libperl-version-perl
+        - libproc-processtable-perl
+        - libssl-dev
+    when:
+      ansible_facts['os_family'] == 'Debian'
     become: yes
