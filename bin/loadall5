@@ -58,6 +58,7 @@ do
 	else
 		# Workaround for Deep Recursion problem on Linux
 		if [[ "$kernel" == 'Linux' ]]; then
+			perl -MCPAN -e 'CPAN::Shell->install("App::cpanminus")'
 			cpanm -iqn Proc::ProcessTable
 		fi
 		perl -MCPAN -e 'CPAN::Shell->install("Test::Reporter::Transport", "CPAN::Reporter", "CPAN::DistnameInfo", "Unix::Processors", "LWP::Simple", "Config::Auto", "HTTP::Cache::Transparent", "Proc::Killfam", "Sys::CpuLoad", "Sys::LoadAvg", "BSD::Resource", "JSON", "Proc::PID::File", "File::HomeDir", "Proc::Govern", "autodie", "IPC::System::Simple", "File::Spec", "FindBin", "IPC::Run", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads")'
