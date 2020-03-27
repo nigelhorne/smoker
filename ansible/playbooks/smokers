@@ -24,7 +24,6 @@
         - automake
         - git
         - rsync
-        - tar
         - patch
         - bzip2
         - flex
@@ -33,6 +32,13 @@
         # - perlbrew
         - sqlite
     become: yes
+  - name: install CPAN smoking stuff on Linux machines
+    package:
+      state: present
+      name:
+        - tar
+    when:
+      ansible_facts['kernel'] == 'Linux'
   - name: install CPAN smoking stuff on RedHat
     package:
       state: present
