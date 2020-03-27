@@ -4,23 +4,20 @@
 - hosts: smokers
   remote_user: njh
 
-  # pre_tasks:
-  # - name: Only runs on RedHat
-    # fail:
-      # msg: Only runs on RedHat
-    # when:
-      # ansible_facts['os_family'] != "RedHat"
-
   tasks:
   - name: upgrade all packages
     package:
       name: '*'
       state: latest
+    when:
+      # Raspberry Pi machines - save needless writes to the SD card
+      ansible_facts['architecture'] != 'arm'
     become: yes
   - name: install CPAN smoking stuff on all machines
     package:
       state: present
       name:
+        - bash
         - curl
         - wget
         - autoconf
