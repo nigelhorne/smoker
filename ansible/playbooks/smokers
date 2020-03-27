@@ -39,6 +39,7 @@
         - tar
     when:
       ansible_facts['system'] == 'Linux'
+    become: yes
   - name: install CPAN smoking stuff on RedHat
     package:
       state: present
