@@ -11,7 +11,8 @@
       state: latest
     when:
       # Raspberry Pi machines - save needless writes to the SD card
-      ansible_facts['architecture'] != 'arm'
+      # NetBSD has the architecture set to 'evbarm' instead of 'arm'
+      ansible_facts['architecture'] is not regex('arm$')
     become: yes
   - name: install CPAN smoking stuff on all machines
     package:
