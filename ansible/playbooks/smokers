@@ -115,3 +115,20 @@
     when:
       ansible_facts['os_family'] is regex('BSD$')
     become: yes
+
+  - name: Add udp-forwarder cron
+    cron:
+      name: udp-forwarder
+      user: njh
+      special_time: reboot
+      job: '[ -x /usr/bin/docker ] && src/njh/smoker/dockerprojects/udp-forwarder || PATH=~/src/njh/smoker/bin:$PATH nice -20 src/njh/smoker/bin/smokerdaemon -p 21212'
+    when: ansible_default_ipv4.address | ipaddr('192.168.0.0/16') | ipaddr('bool')
+
+  - name: Add udp-forwarder check cron
+    cron:
+      name: udp-forwarder-check
+      user: njh
+      hour: '3'
+      minute: '3'
+      job: '[ -x /usr/bin/docker ] && src/njh/smoker/dockerprojects/udp-forwarder || PATH=~/src/njh/smoker/bin:$PATH nice -20 src/njh/smoker/bin/smokerdaemon -p 21212'
+    when: ansible_default_ipv4.address | ipaddr('192.168.0.0/16') | ipaddr('bool')
