@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # Author Nigel Horne: njh@bandsman.co.uk
-# Copyright (C) 2016-2019, Nigel Horne
+# Copyright (C) 2016-2020, Nigel Horne
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
@@ -166,14 +166,28 @@ if(-r $lockfile && (open(my $fin, '<', $lockfile))) {
 }
 
 my $lock;
-if($ppf_is_installed) {
-	$lock = Proc::PID::File->new(dir => File::Spec->tmpdir(), name => 'cpan-test.lck', verify => 1);
-} else {
-	$lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck.pid');
+my $tmpdir;
+my $homedir = File::HomeDir->my_home();
+if(!$ENV{'TMPDIR'}) {
+	$tmpdir = File::Spec->catfile($homedir, 'tmp');
+	if(!-d $tmpdir) {
+		$tmpdir = undef;
+	}
 }
+$tmpdir //= File::Spec->tmpdir();
 
 my %opts;
 getopts('dp:v', \%opts);
+
+if($ppf_is_installed) {
+	print 'Creating lock ',
+		File::Spec->catfile($tmpdir, 'cpan-test.pid'),
+		"\n"
+		if($opts{'v'});
+	$lock = Proc::PID::File->new(dir => $tmpdir, name => 'cpan-test.pid', verify => 1);
+} else {
+	$lockfile = File::Spec->catfile($tmpdir, 'cpan-test.pid');
+}
 
 my $port = $opts{'p'} || 21212;
 
@@ -273,8 +287,9 @@ if(($^O ne 'cygwin') && ($^O ne 'MSWin32')) {
 		warn('Can\'t limit the data size - watch for memory usage');
 
 	if($^O ne 'solaris') {
-		setrlimit(RLIMIT_RSS, 512 * 1024 * 1024, 256 * 1024 * 1024) or
-			warn('Can\'t limit the data size - watch for memory usage');
+		# setrlimit(RLIMIT_RSS, 512 * 1024 * 1024, 64 * 1024 * 1024) or
+			# warn('Can\'t limit the RSS size - watch for memory usage');
+		setrlimit(RLIMIT_RSS, 512 * 1024 * 1024, 64 * 1024 * 1024);
 
 		# Big enough for the Metadata file
 		setrlimit(RLIMIT_FSIZE, 40 * 1024 * 1024, 10 * 1024 * 1024);

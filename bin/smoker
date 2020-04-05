@@ -106,7 +106,8 @@ my $ppf_is_installed = 1;
 use lib File::Spec->catfile(File::HomeDir->my_home(), '.cpan', 'CPAN');
 use MyConfig;
 
-die 'Install and configure CPAN::Reporter' unless($CPAN::Config->{'test_report'});
+die 'Install and configure CPAN::Reporter then set up test_report in $HOME/.cpan/CPAN/MyConfig.pm'
+	unless($CPAN::Config->{'test_report'});
 die unless($CPAN::Config->{'urllist'});
 
 my $mode;
@@ -199,14 +200,24 @@ if((-r $lockfile) && (open(my $fin, '<', $lockfile))) {
 }
 
 my $lock;
+my $tmpdir;
+my $homedir = File::HomeDir->my_home();
+if(!$ENV{'TMPDIR'}) {
+	$tmpdir = File::Spec->catfile($homedir, 'tmp');
+	if(!-d $tmpdir) {
+		$tmpdir = undef;
+	}
+}
+$tmpdir //= File::Spec->tmpdir();
+
 if($ppf_is_installed) {
 	print 'Creating lock ',
-		File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck'),
-		"...\n"
+		File::Spec->catfile($tmpdir, 'cpan-test.pid'),
+		"\n"
 		if($opts{'v'});
-	$lock = Proc::PID::File->new(dir => File::Spec->tmpdir(), name => 'cpan-test.lck', verify => 1);
+	$lock = Proc::PID::File->new(dir => $tmpdir, name => 'cpan-test.pid', verify => 1);
 } else {
-	$lockfile = File::Spec->catfile(File::Spec->tmpdir(), 'cpan-test.lck.pid');
+	$lockfile = File::Spec->catfile($tmpdir, 'cpan-test.pid');
 }
 
 my $config;
@@ -247,7 +258,7 @@ if(($^O ne 'cygwin') && ($^O ne 'MSWin32')) {
 		}
 
 		# setrlimit(RLIMIT_RSS, 512 * 1024 * 1024, 64 * 1024 * 1024) or
-			# warn('Can\'t limit the data size - watch for memory usage');
+			# warn('Can\'t limit the RSS size - watch for memory usage');
 		setrlimit(RLIMIT_RSS, 512 * 1024 * 1024, 64 * 1024 * 1024);
 
 		# Big enough for the Metadata file
@@ -281,7 +292,7 @@ if(defined($number_of_cpus) && ($number_of_cpus > 1)) {
 my @dists;
 my $prev_tests;
 
-my $json_file = File::Spec->catfile(File::HomeDir->my_home(), '.cpan_smoker.rc');
+my $json_file = File::Spec->catfile($homedir, '.cpan_smoker.rc');
 print "Checking $json_file\n" if($opts{'v'});
 my $cachedir;
 if(my $e = $ENV{'CACHEDIR'}) {

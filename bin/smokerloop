@@ -20,7 +20,7 @@ if [ x$TMPDIR = 'x' ]; then
 	fi
 fi
 
-LOCKFILE=${TMPDIR}/cpan-test.lck.pid
+LOCKFILE=${TMPDIR}/cpan-test.pid
 
 ulimit -d 393216
 

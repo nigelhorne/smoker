@@ -31,9 +31,9 @@ typeset -r NEWTMPDIR=${TMPDIR:-/tmp}/testwrapper.$$
 typeset -r ID=`id -u`
 
 if [[ -d /run/user/$ID ]]; then
-	typeset -r LOCKFILE=/run/user/$ID/testwrapper.lck
+	typeset -r LOCKFILE=/run/user/$ID/testwrapper.pid
 else
-	typeset -r LOCKFILE=${TMPDIR:-/tmp}/testwrapper.lck
+	typeset -r LOCKFILE=${TMPDIR:-/tmp}/testwrapper.pid
 fi
 
 if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then

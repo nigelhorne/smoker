@@ -8,7 +8,7 @@ if [ x$TMPDIR = 'x' ]; then
 	fi
 fi
 
-LOCKFILE=${TMPDIR}/cpan-test.lck.pid
+LOCKFILE=${TMPDIR}/cpan-test.pid
 if test -s ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
 	echo "Already running"
 	exit 0
