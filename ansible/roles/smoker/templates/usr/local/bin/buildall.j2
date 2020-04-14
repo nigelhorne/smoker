@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+
+if [ x$TMPDIR = 'x' ]; then
+	export TMPDIR=/tmp
+fi
+
+[ -f ~/perl5/perlbrew/etc/bashrc ] || exit 0
+
+LOCKFILE=${TMPDIR}/cpan-test.lck
+if test -e ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
+	# echo "Already running"
+	exit 0
+fi
+
+# make sure the lockfile is removed when we exit and then claim it
+trap "rm -f ${LOCKFILE}; exit" INT TERM ALRM EXIT
+echo $$ > ${LOCKFILE}
+
+. ~/perl5/perlbrew/etc/bashrc
+
+perlbrew switch-off > /dev/null
+
+PERLS="5.31.10 5.30.2 5.28.2 5.26.3 5.24.4 5.22.4 5.20.3 5.20.1 5.18.4 5.18.3 5.16.3 5.14.4 5.14.1 5.14.2 5.14.0 5.10.1 5.8.1 5.8.2 5.8.3 5.8.4 5.8.5 5.8.6 5.8.7 5.8.8 5.8.9 5.10.0 5.12.5 5.14.3 5.16.2 5.18.0 5.6.2 5.18.2"
+PERLS="$PERLS $(perlbrew available | egrep -v ^i | sed 's/ *//g' | tail +2 | fgrep -v -- -RC | sed 's/cperl-//g' | sed 's/perl-//g' | sort -n | uniq)"
+
+rm -rf $PERLBREW_ROOT/build/* $HOME/.cpan/build/*&
+
+ulimit -d 524288
+
+for i in $PERLS
+do
+	if [ -d $PERLBREW_ROOT/perls/perl-$i ]; then
+		continue
+	fi
+
+	{% if ansible_facts['ansible_system'] == 'GNU' %}
+		perlbrew install -n perl-$i
+		perlbrew install -n perl-$i -Accflags="$CFLAGS" --thread -Dusedevel
+	{% elif defined ansible_facts['ansible_processor_cores'] && ansible_fats['ansible_processor_cores'] > 1) %}
+		export HARNESS_OPTIONS=c:j{%= ansible_facts['ansible_processor_cpres'] %}
+		export TEST_JOBS={%= ansible_facts['ansible_processor_cpres'] %}
+		if [ x$CC = x ]; then
+			if [[ ! -z "$CFLAGS" && "$CFLAGS" =~ '-fsanitize=address' ]]; then
+				perlbrew install -n -j{%= ansible_facts['ansible_processor_cpres'] %} perl-$i -Accflags="$CFLAGS" --thread --multi -Aldflags="-fsanitize=address" -Dusedevel
+			else
+				perlbrew install -n -j{%= ansible_facts['ansible_processor_cpres'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel
+				for j in thread multi 64int 64all ld clang
+				do
+					perlbrew install -n -j{%= ansible_facts['ansible_processor_cpres'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel --$j --as perl-$i-$j
+				done
+				perlbrew install -n -j{%= ansible_facts['ansible_processor_cpres'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel --thread --multi --as perl-$i-thread-multi
+				perlbrew install -n -j{%= ansible_facts['ansible_processor_cpres'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel --thread --multi --ld --as perl-$i-thread-multi-ld
+				perlbrew install -n -j{%= ansible_facts['ansible_processor_cpres'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel --thread --multi --ld --64all --as perl-$i-thread-multi-ld-64all
+			fi
+		else
+			if [[ ! -z "$CFLAGS" && "$CFLAGS" =~ '-fsanitize=address' ]]; then
+				CC=gcc perlbrew install -n -j{%= ansible_facts['ansible_processor_cpres'] %} perl-$i -Accflags="$CFLAGS" --thread --multi -Aldflags="-fsanitize=address" -Dusedevel -Dcc=gcc
+			else
+				perlbrew install -n -j{%= ansible_facts['ansible_processor_cpres'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel -Dcc=$CC
+				for j in thread multi 64int 64all ld clang
+				do
+					perlbrew install -n -j{%= ansible_facts['ansible_processor_cpres'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel --$j --as perl-$i-$j
+				done
+			fi
+		fi
+		perlbrew install -n -j{%= ansible_facts['ansible_processor_cpres'] %} perl-$i
+		{% if @operatingsystem == 'Debian' %}
+			{% if @hostname != 'amber' %}
+				for j in address thread leak
+				do
+					perlbrew install -n -j{%= ansible_facts['ansible_processor_cpres'] %} perl-$i -Accflags="-fsanitize=$j -g -O2" --thread -Aldflags="-fsanitize=$j -g" -Dusedevel --as perl-$i-sanitize-$j -Alddflags="-shared -O2 -L/usr/local/lib -fstack-protector-string -fsanitize=$j -g" -Dcc=$CC
+					cd $PERLBREW_ROOT/perls/perl-$i-sanitize-$j/bin && ln perl5.* perl
+				done
+			{% end %}
+			perlbrew install -n -j{%= ansible_facts['ansible_processor_cpres'] %} perl-$i -Accflags='-fsanitize=undefined -g -O2' --thread -Aldflags='-fsanitize=undefined -g -lubsan' -Dusedevel --as perl-$i-sanitize-undefined -Alddlflags='-shared -O2 -L/usr/local/lib -fstack-protector-strong -fsanitize=undefined -g -lubsan' -Dcc=$CC
+			cd $PERLBREW_ROOT/perls/perl-$i-sanitize-undefined/bin && ln perl5.* perl
+		{% end %}
+	{% else %}
+		perlbrew install -n perl-$i
+		if [ x$CC = x ]; then
+			if [[ ! -z "$CFLAGS" && "$CFLAGS" =~ '-fsanitize=address' ]]; then
+				perlbrew install -n perl-$i -Accflags="$CFLAGS" --thread --multi -Aldflags="-fsanitize=address" -Dusedevel
+			else
+				perlbrew install -n perl-$i -Accflags="$CFLAGS" -Dusedevel
+				for j in thread multi 64int 64all ld clang
+				do
+					perlbrew install -n perl-$i -Accflags="$CFLAGS" -Dusedevel --$j --as perl-$i-$j
+				done
+				perlbrew install -n perl-$i -Accflags="$CFLAGS" -Dusedevel --thread --multi --as perl-$i-thread-multi
+				perlbrew install -n perl-$i -Accflags="$CFLAGS" -Dusedevel --thread --multi --ld --as perl-$i-thread-multi-ld
+				perlbrew install -n perl-$i -Accflags="$CFLAGS" -Dusedevel --thread --multi --ld --64all --as perl-$i-thread-multi-ld-64all
+			fi
+		else
+			if [[ ! -z "$CFLAGS" && "$CFLAGS" =~ '-fsanitize=address' ]]; then
+				CC=gcc perlbrew install -n perl-$i -Accflags="$CFLAGS" --thread --multi -Aldflags="-fsanitize=address" -Acc=$CC -Dusedevel -Dcc=gcc
+			else
+				perlbrew install -n perl-$i -Accflags="$CFLAGS" -Acc=$CC -Dusedevel -Dcc=$CC
+				for j in thread multi 64int 64all ld clang
+				do
+					perlbrew install -n perl-$i -Accflags="$CFLAGS" -Dusedevel --$j --as perl-$i-$j
+				done
+			fi
+		fi
+	{% end %}
+
+	cd $PERLBREW_ROOT/build/perl-$i && make install
+
+	if [ ! -d $PERLBREW_ROOT/perls/perl-$i/bin ]; then
+		continue
+	fi
+
+	cd $PERLBREW_ROOT/perls/perl-$i/bin && ln perl5.* perl
+
+	perlbrew use perl-$i
+
+        # No need to test yet
+	# perl -MCPAN -e 'CPAN::Shell->install("ExtUtils::MakeMaker", "File::pushd", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
+	perl -MCPAN -e 'CPAN::Shell->install("App::cpanminus")'
+        cpanm -qin ExtUtils::MakeMaker File::pushd Test::Reporter::Transport::Socket CPAN::Reporter
+
+	for j in thread multi 64int 64all ld clang
+	do
+		cd $PERLBREW_ROOT/perls/perl-$i-$j/bin && ln perl5.* perl
+		perlbrew use perl-$i-$j
+		# perl -MCPAN -e 'CPAN::Shell->install("ExtUtils::MakeMaker", "File::pushd", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
+                perl -MCPAN -e 'CPAN::Shell->install("App::cpanminus")'
+                cpanm -qin ExtUtils::MakeMaker File::pushd Test::Reporter::Transport::Socket CPAN::Reporter
+	done
+done
+
+perlbrew install -n cperl-stable -Accflags="$CFLAGS" --thread --multi -Dusedevel
+
+perlbrew use cperl-stable
+
+unset CC CFLAGS LDFLAGS
+
+# perl -MCPAN -e 'CPAN::Shell->install("ExtUtils::MakeMaker", "File::pushd", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
+perl -MCPAN -e 'CPAN::Shell->install("App::cpanminus")'
+cpanm -qin ExtUtils::MakeMaker File::pushd Test::Reporter::Transport::Socket CPAN::Reporter
+
+perlbrew off
+
+# perl -MCPAN -e 'CPAN::Shell->install("ExtUtils::MakeMaker", "File::pushd", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
+perl -MCPAN -e 'CPAN::Shell->install("App::cpanminus")'
+cpanm -qin ExtUtils::MakeMaker File::pushd Test::Reporter::Transport::Socket CPAN::Reporter
+
+loadall1 -ns < /dev/null
+loadall2 < /dev/null
+loadall3 < /dev/null
+perlbrew exec perl -MCPAN -e 'CPAN::Shell->upgrade'
+loadall5 < /dev/null

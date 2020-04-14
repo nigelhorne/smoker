@@ -1,10 +1,7 @@
 ---
 # Probably a few too many modules here as it may include stuff not needed
 # for CPAN testing that I need to take out
-- hosts: smokers
-  remote_user: njh
 
-  tasks:
   - name: upgrade all packages
     package:
       name: '*'
@@ -14,6 +11,7 @@
       # NetBSD has the architecture set to 'evbarm' instead of 'arm'
       ansible_facts['architecture'] is not regex('arm$')
     become: yes
+
   - name: install CPAN smoking stuff on all machines
     package:
       state: present
@@ -33,6 +31,7 @@
         # - perlbrew
         - sqlite
     become: yes
+
   - name: install CPAN smoking stuff on Linux machines
     package:
       state: present
@@ -41,6 +40,7 @@
     when:
       ansible_facts['system'] == 'Linux'
     become: yes
+
   - name: install CPAN smoking stuff on RedHat
     package:
       state: present
@@ -64,6 +64,7 @@
     when:
       ansible_facts['os_family'] == 'RedHat'
     become: yes
+
   - name: install CPAN smoking stuff on Debian
     package:
       state: present
@@ -81,6 +82,7 @@
     when:
       ansible_facts['os_family'] == 'Debian'
     become: yes
+
   - name: install CPAN smoking stuff on BSD - packages
     package:
       state: present
@@ -99,6 +101,7 @@
     when:
       ansible_facts['os_family'] is regex('BSD$')
     become: yes
+
   # Ansible's cpanm module doesn't support adding more than one module
   # - name: install CPAN smoking stuff on BSD - modules
     # cpanm:
@@ -132,3 +135,12 @@
       minute: '3'
       job: '[ -x /usr/bin/docker ] && src/njh/smoker/dockerprojects/udp-forwarder || PATH=~/src/njh/smoker/bin:$PATH nice -20 src/njh/smoker/bin/smokerdaemon -p 21212'
     when: ansible_default_ipv4.address | ipaddr('192.168.0.0/16') | ipaddr('bool')
+
+  - name: buildall
+    template:
+      src: templates/usr/local/bin/buildall.j2
+      dest: /usr/local/bin/buildall
+      owner: bin
+      group: bin
+      mode: '0644'
+    become: yes

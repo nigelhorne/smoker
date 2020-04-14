@@ -1,0 +1,20 @@
+---
+- hosts: smokers
+  remote_user: njh
+  become: yes
+
+  roles:
+    - role: smoker
+      tags: smokes
+
+  pre_tasks:
+    - name: get package facts
+      package_facts:
+        manager: auto
+      tags:
+        always
+
+    - name: get service facts
+      service_facts:
+      tags:
+        always
