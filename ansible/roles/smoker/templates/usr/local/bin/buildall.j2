@@ -36,6 +36,7 @@ do
 	{% if ansible_facts['ansible_system'] == 'GNU' %}
 		perlbrew install -n perl-$i
 		perlbrew install -n perl-$i -Accflags="$CFLAGS" --thread -Dusedevel
+<<<<<<< HEAD
 	{% elif (ansible_facts['ansible_processor_cores'] is defined) and (ansible_facts['ansible_processor_cores'] > 1) %}
 		export HARNESS_OPTIONS=c:j{{ ansible_facts['ansible_processor_cores'] }}
 		export TEST_JOBS={{ ansible_facts['ansible_processor_cores'] }}
@@ -73,6 +74,45 @@ do
 				done
 			{% endif %}
 			perlbrew install -n -j{{ ansible_facts['ansible_processor_cores'] }} perl-$i -Accflags='-fsanitize=undefined -g -O2' --thread -Aldflags='-fsanitize=undefined -g -lubsan' -Dusedevel --as perl-$i-sanitize-undefined -Alddlflags='-shared -O2 -L/usr/local/lib -fstack-protector-strong -fsanitize=undefined -g -lubsan' -Dcc=$CC
+=======
+	{% elif defined ansible_facts['ansible_processor_cores'] && ansible_fats['ansible_processor_cores'] > 1) %}
+		export HARNESS_OPTIONS=c:j{%= ansible_facts['ansible_processor_cores'] %}
+		export TEST_JOBS={%= ansible_facts['ansible_processor_cores'] %}
+		if [ x$CC = x ]; then
+			if [[ ! -z "$CFLAGS" && "$CFLAGS" =~ '-fsanitize=address' ]]; then
+				perlbrew install -n -j{%= ansible_facts['ansible_processor_cores'] %} perl-$i -Accflags="$CFLAGS" --thread --multi -Aldflags="-fsanitize=address" -Dusedevel
+			else
+				perlbrew install -n -j{%= ansible_facts['ansible_processor_cores'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel
+				for j in thread multi 64int 64all ld clang
+				do
+					perlbrew install -n -j{%= ansible_facts['ansible_processor_cores'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel --$j --as perl-$i-$j
+				done
+				perlbrew install -n -j{%= ansible_facts['ansible_processor_cores'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel --thread --multi --as perl-$i-thread-multi
+				perlbrew install -n -j{%= ansible_facts['ansible_processor_cores'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel --thread --multi --ld --as perl-$i-thread-multi-ld
+				perlbrew install -n -j{%= ansible_facts['ansible_processor_cores'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel --thread --multi --ld --64all --as perl-$i-thread-multi-ld-64all
+			fi
+		else
+			if [[ ! -z "$CFLAGS" && "$CFLAGS" =~ '-fsanitize=address' ]]; then
+				CC=gcc perlbrew install -n -j{%= ansible_facts['ansible_processor_cores'] %} perl-$i -Accflags="$CFLAGS" --thread --multi -Aldflags="-fsanitize=address" -Dusedevel -Dcc=gcc
+			else
+				perlbrew install -n -j{%= ansible_facts['ansible_processor_cores'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel -Dcc=$CC
+				for j in thread multi 64int 64all ld clang
+				do
+					perlbrew install -n -j{%= ansible_facts['ansible_processor_cores'] %} perl-$i -Accflags="$CFLAGS" -Dusedevel --$j --as perl-$i-$j
+				done
+			fi
+		fi
+		perlbrew install -n -j{%= ansible_facts['ansible_processor_cores'] %} perl-$i
+		{% if @operatingsystem == 'Debian' %}
+			{% if @hostname != 'amber' %}
+				for j in address thread leak
+				do
+					perlbrew install -n -j{%= ansible_facts['ansible_processor_cores'] %} perl-$i -Accflags="-fsanitize=$j -g -O2" --thread -Aldflags="-fsanitize=$j -g" -Dusedevel --as perl-$i-sanitize-$j -Alddflags="-shared -O2 -L/usr/local/lib -fstack-protector-string -fsanitize=$j -g" -Dcc=$CC
+					cd $PERLBREW_ROOT/perls/perl-$i-sanitize-$j/bin && ln perl5.* perl
+				done
+			{% end %}
+			perlbrew install -n -j{%= ansible_facts['ansible_processor_cores'] %} perl-$i -Accflags='-fsanitize=undefined -g -O2' --thread -Aldflags='-fsanitize=undefined -g -lubsan' -Dusedevel --as perl-$i-sanitize-undefined -Alddlflags='-shared -O2 -L/usr/local/lib -fstack-protector-strong -fsanitize=undefined -g -lubsan' -Dcc=$CC
+>>>>>>> 6e1044efa30f33ac9e0fbd94a1e800adb05177d9
 			cd $PERLBREW_ROOT/perls/perl-$i-sanitize-undefined/bin && ln perl5.* perl
 		{% endif %}
 	{% else %}
