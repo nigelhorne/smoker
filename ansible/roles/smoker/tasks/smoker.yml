@@ -142,5 +142,5 @@
       dest: /usr/local/bin/buildall
       owner: bin
       group: bin
-      mode: '0644'
+      mode: '0755'
     become: yes
