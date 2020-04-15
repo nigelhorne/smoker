@@ -1,3 +1,7 @@
+#!/usr/bin/env bash
+
+set -xe
+
 # Prevent modules being tested from reaching out to the Internet
 /sbin/iptables -F DOCKER-USER
 /sbin/iptables -A DOCKER-USER -s 192.168.0.0/16 -j ACCEPT
