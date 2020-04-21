@@ -181,7 +181,7 @@ getopts('dp:v', \%opts);
 
 if($ppf_is_installed) {
 	print 'Creating lock ',
-		File::Spec->catfile($tmpdir, 'cpan-test.pid'),
+		File::Spec->catfile($tmpdir, 'cpan-test'),
 		"\n"
 		if($opts{'v'});
 	$lock = Proc::PID::File->new(dir => $tmpdir, name => 'cpan-test.pid', verify => 1);

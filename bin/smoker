@@ -215,7 +215,7 @@ if($ppf_is_installed) {
 		File::Spec->catfile($tmpdir, 'cpan-test.pid'),
 		"\n"
 		if($opts{'v'});
-	$lock = Proc::PID::File->new(dir => $tmpdir, name => 'cpan-test.pid', verify => 1);
+	$lock = Proc::PID::File->new(dir => $tmpdir, name => 'cpan-test', verify => 1);
 } else {
 	$lockfile = File::Spec->catfile($tmpdir, 'cpan-test.pid');
 }
