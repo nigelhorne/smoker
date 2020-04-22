@@ -36,7 +36,7 @@ do
 	{% if ansible_facts['system'] == 'GNU' %}
 		perlbrew install -n perl-$i
 		perlbrew install -n perl-$i -Accflags="$CFLAGS" --thread -Dusedevel
-	{% elif (ansible_facts['processor_count'] is defined) and (ansible_facts['processor_count'] > 1) %}
+	{% elif (ansible_facts['processor_count'] is defined) and (ansible_facts['processor_count']|int > 1) %}
 		export HARNESS_OPTIONS=c:j{{ ansible_facts['processor_count'] }}
 		export TEST_JOBS={{ ansible_facts['processor_count'] }}
 		if [ x$CC = x ]; then
