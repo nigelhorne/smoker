@@ -119,6 +119,15 @@
       ansible_facts['os_family'] is regex('BSD$')
     become: yes
 
+  # This seems crazy, but is actually what I want
+  - name: Get latest version of smoker code
+    cron:
+      name: smoker-update
+      user: njh
+      hour: '2'
+      minute: '3'
+      job: 'cd src/njh/smoker && /usr/bin/git pull'
+
   - name: Add udp-forwarder cron
     cron:
       name: udp-forwarder
