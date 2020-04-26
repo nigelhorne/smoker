@@ -2,6 +2,9 @@
 # Probably a few too many modules here as it may include stuff not needed
 # for CPAN testing that I need to take out
 
+# TODO: user (currently hardwired to 'njh') should be a variable
+# TODO: install perlbrew-cron
+
   - name: upgrade all packages
     package:
       name: '*'
@@ -133,7 +136,7 @@
       name: udp-forwarder
       user: njh
       special_time: reboot
-      job: '[ -x /usr/bin/docker ] && src/njh/smoker/dockerprojects/udp-forwarder || PATH=~/src/njh/smoker/bin:$PATH nice -20 src/njh/smoker/bin/smokerdaemon -p 21212'
+      job: '[ -x /usr/bin/docker ] && src/njh/smoker/dockerprojects/udp-forwarder || PATH=~/src/njh/smoker/bin:$PATH nice -20 bin/perlbrew-cron --with perl-5.30.2 src/njh/smoker/bin/smokerdaemon -p 21212'
     when: ansible_default_ipv4.address | ipaddr('192.168.0.0/16') | ipaddr('bool')
 
   - name: Add udp-forwarder check cron
@@ -142,7 +145,7 @@
       user: njh
       hour: '3'
       minute: '3'
-      job: '[ -x /usr/bin/docker ] && src/njh/smoker/dockerprojects/udp-forwarder || PATH=~/src/njh/smoker/bin:$PATH nice -20 src/njh/smoker/bin/smokerdaemon -p 21212'
+      job: '[ -x /usr/bin/docker ] && src/njh/smoker/dockerprojects/udp-forwarder || PATH=~/src/njh/smoker/bin:$PATH nice -20 bin/perlbrew-cron src/njh/smoker/bin/smokerdaemon -p 21212'
     when: ansible_default_ipv4.address | ipaddr('192.168.0.0/16') | ipaddr('bool')
 
   - name: buildall
