@@ -236,12 +236,12 @@ if($config && defined($config->{'clean_after_test'})) {
 
 local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	print "Quitting...\n" if($opts{'v'});
+	clean($clean_after_test);
 	if($ppf_is_installed) {
 		# $lock->release();
 	} elsif(-e $lockfile) {
 		unlink($lockfile);
 	}
-	clean($clean_after_test);
 	exit(1);
 };
 
@@ -381,6 +381,11 @@ if($ARGV[0]) {
 if(scalar(@dists) == 0) {	# Won't write the pruned tree
 	print "Nothing to smoke\n" if($opts{'v'});
 	clean($clean_after_test);
+	if($ppf_is_installed) {
+		# $lock->release();
+	} elsif(-e $lockfile) {
+		unlink($lockfile);
+	}
 	exit(0);
 }
 
