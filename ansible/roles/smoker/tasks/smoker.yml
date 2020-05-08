@@ -81,6 +81,7 @@
         - libncurses-dev
         - libperl-version-perl
         - libproc-processtable-perl
+	- libtest-memory-cycle-perl
         - libssl-dev
     when:
       ansible_facts['os_family'] == 'Debian'
