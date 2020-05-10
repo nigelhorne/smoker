@@ -208,7 +208,7 @@ if(!$ENV{'TMPDIR'}) {
 		$tmpdir = undef;
 	}
 }
-$tmpdir //= File::Spec->tmpdir();
+$tmpdir ||= File::Spec->tmpdir();
 
 if($ppf_is_installed) {
 	print 'Creating lock ',
