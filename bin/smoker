@@ -234,8 +234,9 @@ if($config && defined($config->{'clean_after_test'})) {
 	$clean_after_test = 1;
 }
 
-local $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
+local $SIG{ALRM} = $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	print "Quitting...\n" if($opts{'v'});
+	kill '-CONT', getpgrp();
 	clean($clean_after_test);
 	if($ppf_is_installed) {
 		# $lock->release();
@@ -498,6 +499,8 @@ if($opts{'i'}) {
 		timed_system(3000, "$Bin/testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
 	}
 }
+
+kill '-CONT', getpgrp();
 
 my $now = time;
 foreach my $dist(@dists) {
