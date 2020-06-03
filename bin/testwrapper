@@ -48,7 +48,9 @@ chmod 700 $NEWTMPDIR
 cd $NEWTMPDIR
 
 # make sure the lockfile is removed when we exit and then claim it
-trap "rm -fr ${LOCKFILE} ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
+trap "flock -n $LOCKFILE rm -fr ${LOCKFILE} ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
+
+# FIXME:  should all be done within one flock call
 
 if [[ -x /usr/bin/timeout ]]; then
 	# Since this is the last level of the call chain
@@ -61,4 +63,4 @@ fi
 
 TMPDIR=$NEWTMPDIR flock -n $LOCKFILE perl -MCPAN -e "CPAN::Shell->clean($*)"
 
-exec rm -rf ${NEWTMPDIR} ${LOCKFILE}
+exec flock -n $LOCKFILE rm -rf ${NEWTMPDIR} ${LOCKFILE}
