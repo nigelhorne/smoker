@@ -48,7 +48,13 @@ chmod 700 $NEWTMPDIR
 cd $NEWTMPDIR
 
 # make sure the lockfile is removed when we exit and then claim it
-trap "flock -n $LOCKFILE rm -fr ${LOCKFILE} ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
+if $(command -v flock > /dev/null); then
+	typeset -r FLOCK="flock -n"
+else
+	typeset -r FLOCK=
+fi
+
+trap "$FLOCK $LOCKFILE rm -fr ${LOCKFILE} ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
 
 # FIXME:  should all be done within one flock call
 
@@ -56,11 +62,11 @@ if [[ -x /usr/bin/timeout ]]; then
 	# Since this is the last level of the call chain
 	#	smokerdaemon or /usr/bin/timeout->smoker->testwrapper
 	#	this should timeout first
-	TMPDIR=$NEWTMPDIR flock -n $LOCKFILE timeout -k 5m 45m perl -MCPAN -e "CPAN::Shell->test($*)"
+	TMPDIR=$NEWTMPDIR $FLOCK $LOCKFILE timeout -k 5m 45m perl -MCPAN -e "CPAN::Shell->test($*)"
 else
-	TMPDIR=$NEWTMPDIR flock -n $LOCKFILE perl -MCPAN -e "CPAN::Shell->test($*)"
+	TMPDIR=$NEWTMPDIR $FLOCK $LOCKFILE perl -MCPAN -e "CPAN::Shell->test($*)"
 fi
 
-TMPDIR=$NEWTMPDIR flock -n $LOCKFILE perl -MCPAN -e "CPAN::Shell->clean($*)"
+TMPDIR=$NEWTMPDIR $FLOCK $LOCKFILE perl -MCPAN -e "CPAN::Shell->clean($*)"
 
-exec flock -n $LOCKFILE rm -rf ${NEWTMPDIR} ${LOCKFILE}
+exec $FLOCK $LOCKFILE rm -rf ${NEWTMPDIR} ${LOCKFILE}
