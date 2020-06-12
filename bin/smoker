@@ -236,7 +236,8 @@ if($config && defined($config->{'clean_after_test'})) {
 
 local $SIG{ALRM} = $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	print "Quitting...\n" if($opts{'v'});
-	kill '-CONT', getpgrp();
+	# kill '-CONT', getpgrp();	# Fails with no such signal
+	kill 'CONT', $child if($child);
 	clean($clean_after_test);
 	if($ppf_is_installed) {
 		# $lock->release();
@@ -500,7 +501,8 @@ if($opts{'i'}) {
 	}
 }
 
-kill '-CONT', getpgrp();
+# kill '-CONT', getpgrp();	# Fails with no such signal
+kill 'CONT', $child if($child);
 
 my $now = time;
 foreach my $dist(@dists) {
