@@ -77,6 +77,7 @@ use POSIX ":sys_wait_h";
 my $ppf_is_installed = 1;
 
 my $mode;
+my $child;
 
 # Work out the best way to run commands
 # Generally Proc::Killfam is better to use since all children will be killed,
@@ -425,7 +426,8 @@ while(1) {
 		}
 	}
 
-	kill '-CONT', getpgrp();
+	# kill '-CONT', getpgrp();	# Fails with no such signal
+	kill 'CONT', $child if($child);
 
 	nohang();
 
@@ -491,15 +493,13 @@ sub timed_system {
 	}
 
 	if($mode eq 'killfam') {
-		my $pid;
-
 		my $rc = -1;
 		eval {
-			$pid = fork;
+			$child = fork;
 
-			die "Fork failed: $!" unless defined $pid;
+			die "Fork failed: $!" unless defined $child;
 
-			unless ($pid) {
+			unless ($child) {
 				if($opts{'v'}) {
 					print "$shell -xc $command\n";
 					exec $shell, '-xc', $command;
@@ -512,25 +512,29 @@ sub timed_system {
 
 			local $SIG{ALRM} = sub {
 				if($opts{'v'}) {
-					print "Killing process family $pid\n";
+					print "Killing process family $child\n";
 				}
-				my @pidlist = ($pid);
+				my @pidlist = ($child);
+				Proc::Killfam::killfam(18, @pidlist);
+				sleep 2;
 				Proc::Killfam::killfam(14, @pidlist);
 				sleep 2;
 				Proc::Killfam::killfam(15, @pidlist);
 				sleep 2;
 				Proc::Killfam::killfam(9, @pidlist);
 				sleep 2;
-				kill 14, $pid;
+				kill 18, $child;
 				sleep 2;
-				kill 15, $pid;
+				kill 14, $child;
 				sleep 2;
-				kill 9, $pid;
+				kill 15, $child;
+				sleep 2;
+				kill 9, $child;
 				sleep 2;
 
-				if(kill(0, $pid)) {
-					syslog('warning', "$pid won't die");
-					die "Timeout! $pid Won't die";
+				if(kill(0, $child)) {
+					syslog('warning', "$child won't die");
+					die "Timeout! $child Won't die";
 				}
 				# die "Timeout!"
 
@@ -539,19 +543,21 @@ sub timed_system {
 
 			alarm $timeout;
 
-			$rc = (waitpid($pid, 0) == $pid) ? $? : -1;
+			$rc = (waitpid($child, 0) == $child) ? $? : -1;
 
 			alarm 0;
 
-			if(kill(0, $pid)) {
-				my @pidlist = ($pid);
+			if(kill(0, $child)) {
+				my @pidlist = ($child);
+				Proc::Killfam::killfam(18, @pidlist);
+				sleep 2;
 				Proc::Killfam::killfam(14, @pidlist);
 				sleep 2;
 				Proc::Killfam::killfam(15, @pidlist);
 				sleep 2;
 				Proc::Killfam::killfam(9, @pidlist);
 				sleep 2;
-				kill 9, $pid;
+				kill 9, $child;
 			}
 			# TODO
 			# Elsif $rc != -1 - insert code like System module
