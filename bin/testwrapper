@@ -49,13 +49,13 @@ cd $NEWTMPDIR
 
 # make sure the lockfile is removed when we exit and then claim it
 if $(command -v flock > /dev/null); then
-	typeset -r FLOCK="flock -n"
+	typeset -r FLOCK="flock -n ${LOCKFILE}"
 else
 	# Solaris doesn't have the flock command
 	typeset -r FLOCK=
 fi
 
-trap "$FLOCK rm -fr ${LOCKFILE} ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
+trap "$FLOCK rm -fr ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
 
 # FIXME:  should all be done within one flock call
 
@@ -70,4 +70,4 @@ fi
 
 TMPDIR=$NEWTMPDIR $FLOCK perl -MCPAN -e "CPAN::Shell->clean($*)"
 
-exec $FLOCK rm -rf ${NEWTMPDIR} ${LOCKFILE}
+exec $FLOCK rm -rf ${NEWTMPDIR}
