@@ -1,5 +1,5 @@
-Copy ~/.cpan/MyConfig.pm to the current directory. Edit changing all
-/home/$USER/ to /home/smoker.
+Copy ~/.cpan/MyConfig.pm ~/.cpanreporter/config.ini to the current directory.
+Edit changing all /home/$USER to /home/smoker.
 
 Install socat: 'apt install socat'
 

@@ -9,6 +9,7 @@
 # FIXME: remove temporary files on error or signal, and/or use stdin
 
 # TODO: check if the given port is free
+# TODO: Support distributions other than only Debian
 
 set -e
 
