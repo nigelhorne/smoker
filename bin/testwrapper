@@ -51,10 +51,11 @@ cd $NEWTMPDIR
 if $(command -v flock > /dev/null); then
 	typeset -r FLOCK="flock -n"
 else
+	# Solaris doesn't have the flock command
 	typeset -r FLOCK=
 fi
 
-trap "$FLOCK $LOCKFILE rm -fr ${LOCKFILE} ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
+trap "$FLOCK rm -fr ${LOCKFILE} ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
 
 # FIXME:  should all be done within one flock call
 
@@ -62,11 +63,11 @@ if [[ -x /usr/bin/timeout ]]; then
 	# Since this is the last level of the call chain
 	#	smokerdaemon or /usr/bin/timeout->smoker->testwrapper
 	#	this should timeout first
-	TMPDIR=$NEWTMPDIR $FLOCK $LOCKFILE timeout -k 5m 45m perl -MCPAN -e "CPAN::Shell->test($*)"
+	TMPDIR=$NEWTMPDIR $FLOCK timeout -k 5m 45m perl -MCPAN -e "CPAN::Shell->test($*)"
 else
-	TMPDIR=$NEWTMPDIR $FLOCK $LOCKFILE perl -MCPAN -e "CPAN::Shell->test($*)"
+	TMPDIR=$NEWTMPDIR $FLOCK perl -MCPAN -e "CPAN::Shell->test($*)"
 fi
 
-TMPDIR=$NEWTMPDIR $FLOCK $LOCKFILE perl -MCPAN -e "CPAN::Shell->clean($*)"
+TMPDIR=$NEWTMPDIR $FLOCK perl -MCPAN -e "CPAN::Shell->clean($*)"
 
-exec $FLOCK $LOCKFILE rm -rf ${NEWTMPDIR} ${LOCKFILE}
+exec $FLOCK rm -rf ${NEWTMPDIR} ${LOCKFILE}
