@@ -10,15 +10,15 @@ if [ x$TMPDIR = 'x' ]; then
 	fi
 fi
 
-typeset -r LOCKFILE=${TMPDIR}/cpan-test.pid
-if test -s ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
+typeset -r PIDFILE=${TMPDIR}/cpan-test.pid
+if test -s ${PIDFILE} && kill -0 `cat ${PIDFILE}`; then
 	# echo "Already running"
 	exit 0
 fi
 
 # make sure the lockfile is removed when we exit and then claim it
-trap "rm -f ${LOCKFILE}; exit" INT TERM ALRM EXIT
-echo $$ > ${LOCKFILE}
+trap "rm -f ${PIDFILE}; exit" INT TERM ALRM EXIT
+echo $$ > ${PIDFILE}
 
 # Stage 5
 . ~/perl5/perlbrew/etc/bashrc
@@ -71,4 +71,4 @@ do
 	# PERL_CR_SMOKER_RUNONCE=1 perl -MCPAN::Reporter::Smoker -e start
 done
 
-rm -f ${LOCKFILE}
+rm -f ${PIDFILE}

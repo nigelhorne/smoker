@@ -8,15 +8,15 @@ if [ x$TMPDIR = 'x' ]; then
 	fi
 fi
 
-LOCKFILE=${TMPDIR}/cpan-test.pid
-if test -s ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
+PIDFILE=${TMPDIR}/cpan-test.pid
+if test -s ${PIDFILE} && kill -0 `cat ${PIDFILE}`; then
 	echo "Already running"
 	exit 0
 fi
 
 # make sure the lockfile is removed when we exit and then claim it
-trap "rm -f ${LOCKFILE}; exit" INT TERM ALRM EXIT
-echo $$ > ${LOCKFILE}
+trap "rm -f ${PIDFILE}; exit" INT TERM ALRM EXIT
+echo $$ > ${PIDFILE}
 
 ulimit -d 393216
 
@@ -128,4 +128,4 @@ while true; do
 	# fi
 done
 
-rm -f ${LOCKFILE}
+rm -f ${PIDFILE}

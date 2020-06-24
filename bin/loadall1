@@ -8,15 +8,15 @@ if [ x$TMPDIR = 'x' ]; then
 	fi
 fi
 
-LOCKFILE=${TMPDIR}/cpan-test.pid
-if test -s ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
+PIDFILE=${TMPDIR}/cpan-test.pid
+if test -s ${PIDFILE} && kill -0 `cat ${PIDFILE}`; then
 	# echo "Already running"
 	exit 0
 fi
 
 # make sure the lockfile is removed when we exit and then claim it
-trap "rm -f ${LOCKFILE}; exit" INT TERM ALRM EXIT
-echo $$ > ${LOCKFILE}
+trap "rm -f ${PIDFILE}; exit" INT TERM ALRM EXIT
+echo $$ > ${PIDFILE}
 
 EARLYPERLS="6.2 8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 10.0 10.1"
 
@@ -100,4 +100,4 @@ do
 	cpanm -iqn File::HomeDir ExtUtils::MakeMaker File::pushd Test::Reporter::Transport::Socket CPAN::Reporter
 done
 
-rm -f ${LOCKFILE}
+rm -f ${PIDFILE}
