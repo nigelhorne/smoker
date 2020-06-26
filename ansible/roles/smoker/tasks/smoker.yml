@@ -102,6 +102,7 @@
         - p5-Sys-CpuLoad
         - p5-Test-Reporter
         - p5-Unix-Processors
+	- flock
     when:
       ansible_facts['os_family'] is regex('BSD$')
     become: yes
