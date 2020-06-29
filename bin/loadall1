@@ -80,7 +80,13 @@ fi
 
 if [ $1x == x ]; then
 	perlbrew switch-off
-	LIST=`perlbrew list | awk '{ print $1; }'`
+	typeset -r OS=$(uname)
+	# Start with the most recent version, where possible
+	if [ $OS == 'Linux' -o $OS == 'Darwin' ]; then
+		LIST=`perlbrew list | awk '{ print $1; }' | sort -Vr`
+	else
+		LIST=`perlbrew list | awk '{ print $1; }'`
+	fi
 else
 	LIST=$*
 fi
