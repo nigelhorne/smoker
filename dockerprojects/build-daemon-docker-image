@@ -18,7 +18,7 @@ if [[ ! -r MyConfig.pm ]]; then
 	exit 1
 fi
 
-typeset -r PERL=${1:-5.30.2}
+typeset -r PERL=${1:-5.32.0}
 typeset -r PORT=${2:-21212}
 typeset -r TMPDIR=${TMPDIR:-/tmp}
 # Doesn't work on ARM
