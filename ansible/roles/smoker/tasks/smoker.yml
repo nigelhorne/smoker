@@ -13,7 +13,7 @@
       # Raspberry Pi machines - save needless writes to the SD card
       # NetBSD has the architecture set to 'evbarm' instead of 'arm'
       ansible_facts['architecture'] is not regex('arm$')
-    become: yes
+    become: true
 
   - name: install CPAN smoking stuff on all machines
     package:
@@ -33,7 +33,7 @@
         # - lynx
         # - perlbrew
         - sqlite
-    become: yes
+    become: true
 
   - name: install CPAN smoking stuff on Linux machines
     package:
@@ -42,7 +42,7 @@
         - tar
     when:
       ansible_facts['system'] == 'Linux'
-    become: yes
+    become: true
 
   - name: install CPAN smoking stuff on RedHat
     package:
@@ -66,7 +66,7 @@
         - perl-version
     when:
       ansible_facts['os_family'] == 'RedHat'
-    become: yes
+    become: true
 
   - name: install CPAN smoking stuff on Debian
     package:
@@ -81,11 +81,11 @@
         - libncurses-dev
         - libperl-version-perl
         - libproc-processtable-perl
-	- libtest-memory-cycle-perl
+        - libtest-memory-cycle-perl
         - libssl-dev
     when:
       ansible_facts['os_family'] == 'Debian'
-    become: yes
+    become: true
 
   - name: install CPAN smoking stuff on BSD - packages
     package:
@@ -102,10 +102,10 @@
         - p5-Sys-CpuLoad
         - p5-Test-Reporter
         - p5-Unix-Processors
-	- flock
+        - flock
     when:
       ansible_facts['os_family'] is regex('BSD$')
-    become: yes
+    become: true
 
   # Ansible's cpanm module doesn't support adding more than one module
   # - name: install CPAN smoking stuff on BSD - modules
@@ -117,12 +117,12 @@
         # - Proc::Killfam
     # when:
       # ansible_facts['os_family'] is regex('BSD$')
-    # become: yes
+    # become: true
   - name: install CPAN smoking stuff on BSD - modules
     command: cpanm -iqn Proc::Govern Proc::Killfam
     when:
       ansible_facts['os_family'] is regex('BSD$')
-    become: yes
+    become: true
 
   # This seems crazy, but is actually what I want
   - name: Get latest version of smoker code
@@ -157,4 +157,4 @@
       owner: bin
       group: bin
       mode: '0755'
-    become: yes
+    become: true
