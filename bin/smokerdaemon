@@ -20,10 +20,20 @@
 use utf8;
 use strict;
 use warnings;
-use open qw(:std :utf8);
-# no feature qw(indirect);
-use feature qw(signatures);
-no warnings qw(experimental::signatures);
+
+BEGIN {
+	if($] >= 5.016) {
+		use open qw(:std :utf8);
+		# if($] >= 5.032) {
+			# no feature qw(indirect);
+		# }
+		if($] >= 5.020) {
+			use feature qw(signatures);
+		}
+		no warnings qw(experimental::signatures);
+		# use autodie qw(:all);	# Don't enable, since the kill failing isn't caught
+	}
+}
 
 my @modules;
 
