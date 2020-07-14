@@ -19,7 +19,7 @@ typeset -r age=$(fileAge ~/.cpanreporter/reports-sent.db)
 typeset -r HOSTNAME=$(hostname)
 
 if (( age > 14400 )); then
-	logger 'reports-sent.db is old: check system is testing CPAN'
+	logger -t cpan 'reports-sent.db is old: check system is testing CPAN'
 	echo reports-sent.db is old: check CPAN is being tested on $HOSTNAME |
 		mail -s "Check CPAN on $HOSTNAME" root
 fi

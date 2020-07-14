@@ -37,7 +37,7 @@ else
 fi
 
 if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
-	logger "$0: already running"
+	logger -t cpan "$0: already running"
 	exit
 fi
 
