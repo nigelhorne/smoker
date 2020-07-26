@@ -21,6 +21,8 @@ use utf8;
 use strict;
 use warnings;
 
+my @modules;
+
 BEGIN {
 	if($] >= 5.016) {
 		use open qw(:std :utf8);
@@ -33,12 +35,8 @@ BEGIN {
 		no warnings qw(experimental::signatures);
 		# use autodie qw(:all);	# Don't enable, since the kill failing isn't caught
 	}
-}
 
-my @modules;
-
-# Install Pre-requisites
-BEGIN {
+	# Install Pre-requisites
 	@modules = (
 		'File::HomeDir', 'IPC::System::Simple', 'Proc::PID::File',
 		'Sys::CpuLoad', 'Unix::Processors', 'BSD::Resource',
@@ -88,6 +86,9 @@ use FindBin qw($Bin);
 use Fcntl qw(:flock);
 use Getopt::Std;
 use POSIX ":sys_wait_h";
+
+# Only run inside a docker container
+exit unless(-r '/proc/1/cgroup');
 
 my $ppf_is_installed = 1;
 

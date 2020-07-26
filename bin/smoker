@@ -29,6 +29,8 @@ use utf8;
 use strict;
 use warnings;
 
+my @modules;
+
 BEGIN {
 	if($] >= 5.016) {
 		use open qw(:std :utf8);
@@ -41,12 +43,8 @@ BEGIN {
 		no warnings qw(experimental::signatures);
 		# use autodie qw(:all);	# Don't enable, since the kill failing isn't caught
 	}
-}
 
-my @modules;
-
-# Install Pre-requisites
-BEGIN {
+	# Install Pre-requisites
 	@modules = (
 		'File::HomeDir', 'File::Path',
 		'Getopt::Std',
@@ -68,6 +66,9 @@ BEGIN {
 		system('cpan -i ' . join(' ', @needfull));
 	}
 }
+
+# Only run inside a docker container
+exit unless(-r '/proc/1/cgroup');
 
 if($^O eq 'MSWin32') {
 	push @modules, 'BSD_Resource_NULL',
