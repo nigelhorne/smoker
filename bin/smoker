@@ -37,10 +37,10 @@ BEGIN {
 		# if($] >= 5.032) {
 			# no feature qw(indirect);
 		# }
-		if($] >= 5.020) {
-			use feature qw(signatures);
-		}
-		no warnings qw(experimental::signatures);
+		# if($] >= 5.020) {
+			# use feature qw(signatures);
+			# no warnings qw(experimental::signatures);
+		# }
 		# use autodie qw(:all);	# Don't enable, since the kill failing isn't caught
 	}
 
