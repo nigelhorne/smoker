@@ -17,6 +17,7 @@
 
 # -v: verbose (logs more of what's going on)
 # -d: debug (logs go to the console instead of /tmp/smoker.out and /tmp/smoker.err
+# -f: force running the smoker
 
 # TODO:  $HOME/.cpan_smoker.rc doesn't get pruned.  Should remove entries older
 #	than a week, for example
@@ -50,10 +51,13 @@ BEGIN {
 		'Getopt::Std',
 		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
 		'CPAN::Reporter', 'LWP::Simple', 'JSON', 'Proc::PID::File',
-		'Unix::Processors', 'Sys::CpuLoad', 'Sys::Syslog',
+		'Unix::Processors', 'Sys::Syslog',
 	);
 	if($^O ne 'MSWin32') {
 		push @modules, 'BSD::Resource',
+	}
+	if($^O ne 'cygwin') {
+		push @modules, 'Sys::CpuLoad',
 	}
 	my @needfull;
 	foreach my $module(@modules) {
@@ -66,9 +70,6 @@ BEGIN {
 		system('cpan -i ' . join(' ', @needfull));
 	}
 }
-
-# Only run inside a docker container
-exit unless(-r '/proc/1/cgroup');
 
 if($^O eq 'MSWin32') {
 	push @modules, 'BSD_Resource_NULL',
@@ -183,7 +184,12 @@ foreach my $module(@modules) {
 }
 
 my %opts;
-getopts('div', \%opts);
+getopts('dfiv', \%opts);
+
+if(!$opts{'f'}) {
+	# Only run inside a docker container
+	exit unless(-r '/proc/1/cgroup');
+}
 
 if($opts{'d'}) {
 	$opts{'v'} = 1;
@@ -414,7 +420,7 @@ while(1) {
 	# if($load[LOADAVG_1MIN] >= 3) {
 		# print STDERR 'Busy - Load Average ', $load[LOADAVG_1MIN], "\n";
 
-	if($Config{'osname'} ne 'cygwin') {
+	if((!$opts{'f'}) && ($Config{'osname'} ne 'cygwin')) {
 		# I don't know what Cygwin's load average is calculated from
 		# so I don't trust it
 		my @lav = Sys::CpuLoad::load();
