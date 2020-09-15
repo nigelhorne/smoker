@@ -30,7 +30,7 @@ use utf8;
 use strict;
 use warnings;
 
-my @modules;
+my @needfull;
 
 BEGIN {
 	if($] >= 5.016) {
@@ -46,7 +46,7 @@ BEGIN {
 	}
 
 	# Install Pre-requisites
-	@modules = (
+	my @modules = (
 		'File::HomeDir', 'File::Path',
 		'Getopt::Std',
 		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
@@ -59,7 +59,6 @@ BEGIN {
 	if($^O ne 'cygwin') {
 		push @modules, 'Sys::CpuLoad',
 	}
-	my @needfull;
 	foreach my $module(@modules) {
 		eval "use $module";
 		if($@) {
@@ -72,10 +71,10 @@ BEGIN {
 }
 
 if($^O eq 'MSWin32') {
-	push @modules, 'BSD_Resource_NULL',
+	push @needfull, 'BSD_Resource_NULL',
 }
 
-foreach my $module(@modules) {
+foreach my $module(@needfull) {
 	my $version;
 	if($module =~ /(.+)\s(.+)$/) {
 		$module = $1;
@@ -145,19 +144,23 @@ if(($Config{'osname'} eq 'solaris') ||
 	$mode = 'killfam';
 }
 
+@needfull = ();
+my @modules;
+
 if($mode eq 'cmd') {
 	@modules = ( 'IPC::Cmd' );
 } elsif($mode eq 'govern') {
-	@modules = ( 'Proc::Govern', 'Proc::Killfam' );
+	@modules = ( 'Proc::Govern', 'Proc::Killfam', 'Unix::Uptime' );
 } elsif($mode eq 'killfam') {
 	@modules = ( 'Proc::Killfam' );
 }
 
-my @needfull;
 foreach my $module(@modules) {
-	eval "use $module";
+	eval "require $module";
 	if($@) {
 		push @needfull, $module;
+	} else {
+		$module->import();
 	}
 }
 if(scalar(@needfull)) {
