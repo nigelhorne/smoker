@@ -514,6 +514,7 @@ if($opts{'i'}) {
 			close(STDERR);
 			open(STDERR, '>>', "$logfile.err");
 		}
+		print "$Bin/testwrapper $list" if($opts{'v'});
 		timed_system(3000, "$Bin/testwrapper $list");
 	} elsif($opts{'d'}) {
 		timed_system(3000, "$Bin/testwrapper $list < /dev/null");
