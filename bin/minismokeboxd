@@ -20,7 +20,7 @@ echo $$ > ${PIDFILE}
 
 ulimit -d 393216
 
-export CPAN_SQLITE_NO_LOG_FILES=1 AUTOMATED_TESTING=1
+export CPAN_SQLITE_NO_LOG_FILES=1 AUTOMATED_TESTING=1 PERL_MM_USE_DEFAULT=1
 
 if [ -d /var/www/mirrors/CPAN ]; then
 	# CPAN=file:///var/www/mirrors/CPAN/

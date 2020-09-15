@@ -203,6 +203,7 @@ delete $ENV{'CFLAGS'};
 delete $ENV{'LDFLAGS'};
 if(!$opts{'i'}) {
 	$ENV{'AUTOMATED_TESTING'} = 1;
+	$ENV{'PERL_MM_USE_DEFAULT'} = 1;
 }
 
 openlog('CPAN', 'cons,pid', 'user');

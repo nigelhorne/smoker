@@ -268,6 +268,7 @@ delete $ENV{'CC'};
 delete $ENV{'CFLAGS'};
 delete $ENV{'LDFLAGS'};
 $ENV{'AUTOMATED_TESTING'} = 1;
+$ENV{'PERL_MM_USE_DEFAULT'} = 1;
 
 my $clean_after_test = 0;
 my $config;
