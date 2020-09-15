@@ -48,7 +48,7 @@ BEGIN {
 	# Install Pre-requisites
 	my @modules = (
 		'File::HomeDir', 'File::Path',
-		'Getopt::Std',
+		'File::Write::Rotate', 'Getopt::Std',
 		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
 		'CPAN::Reporter', 'LWP::Simple', 'JSON', 'Proc::PID::File',
 		'Unix::Processors', 'Sys::Syslog',
