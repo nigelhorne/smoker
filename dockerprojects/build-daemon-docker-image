@@ -4,6 +4,8 @@
 #	e.g. build-daemon-docker-image 5.30.2 21213
 #	build-daemon-docker-image 5.18.2 21214 --thread
 
+# docker run -it --entrypoint /bin/bash smoker-perl-5.33.1 -s
+
 # You'll need to 'apt install socat'
 
 # FIXME: remove temporary files on error or signal, and/or use stdin

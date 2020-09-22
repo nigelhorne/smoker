@@ -11,6 +11,8 @@
 # TODO: check if the given port is free
 # TODO: Support distributions other than only Debian
 
+# docker run -it --entrypoint /bin/bash smoker-perl-5.33.1 -s
+
 set -e
 
 typeset -r PERL=${1:-5.32.0}
