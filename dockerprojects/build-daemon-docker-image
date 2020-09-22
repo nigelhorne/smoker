@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Usage: 'install perlversion port'
-#	e.g. build-docker-image 5.30.2 21213
-#	build-docker-image 5.18.2 21214 --thread
+#	e.g. build-daemon-docker-image 5.30.2 21213
+#	build-daemon-docker-image 5.18.2 21214 --thread
 
 # You'll need to 'apt install socat'
 
