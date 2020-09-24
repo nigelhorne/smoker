@@ -50,7 +50,7 @@ do
 	else
 		unset PERL_CPAN_REPORTER_DIR
 	fi
-	perl -MCPAN -e 'CPAN::Shell->install("YAML::XS", "YAML::Any")'
+	perl -MCPAN -e 'CPAN::Shell->install("CPAN::DistnameInfo", "YAML::XS", "YAML::Any")'
 done
 
 rm -f ${PIDFILE}
