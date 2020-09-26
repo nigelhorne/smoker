@@ -103,7 +103,7 @@ do
 
 	# Don't test as the tests won't go anywhere yet
 	perl -MCPAN -e 'CPAN::Shell->install("App::cpanminus")'
-	cpanm -iqn File::HomeDir ExtUtils::MakeMaker File::pushd Test::Reporter::Transport::Socket CPAN::Reporter
+	cpanm -iqn --skip-satisfied File::HomeDir ExtUtils::MakeMaker File::pushd Test::Reporter::Transport::Socket CPAN::Reporter
 done
 
 rm -f ${PIDFILE}
