@@ -161,17 +161,15 @@
       mode: '0755'
     become: true
 
-  - name: run buildall pn Linux
+  - name: run buildall on Linux
     cron:
-      name: buildall
+      name: run buildall
       user: njh
       hour: '0'
       minute: '31'
-      job: '[ -x /usr/bin/docker ] && src/njh/smoker/dockerprojects/udp-forwarder || PATH=~/src/njh/smoker/bin:$PATH nice -20 bin/perlbrew-cron src/njh/smoker/bin/smokerdaemon -p 21212'
       job: 'nice /usr/bin/flock -n /tmp/smoker.lck timeout -k 60s 1h /usr/local/bin/buildall'
     when:
       ansible_facts['system'] == 'Linux'
-
 
 # command => $::osfamily ? {
 # 'Debian' => "nice /usr/bin/flock -n /tmp/smoker.lck timeout -k 60s 1h /usr/local/bin/buildall",
