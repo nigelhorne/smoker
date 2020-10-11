@@ -11,5 +11,6 @@ set -xe
 # Allow connections to the loghost machine
 # /sbin/iptables -A DOCKER-USER -d 216.127.186.96 -j ACCEPT
 /sbin/iptables -A DOCKER-USER -d loghost -j ACCEPT
+/sbin/iptables -A DOCKER-USER -d metabase.cpantesters.org -j ACCEPT
 /sbin/iptables -A DOCKER-USER -j LOG --log-prefix "Blocked traffic: " --log-level 7
 /sbin/iptables -A DOCKER-USER -j RETURN
