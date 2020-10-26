@@ -211,9 +211,9 @@ if(!$opts{'i'}) {
 
 openlog('CPAN', 'cons,pid', 'user');
 
-my $lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
-print "Lockfile: $lockfile\n" if($opts{'v'});
-if((-r $lockfile) && (open(my $fin, '<', $lockfile))) {
+my $cpan_lockfile = File::Spec->catfile($CPAN::Config->{'cpan_home'}, '.lock');
+print "Lockfile: $cpan_lockfile\n" if($opts{'v'});
+if((-r $cpan_lockfile) && open(my $fin, '<', $cpan_lockfile)) {
 	my $pid = <$fin>;
 	close $fin;
 	chomp $pid;
@@ -221,7 +221,7 @@ if((-r $lockfile) && (open(my $fin, '<', $lockfile))) {
 		print STDERR "CPAN shell running\n";
 		exit(1);
 	}
-	unlink $lockfile;
+	unlink $cpan_lockfile;
 }
 
 my $lock;
@@ -234,6 +234,8 @@ if(!$ENV{'TMPDIR'}) {
 	}
 }
 $tmpdir ||= File::Spec->tmpdir();
+
+my $lockfile;
 
 if($ppf_is_installed) {
 	print 'Creating lock ',
@@ -439,6 +441,18 @@ while(1) {
 				next;
 			}
 		}
+	}
+
+	if((-r $cpan_lockfile) && open(my $fin, '<', $cpan_lockfile)) {
+		# CPAN shell has been started since we started
+		my $pid = <$fin>;
+		close $fin;
+		chomp $pid;
+		if(kill(0, $pid)) {
+			print STDERR "CPAN shell running\n";
+			exit(1);
+		}
+		unlink $cpan_lockfile;
 	}
 
 	if($ppf_is_installed) {
