@@ -50,7 +50,7 @@ BEGIN {
 		'File::HomeDir', 'File::Path',
 		'File::Write::Rotate', 'Getopt::Std',
 		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
-		'CPAN::Reporter', 'LWP::Simple', 'JSON', 'Proc::PID::File',
+		'CPAN::Reporter', 'LWP::Simple::WithCache', 'JSON', 'Proc::PID::File',
 		'Unix::Processors', 'Sys::Syslog',
 	);
 	if($^O ne 'MSWin32') {
@@ -323,13 +323,14 @@ my $prev_tests;
 
 my $json_file = File::Spec->catfile($homedir, '.cpan_smoker.rc');
 print "Checking $json_file\n" if($opts{'v'});
-my $cachedir;
-if(my $e = $ENV{'CACHEDIR'}) {
-	$cachedir = File::Spec->catfile($e, 'http-cache-transparent');
-} else {
-	$cachedir = File::Spec->catfile(File::Spec->tmpdir(), 'cache', 'http-cache-transparent');
-}
 
+my $cachedir;
+if($cachedir = $ENV{'CACHEDIR'}) {
+	$cachedir = File::Spec->catfile($cachedir, 'http-cache-transparent');
+} else {
+	# $cachedir = File::Spec->catfile(File::Spec->tmpdir(), 'cache', 'http-cache-transparent');
+	$cachedir = File::Spec->catfile(File::HomeDir->my_home(), '.cache', 'http-cache-transparent');
+}
 if(!-d $cachedir) {
 	mkdir $cachedir || die "$cachedir: $!";
 }
@@ -356,7 +357,7 @@ if($ARGV[0]) {
 	my $recent;
 	foreach my $url(@{$CPAN::Config->{'urllist'}}) {
 		print "Fetching $url/RECENT\n" if($opts{'v'});
-		if($recent = get("$url/RECENT")) {
+		if($recent = LWP::Simple::WithCache::get("$url/RECENT")) {
 			last;
 		}
 	}
