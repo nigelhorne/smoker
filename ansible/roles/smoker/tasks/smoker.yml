@@ -2,7 +2,6 @@
 # Probably a few too many modules here as it may include stuff not needed
 # for CPAN testing that I need to take out
 
-# TODO: user (currently hardwired to 'njh') should be a variable
 # TODO: install perlbrew-cron
 
   - name: upgrade all packages
@@ -130,26 +129,26 @@
   - name: Get latest version of smoker code
     cron:
       name: smoker-update
-      user: njh
+      user: {{ ansible_user }}
       hour: '2'
       minute: '3'
-      job: 'cd src/njh/smoker && /usr/bin/git pull'
+      job: 'cd src/{{ ansible_user }}/smoker && /usr/bin/git pull'
 
   - name: Add udp-forwarder cron
     cron:
       name: udp-forwarder
-      user: njh
+      user: {{ ansible_user }}
       special_time: reboot
-      job: '[ -x /usr/bin/docker ] && src/njh/smoker/dockerprojects/udp-forwarder || PATH=~/src/njh/smoker/bin:$PATH nice -20 bin/perlbrew-cron --with perl-5.32.0 src/njh/smoker/bin/smokerdaemon -p 21212'
+      job: '[ -x /usr/bin/docker ] && src/{{ ansible_user }}/smoker/dockerprojects/udp-forwarder || PATH=~/src/{{ ansible_user }}/smoker/bin:$PATH nice -20 bin/perlbrew-cron --with perl-5.32.0 src/{{ ansible_user }}/smoker/bin/smokerdaemon -p 21212'
     when: ansible_default_ipv4.address | ipaddr('192.168.0.0/16') | ipaddr('bool')
 
   - name: Add udp-forwarder check cron
     cron:
       name: udp-forwarder-check
-      user: njh
+      user: {{ ansible_user }}
       hour: '3'
       minute: '3'
-      job: '[ -x /usr/bin/docker ] && src/njh/smoker/dockerprojects/udp-forwarder || PATH=~/src/njh/smoker/bin:$PATH nice -20 bin/perlbrew-cron src/njh/smoker/bin/smokerdaemon -p 21212'
+      job: '[ -x /usr/bin/docker ] && src/{{ ansible_user }}/smoker/dockerprojects/udp-forwarder || PATH=~/src/{{ ansible_user }}/smoker/bin:$PATH nice -20 bin/perlbrew-cron src/{{ ansible_user }}/smoker/bin/smokerdaemon -p 21212'
     when: ansible_default_ipv4.address | ipaddr('192.168.0.0/16') | ipaddr('bool')
 
   - name: buildall
@@ -164,7 +163,7 @@
   - name: run buildall on Linux
     cron:
       name: run buildall
-      user: njh
+      user: {{ ansible_user }}
       hour: '0'
       minute: '31'
       job: 'nice /usr/bin/flock -n /tmp/smoker.lck timeout -k 60s 1h /usr/local/bin/buildall'
