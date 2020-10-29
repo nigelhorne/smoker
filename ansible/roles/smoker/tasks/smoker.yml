@@ -4,171 +4,171 @@
 
 # TODO: install perlbrew-cron
 
-  - name: upgrade all packages
-    package:
-      name: '*'
-      state: latest
-    when:
-      # Raspberry Pi machines - save needless writes to the SD card
-      # NetBSD has the architecture set to 'evbarm' instead of 'arm'
-      ansible_facts['architecture'] is not regex('arm$')
-    become: true
+- name: upgrade all packages
+  package:
+    name: '*'
+    state: latest
+  when:
+    # Raspberry Pi machines - save needless writes to the SD card
+    # NetBSD has the architecture set to 'evbarm' instead of 'arm'
+    ansible_facts['architecture'] is not regex('arm$')
+  become: true
 
-  - name: install CPAN smoking stuff on all machines
-    package:
-      state: present
-      name:
-        - bash
-        - curl
-        - wget
-        - autoconf
-        - automake
-        - git
-        - rsync
-        - patch
-        - bzip2
-        - flex
-        - bison
-        # - lynx
-        # - perlbrew
-        - sqlite
-    become: true
+- name: install CPAN smoking stuff on all machines
+  package:
+    state: present
+    name:
+      - bash
+      - curl
+      - wget
+      - autoconf
+      - automake
+      - git
+      - rsync
+      - patch
+      - bzip2
+      - flex
+      - bison
+      # - lynx
+      # - perlbrew
+      - sqlite
+  become: true
 
-  - name: install CPAN smoking stuff on Linux machines
-    package:
-      state: present
-      name:
-        - tar
-    when:
-      ansible_facts['system'] == 'Linux'
-    become: true
+- name: install CPAN smoking stuff on Linux machines
+  package:
+    state: present
+    name:
+      - tar
+  when:
+    ansible_facts['system'] == 'Linux'
+  become: true
 
-  - name: install CPAN smoking stuff on RedHat
-    package:
-      state: present
-      name:
-        - cpan
-        - expat-devel
-        - gcc-c++
-        - gtk2-devel
-        - libaio-devel
-        - libattr-devel
-        - libcap-devel
-        - ncurses-devel
-        - openssl-devel
-        - yum-utils
-        # - deltarpm
-        - perl-autodie
-        - perl-CPAN
-        - perl-Pod-Perldoc
-        - perl-Proc-ProcessTable
-        - perl-version
-    when:
-      ansible_facts['os_family'] == 'RedHat'
-    become: true
+- name: install CPAN smoking stuff on RedHat
+  package:
+    state: present
+    name:
+      - cpan
+      - expat-devel
+      - gcc-c++
+      - gtk2-devel
+      - libaio-devel
+      - libattr-devel
+      - libcap-devel
+      - ncurses-devel
+      - openssl-devel
+      - yum-utils
+      # - deltarpm
+      - perl-autodie
+      - perl-CPAN
+      - perl-Pod-Perldoc
+      - perl-Proc-ProcessTable
+      - perl-version
+  when:
+    ansible_facts['os_family'] == 'RedHat'
+  become: true
 
-  - name: install CPAN smoking stuff on Debian
-    package:
-      state: present
-      name:
-        - gcc
-        - libaio-dev
-        - libattr1-dev
-        - libcap-dev
-        - libexpat1-dev
-        - libgtk2.0-dev
-        - libncurses-dev
-        - libperl-version-perl
-        - libproc-processtable-perl
-        - libtest-memory-cycle-perl
-        - libssl-dev
-    environment:
-      - NEEDRESTART_MODE: automatically
-    when:
-      ansible_facts['os_family'] == 'Debian'
-    become: true
+- name: install CPAN smoking stuff on Debian
+  package:
+    state: present
+    name:
+      - gcc
+      - libaio-dev
+      - libattr1-dev
+      - libcap-dev
+      - libexpat1-dev
+      - libgtk2.0-dev
+      - libncurses-dev
+      - libperl-version-perl
+      - libproc-processtable-perl
+      - libtest-memory-cycle-perl
+      - libssl-dev
+  environment:
+    - NEEDRESTART_MODE: automatically
+  when:
+    ansible_facts['os_family'] == 'Debian'
+  become: true
 
-  - name: install CPAN smoking stuff on BSD - packages
-    package:
-      state: present
-      name:
-        # You need to install Proc::Govern manually
-        - p5-App-cpanminus
-        - p5-BSD-Resource
-        - p5-CPAN-Reporter
-        - p5-File-HomeDir
-        - p5-IPC-System-Simple
-        - p5-Proc-PID-File
-        - p5-Proc-ProcessTable
-        - p5-Sys-CpuLoad
-        - p5-Test-Reporter
-        - p5-Unix-Processors
-        - flock
-    when:
-      ansible_facts['os_family'] is regex('BSD$')
-    become: true
+- name: install CPAN smoking stuff on BSD - packages
+  package:
+    state: present
+    name:
+      # You need to install Proc::Govern manually
+      - p5-App-cpanminus
+      - p5-BSD-Resource
+      - p5-CPAN-Reporter
+      - p5-File-HomeDir
+      - p5-IPC-System-Simple
+      - p5-Proc-PID-File
+      - p5-Proc-ProcessTable
+      - p5-Sys-CpuLoad
+      - p5-Test-Reporter
+      - p5-Unix-Processors
+      - flock
+  when:
+    ansible_facts['os_family'] is regex('BSD$')
+  become: true
 
-  # Ansible's cpanm module doesn't support adding more than one module
-  # - name: install CPAN smoking stuff on BSD - modules
-    # cpanm:
-      # notest: true
-      # system_lib: true
-      # name:
-        # - Proc::Govern
-        # - Proc::Killfam
-    # when:
-      # ansible_facts['os_family'] is regex('BSD$')
-    # become: true
-  - name: install CPAN smoking stuff on BSD - modules
-    command: cpanm -iqn Proc::Govern Proc::Killfam
-    when:
-      ansible_facts['os_family'] is regex('BSD$')
-    become: true
+# Ansible's cpanm module doesn't support adding more than one module
+# - name: install CPAN smoking stuff on BSD - modules
+#   cpanm:
+#     notest: true
+#     system_lib: true
+#     name:
+#       - Proc::Govern
+#       - Proc::Killfam
+#   when:
+#     ansible_facts['os_family'] is regex('BSD$')
+#   become: true
+- name: install CPAN smoking stuff on BSD - modules
+  command: cpanm -iqn Proc::Govern Proc::Killfam
+  when:
+    ansible_facts['os_family'] is regex('BSD$')
+  become: true
 
-  # This seems crazy, but is actually what I want
-  - name: Get latest version of smoker code
-    cron:
-      name: smoker-update
-      user: {{ ansible_user }}
-      hour: '2'
-      minute: '3'
-      job: 'cd src/{{ ansible_user }}/smoker && /usr/bin/git pull'
+# This seems crazy, but is actually what I want
+- name: Get latest version of smoker code
+  cron:
+    name: smoker-update
+    user: "{{ ansible_user }}"
+    hour: '2'
+    minute: '3'
+    job: "cd src/{{ ansible_user }}/smoker && /usr/bin/git pull"
 
-  - name: Add udp-forwarder cron
-    cron:
-      name: udp-forwarder
-      user: {{ ansible_user }}
-      special_time: reboot
-      job: '[ -x /usr/bin/docker ] && src/{{ ansible_user }}/smoker/dockerprojects/udp-forwarder || PATH=~/src/{{ ansible_user }}/smoker/bin:$PATH nice -20 bin/perlbrew-cron --with perl-5.32.0 src/{{ ansible_user }}/smoker/bin/smokerdaemon -p 21212'
-    when: ansible_default_ipv4.address | ipaddr('192.168.0.0/16') | ipaddr('bool')
+- name: Add udp-forwarder cron
+  cron:
+    name: udp-forwarder
+    user: "{{ ansible_user }}"
+    special_time: reboot
+    job: "[ -x /usr/bin/docker ] && src/{{ ansible_user }}/smoker/dockerprojects/udp-forwarder || PATH=~/src/{{ ansible_user }}/smoker/bin:$PATH nice -20 bin/perlbrew-cron --with perl-5.32.0 src/{{ ansible_user }}/smoker/bin/smokerdaemon -p 21212"
+  when: ansible_default_ipv4.address | ipaddr('192.168.0.0/16') | ipaddr('bool')
 
-  - name: Add udp-forwarder check cron
-    cron:
-      name: udp-forwarder-check
-      user: {{ ansible_user }}
-      hour: '3'
-      minute: '3'
-      job: '[ -x /usr/bin/docker ] && src/{{ ansible_user }}/smoker/dockerprojects/udp-forwarder || PATH=~/src/{{ ansible_user }}/smoker/bin:$PATH nice -20 bin/perlbrew-cron src/{{ ansible_user }}/smoker/bin/smokerdaemon -p 21212'
-    when: ansible_default_ipv4.address | ipaddr('192.168.0.0/16') | ipaddr('bool')
+- name: Add udp-forwarder check cron
+  cron:
+    name: udp-forwarder-check
+    user: "{{ ansible_user }}"
+    hour: '3'
+    minute: '3'
+    job: "[ -x /usr/bin/docker ] && src/{{ ansible_user }}/smoker/dockerprojects/udp-forwarder || PATH=~/src/{{ ansible_user }}/smoker/bin:$PATH nice -20 bin/perlbrew-cron src/{{ ansible_user }}/smoker/bin/smokerdaemon -p 21212"
+  when: ansible_default_ipv4.address | ipaddr('192.168.0.0/16') | ipaddr('bool')
 
-  - name: buildall
-    template:
-      src: templates/usr/local/bin/buildall.j2
-      dest: /usr/local/bin/buildall
-      owner: bin
-      group: bin
-      mode: '0755'
-    become: true
+- name: buildall
+  template:
+    src: templates/usr/local/bin/buildall.j2
+    dest: /usr/local/bin/buildall
+    owner: bin
+    group: bin
+    mode: '0755'
+  become: true
 
-  - name: run buildall on Linux
-    cron:
-      name: run buildall
-      user: {{ ansible_user }}
-      hour: '0'
-      minute: '31'
-      job: 'nice /usr/bin/flock -n /tmp/smoker.lck timeout -k 60s 1h /usr/local/bin/buildall'
-    when:
-      ansible_facts['system'] == 'Linux'
+- name: run buildall on Linux
+  cron:
+    name: run buildall
+    user: "{{ ansible_user }}"
+    hour: '0'
+    minute: '31'
+    job: 'nice /usr/bin/flock -n /tmp/smoker.lck timeout -k 60s 1h /usr/local/bin/buildall'
+  when:
+    ansible_facts['system'] == 'Linux'
 
 # command => $::osfamily ? {
 # 'Debian' => "nice /usr/bin/flock -n /tmp/smoker.lck timeout -k 60s 1h /usr/local/bin/buildall",
