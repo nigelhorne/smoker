@@ -19,10 +19,16 @@ trap "rm -f ${PIDFILE}; exit" INT TERM ALRM EXIT
 echo $$ > ${PIDFILE}
 
 EARLYPERLS="6.2 8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 10.0 10.1"
+typeset -r OS=$(uname)
 
 # read the options
-TEMP=`getopt -o ns --long no5.6.2,skip-bootstrap -n 'loadall1' -- "$@"`
+if [ $OS == 'Darwin' ]; then
+	TEMP=`getopt ns -- "$@"`
+else
+	TEMP=`getopt -o ns --long no5.6.2,skip-bootstrap -n 'loadall1' -- "$@"`
+fi
 eval set -- "$TEMP"
+
 SKIPBOOTSTRAP=no
 
 while true ; do
@@ -78,9 +84,11 @@ if [ $SKIPBOOTSTRAP == 'no' ]; then
 	done
 fi
 
+echo 11111111
+
 if [ $1x == x ]; then
+echo 2222222222
 	perlbrew switch-off
-	typeset -r OS=$(uname)
 	# Start with the most recent version, where possible
 	if [ $OS == 'Linux' -o $OS == 'Darwin' ]; then
 		LIST=`perlbrew list | awk '{ print $1; }' | sort -Vr`
@@ -88,6 +96,8 @@ if [ $1x == x ]; then
 		LIST=`perlbrew list | awk '{ print $1; }'`
 	fi
 else
+echo $1x
+echo 333333333333
 	LIST=$*
 fi
 
@@ -98,6 +108,7 @@ do
 	fi
 
 	perlbrew use $i
+	perlbrew install-cpanm
 
 	# perl -MCPAN -e 'CPAN::Shell->install("ExtUtils::MakeMaker", "File::pushd", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
 
