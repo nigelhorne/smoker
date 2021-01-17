@@ -84,10 +84,7 @@ if [ $SKIPBOOTSTRAP == 'no' ]; then
 	done
 fi
 
-echo 11111111
-
 if [ $1x == x ]; then
-echo 2222222222
 	perlbrew switch-off
 	# Start with the most recent version, where possible
 	if [ $OS == 'Linux' -o $OS == 'Darwin' ]; then
@@ -96,8 +93,6 @@ echo 2222222222
 		LIST=`perlbrew list | awk '{ print $1; }'`
 	fi
 else
-echo $1x
-echo 333333333333
 	LIST=$*
 fi
 
