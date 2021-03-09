@@ -91,6 +91,7 @@ cat > "$TMPDIR/dockerfile" <<EOF
 FROM debian
 LABEL Maintainer="njh@bandsman.co.uk"
 LABEL Description="CPAN Smoker image"
+ENV DEBIAN_FRONTEND noninteractive
 COPY setup.$$ /tmp/setup
 RUN bash /tmp/setup && rm /tmp/setup
 
