@@ -50,7 +50,7 @@ $s->send("\n") if($count);
 openlog 'CPAN', 'cons,pid', 'user';
 my $msg;
 if($count == 1) {
-	$msg = "Updated 1 module\n";
+	$msg = "Updated 1 module";
 } else {
 	$msg = "Updated $count modules";
 }
