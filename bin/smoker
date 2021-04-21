@@ -188,7 +188,7 @@ foreach my $module(@modules) {
 	# }
 }
 
-if(!defined('RLIMIT_DATA')) {
+if(!declared('RLIMIT_DATA')) {
 	use constant {
 		RLIMIT_DATA => -1,
 		RLIMIT_RSS => -1,
@@ -305,11 +305,10 @@ if(($^O ne 'cygwin') && ($^O ne 'MSWin32')) {
 		setrlimit(RLIMIT_FSIZE, 40 * 1024 * 1024, 10 * 1024 * 1024);
 		# setrlimit(RLIMIT_FSIZE, 40 * 1024 * 1024, 10 * 1024 * 1024) or
 			# warn('Can\'t limit the file size - watch for large temporary files');
+		# 5 minutes is more than enough CPU time
+		setrlimit(RLIMIT_CPU, 300, 600) or
+			warn('Can\'t limit the CPU time - watch for long running programs');
 	}
-
-	# 5 minutes is more than enough CPU time
-	setrlimit(RLIMIT_CPU, 300, 600) or
-		warn('Can\'t limit the CPU time - watch for long running programs');
 }
 
 # Eval added to handle RT113898
