@@ -190,10 +190,10 @@ foreach my $module(@modules) {
 
 if(!declared('RLIMIT_DATA')) {
 	use constant {
-		RLIMIT_DATA => -1,
-		RLIMIT_RSS => -1,
-		RLIMIT_CPU => -1,
-		RLIMIT_FSIZE => -1,
+		RLIMIT_DATA => 2,
+		RLIMIT_RSS => 5,
+		RLIMIT_CPU => 0,
+		RLIMIT_FSIZE => 1,
 	};
 }
 
@@ -751,8 +751,8 @@ use vars qw(@ISA @EXPORT);
 @EXPORT = qw(RLIMIT_DATA RLIMIT_CSS RLIMIT_CPU RLIMIT_FSIZE);
 
 use constant {
-	RLIMIT_DATA => -1,
-	RLIMIT_RSS => -1,
-	RLIMIT_CPU => -1,
-	RLIMIT_FSIZE => -1,
+	RLIMIT_DATA => 2,
+	RLIMIT_RSS => 5,
+	RLIMIT_CPU => 0,
+	RLIMIT_FSIZE => 1,
 };
