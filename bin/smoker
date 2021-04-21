@@ -30,6 +30,8 @@ use utf8;
 use strict;
 use warnings;
 
+sub declared ($);
+
 my @needfull;
 
 BEGIN {
@@ -53,7 +55,7 @@ BEGIN {
 		'CPAN::Reporter', 'LWP::Simple::WithCache', 'JSON', 'Proc::PID::File',
 		'Unix::Processors', 'Sys::Syslog',
 	);
-	if($^O ne 'MSWin32') {
+	if(($^O ne 'MSWin32') && ($^O ne 'solaris')) {
 		push @modules, 'BSD::Resource',
 	}
 	if($^O ne 'cygwin') {
@@ -184,6 +186,15 @@ foreach my $module(@modules) {
 	# if($version && ($module::VERSION < $version)) {
 		# die "$module: need $version got ", $module::VERSIOn;
 	# }
+}
+
+if(!defined('RLIMIT_DATA')) {
+	use constant {
+		RLIMIT_DATA => -1,
+		RLIMIT_RSS => -1,
+		RLIMIT_CPU => -1,
+		RLIMIT_FSIZE => -1,
+	};
 }
 
 my %opts;
@@ -718,6 +729,17 @@ sub clean {
 		print "Emptying $build_dir\n" if($opts{'v'});
 		File::Path::rmtree($build_dir);
 	}
+}
+
+# https://perldoc.perl.org/constant
+sub declared ($) {
+	use constant 1.01;              # don't omit this!
+
+	my $name = shift;
+	$name =~ s/^::/main::/;
+	my $pkg = caller;
+	my $full_name = $name =~ /::/ ? $name : "${pkg}::$name";
+	$constant::declared{$full_name};
 }
 
 1;
