@@ -10,7 +10,7 @@
 #	must apply in writing for a licence for use from Nigel Horne at the
 #	above e-mail.
 
-# I Love App::SmokeBox::Mini, unfortunately too many of its dependancies don't
+# I Love App::SmokeBox::Mini, unfortunately too many of its dependencies don't
 # build on many platforms, so this is a small plaything that does for me
 
 # Takes an optional argument of the number of minutes since the last run
