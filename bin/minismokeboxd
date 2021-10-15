@@ -84,6 +84,15 @@ while true; do
 			fi
 
 			timeout -s SIGALRM -k 60s 30m $SHELL -c "ulimit -v $LIMIT; nice perlbrew exec --with $i minismokebox --backend CPAN::Reporter --url $CPAN --perlenv"
+		elif [ -x /usr/local/bin/gtimeout ]; then
+			# OpenBSD - coreutils package
+			if [[ `perlbrew -q exec --with $i perl -V | fgrep sanitize` ]]; then
+				LIMIT=unlimited
+			else
+				LIMIT=393216
+			fi
+
+			gtimeout -s SIGALRM -k 60s 30m $SHELL -c "ulimit -v $LIMIT; nice perlbrew exec --with $i minismokebox --backend CPAN::Reporter --url $CPAN --perlenv"
 		else
 			nice perlbrew exec --with $i minismokebox --backend CPAN::Reporter --url $CPAN --perlenv
 		fi

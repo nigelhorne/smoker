@@ -64,6 +64,9 @@ if [[ -x /usr/bin/timeout ]]; then
 	#	smokerdaemon or /usr/bin/timeout->smoker->testwrapper
 	#	this should timeout first
 	TMPDIR=$NEWTMPDIR $FLOCK timeout -k 5m 45m perl -MCPAN -e "CPAN::Shell->test($*)"
+elif [[ -x /usr/local/bin/gtimeout ]]; then
+	# OpenBSD - coreutils package
+	TMPDIR=$NEWTMPDIR $FLOCK /usr/local/bin/gtimeout -k 5m 45m perl -MCPAN -e "CPAN::Shell->test($*)"
 else
 	TMPDIR=$NEWTMPDIR $FLOCK perl -MCPAN -e "CPAN::Shell->test($*)"
 fi
