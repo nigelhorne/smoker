@@ -22,7 +22,7 @@ EARLYPERLS="6.2 8.1 8.2 8.3 8.4 8.5 8.6 8.7 8.8 8.9 10.0 10.1"
 typeset -r OS=$(uname)
 
 # read the options
-if [ $OS == 'Darwin' -o $OS == 'FreeBSD' ]; then
+if [ $OS == 'Darwin' -o $OS == 'FreeBSD' -o $OS == 'OpenBSD' ]; then
 	TEMP=`getopt ns -- "$@"`
 else
 	TEMP=`getopt -o ns --long no5.6.2,skip-bootstrap -n 'loadall1' -- "$@"`
