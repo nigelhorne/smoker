@@ -108,8 +108,10 @@ do
 	# perl -MCPAN -e 'CPAN::Shell->install("ExtUtils::MakeMaker", "File::pushd", "Test::Reporter::Transport::Socket", "CPAN::Reporter")'
 
 	# Don't test as the tests won't go anywhere yet
-	perl -MCPAN -e 'CPAN::Shell->install("App::cpanminus")'
-	cpanm -iqn --skip-satisfied File::HomeDir ExtUtils::MakeMaker File::pushd Test::Reporter::Transport::Socket CPAN::Reporter
+	# perl -MCPAN -e 'CPAN::Shell->install("App::cpanminus")' 2> /dev/null
+	# cpanm -iqn --skip-satisfied File::HomeDir ExtUtils::MakeMaker File::pushd Test::Reporter::Transport::Socket CPAN::Reporter
+	perl -MCPAN -e 'CPAN::Shell->install("App::cpm")' 2> /dev/null
+	cpm install --global --no-test File::HomeDir ExtUtils::MakeMaker File::pushd Test::Reporter::Transport::Socket CPAN::Reporter
 done
 
 rm -f ${PIDFILE}
