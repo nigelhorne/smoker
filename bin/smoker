@@ -724,7 +724,7 @@ sub clean {
 
 # https://perldoc.perl.org/constant
 sub declared ($) {
-	use constant 1.01;              # don't omit this!
+	use constant 1.01;	# don't omit this!
 
 	my $name = shift;
 	$name =~ s/^::/main::/;

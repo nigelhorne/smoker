@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+if [ x$TMPDIR = 'x' ]; then
+	if [[ -d $HOME/tmp ]]; then
+		export TMPDIR=$HOME/tmp
+	else
+		export TMPDIR=/tmp
+	fi
+fi
+
+LOCKFILE=${TMPDIR}/cpan-test.lck
+if test -e ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
+	echo "Already running"
+	exit 0
+fi
+
+# make sure the lockfile is removed when we exit and then claim it
+trap "rm -f ${LOCKFILE}; exit" INT TERM ALRM EXIT
+echo $$ > ${LOCKFILE}
+
+# # perlbrew available | grep -v '^i' | xargs -n 1 perlbrew -j8 install -Accflags="$CFLAGS" -Duseithreads -Dusemultiplicity
+# perlbrew available | grep -v '^i' | xargs -n 1 perlbrew install -Accflags="$CFLAGS" -Duseithreads -Dusemultiplicity
+
+export PERL5LIB=
+
+. ~/perl5/perlbrew/etc/bashrc
+
+if [ x$TMPDIR = 'x' ]; then
+	export TMPDIR=/tmp
+fi
+
+export MAILDOMAIN=bandsman.co.uk
+export LANG=
+export CPAN_SQLITE_NO_LOG_FILES=1
+export CC=
+export CFLAGS=
+export LDFLAGS=
+
+perlbrew switch-off
+
+if [ $1x == x ]; then
+	LIST=`perlbrew list`
+else
+	LIST=$*
+fi
+
+for i in $LIST
+do
+	if [ ! -d $PERLBREW_ROOT/perls/$i ]; then
+		continue
+	fi
+
+	echo $i:
+	perlbrew use $i
+
+	rm ~/.cpan/prefs/disabled.yml
+	# perl -MCPAN -e 'CPAN::Shell->install(Module::Install::Base)' 2>/dev/null
+	# perl -MCPAN -e 'CPAN::Shell->install("LWP::Protocol::http", "LWP::Protocol::https", "Crypt::SSLeay", "Test::Reporter::Transport::Metabase", "CPAN::Reporter")' 2> /dev/null
+
+	# perl -MCPAN -e 'CPAN::Shell->install("LWP::Protocol::http", "LWP::Protocol::https", "Test::Reporter::Transport::Metabase", "CPAN::Reporter")' 2> /dev/null
+	# No need to test as the reports won't go anyway
+	perl -MCPAN -e 'CPAN::Shell->install("App::cpanminus")' 2> /dev/null
+	cpanm -iqn --skip-satisfied LWP::Protocol::http LWP::Protocol::https Test::Reporter::Transport::Metabase CPAN::Reporter
+done
+
+rm -f ${LOCKFILE}
