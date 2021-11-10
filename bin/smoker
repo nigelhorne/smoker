@@ -26,6 +26,11 @@
 # or
 # 19 * * * * docker run perl-5.32.0
 
+# RLIMIT_DATA => 2,
+# RLIMIT_RSS => 5,
+# RLIMIT_CPU => 0,
+# RLIMIT_FSIZE => 1,
+
 use utf8;
 use strict;
 use warnings;
@@ -70,10 +75,6 @@ BEGIN {
 	if(scalar(@needfull)) {
 		system('cpan -i ' . join(' ', @needfull));
 	}
-}
-
-if($^O eq 'MSWin32') {
-	push @needfull, 'BSD_Resource_NULL',
 }
 
 foreach my $module(@needfull) {
@@ -188,15 +189,6 @@ foreach my $module(@modules) {
 	# }
 }
 
-if(!declared('RLIMIT_DATA')) {
-	use constant {
-		RLIMIT_DATA => 2,
-		RLIMIT_RSS => 5,
-		RLIMIT_CPU => 0,
-		RLIMIT_FSIZE => 1,
-	};
-}
-
 my %opts;
 getopts('dfiv', \%opts);
 
@@ -293,20 +285,20 @@ local $SIG{ALRM} = $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 if(($^O ne 'cygwin') && ($^O ne 'MSWin32')) {
 	if($Config{'osname'} ne 'solaris') {
 		if($^O ne 'darwin') {
-			setrlimit(RLIMIT_DATA, 512 * 1024 * 1024, 512 * 1024 * 1024) or
+			setrlimit(2, 512 * 1024 * 1024, 512 * 1024 * 1024) or
 				warn('Can\'t limit the data size - watch for memory usage');
 		}
 
 		# setrlimit(RLIMIT_RSS, 512 * 1024 * 1024, 64 * 1024 * 1024) or
 			# warn('Can\'t limit the RSS size - watch for memory usage');
-		setrlimit(RLIMIT_RSS, 512 * 1024 * 1024, 64 * 1024 * 1024);
+		setrlimit(5, 512 * 1024 * 1024, 64 * 1024 * 1024);
 
 		# Big enough for the Metadata file
-		setrlimit(RLIMIT_FSIZE, 40 * 1024 * 1024, 10 * 1024 * 1024);
+		setrlimit(1, 40 * 1024 * 1024, 10 * 1024 * 1024);
 		# setrlimit(RLIMIT_FSIZE, 40 * 1024 * 1024, 10 * 1024 * 1024) or
 			# warn('Can\'t limit the file size - watch for large temporary files');
 		# 5 minutes is more than enough CPU time
-		setrlimit(RLIMIT_CPU, 300, 600) or
+		setrlimit(0, 300, 600) or
 			warn('Can\'t limit the CPU time - watch for long running programs');
 	}
 }
@@ -742,17 +734,3 @@ sub declared ($) {
 }
 
 1;
-
-package BSD_Resource_NULL;
-
-use base 'Exporter';
-use vars qw(@ISA @EXPORT);
-@ISA = qw(Exporter);
-@EXPORT = qw(RLIMIT_DATA RLIMIT_CSS RLIMIT_CPU RLIMIT_FSIZE);
-
-use constant {
-	RLIMIT_DATA => 2,
-	RLIMIT_RSS => 5,
-	RLIMIT_CPU => 0,
-	RLIMIT_FSIZE => 1,
-};
