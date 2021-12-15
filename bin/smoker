@@ -55,9 +55,10 @@ BEGIN {
 	# Install Pre-requisites
 	my @modules = (
 		'File::HomeDir', 'File::Path',
-		'File::Write::Rotate', 'Getopt::Std',
-		'HTTP::Cache::Transparent', 'Test::Reporter::Transport',
+		# 'File::Write::Rotate',
+		'Getopt::Std', 'HTTP::Cache::Transparent',
 		'CPAN::Reporter', 'LWP::Simple::WithCache', 'JSON', 'Proc::PID::File',
+		'Test::Reporter::Transport',
 		'Unix::Processors', 'Sys::Syslog',
 	);
 	if(($^O ne 'MSWin32') && ($^O ne 'solaris')) {
