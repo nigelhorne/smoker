@@ -40,8 +40,8 @@ sub declared ($);
 my @needfull;
 
 BEGIN {
-	if($] >= 5.016) {
-		use open qw(:std :utf8);
+	# if($] >= 5.016) {
+		# use open qw(:std :utf8);
 		# if($] >= 5.032) {
 			# no feature qw(indirect);
 		# }
@@ -50,7 +50,8 @@ BEGIN {
 			# no warnings qw(experimental::signatures);
 		# }
 		# use autodie qw(:all);	# Don't enable, since the kill failing isn't caught
-	}
+	# }
+	use if $] >= 5.016, "open", qw(:std :utf8);
 
 	# Install Pre-requisites
 	my @modules = (
