@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# If you get an error about 'CPAN::Modulelist'
+# start a CPAN shell and run 'reload index'
+
 if [ x$TMPDIR = 'x' ]; then
 	if [[ -d $HOME/tmp ]]; then
 		export TMPDIR=$HOME/tmp
