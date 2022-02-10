@@ -58,7 +58,8 @@ BEGIN {
 		'File::HomeDir', 'File::Path',
 		# 'File::Write::Rotate',
 		'Getopt::Std', 'HTTP::Cache::Transparent',
-		'CPAN::Reporter', 'LWP::Simple::WithCache', 'JSON', 'Proc::PID::File',
+		'CPAN::Reporter', 'LWP::Protocol::https',
+		'LWP::Simple::WithCache', 'JSON', 'Proc::PID::File',
 		'Test::Reporter::Transport',
 		'Unix::Processors', 'Sys::Syslog',
 	);
