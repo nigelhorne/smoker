@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # Author Nigel Horne: njh@bandsman.co.uk
-# Copyright (C) 2015-2020, Nigel Horne
+# Copyright (C) 2015-2022, Nigel Horne
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
@@ -55,7 +55,7 @@ BEGIN {
 
 	# Install Pre-requisites
 	my @modules = (
-		'File::HomeDir', 'File::Path',
+		'File::HomeDir', 'File::Path', 'File::Temp',
 		# 'File::Write::Rotate',
 		'Getopt::Std', 'HTTP::Cache::Transparent',
 		'CPAN::Reporter', 'LWP::Protocol::https',
@@ -425,7 +425,7 @@ if(scalar(@dists) == 0) {	# Won't write the pruned tree
 }
 
 my $count = 0;
-my $logfile = File::Spec->catfile(File::Spec->tmpdir(), basename($0));
+my $logfile = File::Spec->catfile($tmpdir, basename($0));
 
 while(1) {
 	# my @load = Sys::LoadAvg::loadavg();
@@ -611,7 +611,7 @@ sub timed_system {
 		if($opts{'v'} || $opts{'i'}) {
 			$args{show_stdout} = 1;
 			$args{show_stderr} = 1;
-			$args{log_stderr}->{'dir'} = File::Spec->tmpdir();
+			$args{log_stderr}->{'dir'} = tmpdir();
 			# $args{log_stderr}->{'size'} = '1M';
 			$args{log_stderr}->{'size'} = 1024 * 1024;
 			$args{log_stderr}->{'histories'} = '100';
@@ -623,6 +623,10 @@ sub timed_system {
 		return Proc::Govern::govern_process(%args);
 	}
 
+	my $rundir = File::Temp->newdir();
+	$ENV{'TMPDIR'} = $rundir;
+	print "Setting TMPDIR to $rundir\n" if($opts{'v'});
+
 	if($mode eq 'killfam') {
 		my $rc = -1;
 		eval {
@@ -631,6 +635,7 @@ sub timed_system {
 			die "Fork failed: $!" unless defined $child;
 
 			unless ($child) {
+				chdir $rundir;
 				if($opts{'v'}) {
 					print "$shell -xc $command\n";
 					exec $shell, '-xc', $command;
@@ -701,7 +706,11 @@ sub timed_system {
 
 		return $rc;
 	}
-	return IPC::Cmd::run(command => \@command, timeout => $timeout, verbose => $opts{'v'});
+	my $olddir = getcwd();
+	chdir $rundir;
+	my $rc = IPC::Cmd::run(command => \@command, timeout => $timeout, verbose => $opts{'v'});
+	chdir $olddir;
+	return $rc;
 }
 
 sub nohang {
