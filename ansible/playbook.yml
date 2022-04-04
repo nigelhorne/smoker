@@ -1,7 +1,13 @@
 ---
+
+# To run on all machines:
+#	ansible-playbook -vv -i playbook.yml -k
+# To run on debian machines:
+#	ansible-playbook -vv -i playbook.yml -l debian -k
+
 - hosts: smokers
   remote_user: njh
-  become: yes
+  become: true
 
   roles:
     - role: smoker
