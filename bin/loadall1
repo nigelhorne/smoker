@@ -114,4 +114,5 @@ do
 	cpm install --global --no-test File::HomeDir ExtUtils::MakeMaker File::pushd Test::Reporter::Transport::Socket CPAN::Reporter
 done
 
-rm -f ${PIDFILE}
+rm -rf ~/.perl-cpm/build
+rm -f ~/.perl-cpm/build.log* ${PIDFILE}
