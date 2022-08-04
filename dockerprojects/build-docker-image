@@ -1,23 +1,20 @@
 #!/usr/bin/env bash
 
-# Usage: 'install perlversion port'
+# Usage: 'build-docker-image perlversion [ args ]'
 #	e.g. build-docker-image 5.30.2
 #	build-docker-image 5.18.2 --thread
-
-# You'll need to 'apt install socat'
 
 # 'docker logs $container' will show what's been tested
 
 # FIXME: remove temporary files on error or signal, and/or use stdin
 
-# TODO: check if the given port is free
 # TODO: Support distributions other than only Debian
 
 # docker run -it --entrypoint /bin/bash smoker-perl-5.33.1 -s
 
 set -e
 
-typeset -r PERL=${1:-5.34.0}
+typeset -r PERL=${1:-5.36.0}
 typeset -r TMPDIR=${TMPDIR:-/tmp}
 # Doesn't work on ARM
 # typeset -r NPROC=$(grep ^cpu\\scores /proc/cpuinfo | uniq | awk '{print $4}')
