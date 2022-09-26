@@ -58,7 +58,7 @@ BEGIN {
 		'File::HomeDir', 'File::Path', 'File::Temp',
 		# 'File::Write::Rotate',
 		'Getopt::Std', 'HTTP::Cache::Transparent',
-		'CPAN::Reporter', 'LWP::Protocol::https',
+		'CPAN::Reporter',
 		'LWP::Simple::WithCache', 'JSON', 'Proc::PID::File',
 		'Test::Reporter::Transport',
 		'Unix::Processors', 'Sys::Syslog',
@@ -165,6 +165,14 @@ if($mode eq 'cmd') {
 	@modules = ( 'Proc::Govern', 'Proc::Killfam', 'Unix::Uptime' );
 } elsif($mode eq 'killfam') {
 	@modules = ( 'Proc::Killfam' );
+}
+
+# Only load HTTPS support if it's needed
+my @urllist = @{$CPAN::Config->{'urllist'}};
+foreach my $url(@urllist) {
+	if($url =~ /^https:\/\//) {
+		push @needfull, 'LWP::Protocol::https';
+	}
 }
 
 foreach my $module(@modules) {
