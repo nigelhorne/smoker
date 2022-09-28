@@ -59,7 +59,7 @@ BEGIN {
 		# 'File::Write::Rotate',
 		'Getopt::Std', 'HTTP::Cache::Transparent',
 		'CPAN::Reporter',
-		'LWP::Simple::WithCache', 'JSON', 'Proc::PID::File',
+		'LWP::Simple::WithCache', 'JSON::MaybeXS', 'Proc::PID::File',
 		'Test::Reporter::Transport',
 		'Unix::Processors', 'Sys::Syslog',
 	);
@@ -360,7 +360,7 @@ HTTP::Cache::Transparent::init({
 });
 
 if((-r $json_file) && open(my $fin, '<', $json_file)) {
-	my $json = JSON->new()->allow_nonref();
+	my $json = JSON::MaybeXS->new()->allow_nonref();
 	local $/ = undef;
 	eval {
 		$prev_tests = $json->decode(<$fin>);
@@ -573,7 +573,7 @@ foreach my $dist(@dists) {
 unlink $json_file if(-e $json_file);
 
 if(open(my $fout, '>', $json_file)) {
-	print $fout JSON->new()->allow_nonref()->encode($prev_tests);
+	print $fout JSON::MaybeXS->new()->allow_nonref()->encode($prev_tests);
 	close $fout;
 }
 
