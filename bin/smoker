@@ -51,7 +51,7 @@ BEGIN {
 		# }
 		# use autodie qw(:all);	# Don't enable, since the kill failing isn't caught
 	# }
-	use if $] >= 5.016, "open", qw(:std :utf8);
+	use if $] >= 5.016, 'open', qw(:std :utf8);
 
 	# Install Pre-requisites
 	my @modules = (
@@ -173,6 +173,10 @@ foreach my $url(@urllist) {
 	if($url =~ /^https:\/\//) {
 		push @needfull, 'LWP::Protocol::https';
 	}
+}
+
+if($ARGV[0]) {
+	push @needfull, 'CPAN::Recent::Uploads';
 }
 
 foreach my $module(@modules) {
@@ -369,8 +373,6 @@ if((-r $json_file) && open(my $fin, '<', $json_file)) {
 }
 
 if($ARGV[0]) {
-	require CPAN::Recent::Uploads;
-
 	@dists = CPAN::Recent::Uploads->recent($ARGV[0] * 60, @{$CPAN::Config->{'urllist'}}[0]);
 } else {
 	my $recent;
