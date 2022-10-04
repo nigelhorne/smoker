@@ -373,6 +373,10 @@ if((-r $json_file) && open(my $fin, '<', $json_file)) {
 }
 
 if($ARGV[0]) {
+	# Unsure why this is needed as it's imported earlier, but without
+	# this, it complains that the routine recent() isn't known
+	require CPAN::Recent::Uploads;
+
 	@dists = CPAN::Recent::Uploads->recent($ARGV[0] * 60, @{$CPAN::Config->{'urllist'}}[0]);
 } else {
 	my $recent;
@@ -628,7 +632,7 @@ sub timed_system {
 		if($opts{'v'} || $opts{'i'}) {
 			$args{show_stdout} = 1;
 			$args{show_stderr} = 1;
-			$args{log_stderr}->{'dir'} = tmpdir();
+			$args{log_stderr}->{'dir'} = $tmpdir;
 			# $args{log_stderr}->{'size'} = '1M';
 			$args{log_stderr}->{'size'} = 1024 * 1024;
 			$args{log_stderr}->{'histories'} = '100';
