@@ -160,7 +160,7 @@ if(($Config{'osname'} eq 'solaris') ||
 my @modules;
 
 if($mode eq 'cmd') {
-	@modules = ( 'IPC::Cmd' );
+	@modules = ( 'IPC::Cmd', 'Cwd' );
 } elsif($mode eq 'govern') {
 	@modules = ( 'Proc::Govern', 'Proc::Killfam', 'Unix::Uptime' );
 } elsif($mode eq 'killfam') {
@@ -644,9 +644,13 @@ sub timed_system {
 		return Proc::Govern::govern_process(%args);
 	}
 
-	my $rundir = File::Temp->newdir(TEMPLATE => "$basename-XXXXX");
-	$ENV{'TMPDIR'} = $rundir;
+	if(!defined($ENV{'TMPDIR'})) {
+		$ENV{'TMPDIR'} = ($^O eq 'MSWin32') ? 'c:\temp' : '/tmp';
+	}
+	# On Solaris newdir() doesn't seem to use $TMPDIR
+	my $rundir = File::Temp->newdir(TEMPLATE => File::Spec->catfile($ENV{'TMPDIR'}, "$basename-XXXXX"));
 	print "Setting TMPDIR to $rundir\n" if($opts{'v'});
+	$ENV{'TMPDIR'} = $rundir;
 
 	if($mode eq 'killfam') {
 		my $rc = -1;
