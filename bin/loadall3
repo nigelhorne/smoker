@@ -51,6 +51,11 @@ do
 	perl -MCPAN -e 'CPAN::Shell->install("YAML::Syck", "App::Cpan", "File::Spec", "Archive::Tar", "IO::Zlib", "CPAN::DistnameInfo", "DBD::SQLite", "File::HomeDir", "CPAN::SQLite")'
 	HARNESS_OPTIONS=c TEST_JOBS= perl -MCPAN -e 'CPAN::Shell->install("App::Cpan", "CPAN::SQLite")'
 	# perl -MCPAN -e 'CPAN::Shell->upgrade'
+
+	# CPAN::SQLite can be broken. The author blames testers rather than
+	#	fixing his code. So try harder to force an installation
+	perl -MCPAN -e 'CPAN::Shell->install("App::cpm")' 2> /dev/null
+	cpm install --global --no-test CPAN::SQLite
 done
 
 rm -f ${PIDFILE}
