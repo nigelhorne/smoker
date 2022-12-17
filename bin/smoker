@@ -445,7 +445,7 @@ if(scalar(@dists) == 0) {	# Won't write the pruned tree
 }
 
 my $count = 0;
-my $basename = basename(0);
+my $basename = basename($0);
 my $logfile = File::Spec->catfile($tmpdir, $basename);
 
 while(1) {
