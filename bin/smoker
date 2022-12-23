@@ -61,13 +61,13 @@ BEGIN {
 		'CPAN::Reporter',
 		'LWP::Simple::WithCache', 'JSON::MaybeXS', 'Proc::PID::File',
 		'Test::Reporter::Transport',
-		'Unix::Processors', 'Sys::Syslog',
+		'Unix::Processors', 'Sys::Syslog'
 	);
 	if(($^O ne 'MSWin32') && ($^O ne 'solaris')) {
-		push @modules, 'BSD::Resource',
+		push @modules, 'BSD::Resource';
 	}
 	if($^O ne 'cygwin') {
-		push @modules, 'Sys::CpuLoad',
+		push @modules, 'Sys::CpuLoad';
 	}
 	foreach my $module(@modules) {
 		eval "use $module";
@@ -83,8 +83,8 @@ BEGIN {
 	}
 	if(scalar(@needfull)) {
 		# system('cpan -i ' . join(' ', @needfull));
-		# print 'Running perl -MCPAN -e \'CPAN::Shell->install("' . join('" "' . @needfull), '")\'', "\n";
-		system('perl -MCPAN -e \'CPAN::Shell->install("' . join('" "', @needfull) . '")\'');
+		print 'Running perl -MCPAN -e \'CPAN::Shell->install\("' . join('", "', @needfull), '")\'', "\n";
+		system('perl -MCPAN -e \'CPAN::Shell->install("' . join('", "', @needfull) . '")\'');
 	}
 }
 
@@ -205,9 +205,9 @@ if($opts{'d'}) {
 if(scalar(@needfull)) {
 	# system('cpan -i ' . join(' ', @needfull));
 	if($opts{'v'}) {
-		print 'Running perl -MCPAN -e \'CPAN::Shell->install("' . join('" "', @needfull) . '")\'' . "\n";
+		print 'Running perl -MCPAN -e \'CPAN::Shell->install\("' . join('", "', @needfull), '")\'', "\n";
 	}
-	system('perl -MCPAN -e \'CPAN::Shell->install("' . join('" "', @needfull) . '")\'');
+	system('perl -MCPAN -e \'CPAN::Shell->install("' . join('", "', @needfull) . '")\'');
 die @needfull;
 }
 
