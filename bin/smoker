@@ -614,6 +614,7 @@ sub timed_system {
 	my $command = join(' ', @_);
 
 	if($opts{'v'}) {
+		print "Shell: $shell\n";
 		@command = ($shell, '-xc', $command);
 	} else {
 		@command = ($shell, '-c', $command);
