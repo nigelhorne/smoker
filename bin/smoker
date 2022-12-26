@@ -56,7 +56,6 @@ BEGIN {
 	# Install Pre-requisites
 	my @modules = (
 		'File::HomeDir', 'File::Path', 'File::Temp',
-		# 'File::Write::Rotate',
 		'Getopt::Std', 'HTTP::Cache::Transparent',
 		'CPAN::Reporter',
 		'LWP::Simple::WithCache', 'JSON::MaybeXS', 'Proc::PID::File',
@@ -164,7 +163,8 @@ my @modules;
 if($mode eq 'cmd') {
 	@modules = ( 'IPC::Cmd', 'Cwd' );
 } elsif($mode eq 'govern') {
-	@modules = ( 'Proc::Govern', 'Proc::Killfam', 'Unix::Uptime' );
+	# Proc::Govern needs File::Write::Rotate
+	@modules = ( 'Proc::Govern', 'Proc::Killfam', 'Unix::Uptime', 'File::Write::Rotate' );
 } elsif($mode eq 'killfam') {
 	@modules = ( 'Proc::Killfam' );
 }
