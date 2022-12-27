@@ -208,7 +208,6 @@ if(scalar(@needfull)) {
 		print 'Running perl -MCPAN -e \'CPAN::Shell->install\("' . join('", "', @needfull), '")\'', "\n";
 	}
 	system('perl -MCPAN -e \'CPAN::Shell->install("' . join('", "', @needfull) . '")\'');
-die @needfull;
 }
 
 foreach my $module(@modules) {
