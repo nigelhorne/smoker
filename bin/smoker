@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # Author Nigel Horne: njh@bandsman.co.uk
-# Copyright (C) 2015-2022, Nigel Horne
+# Copyright (C) 2015-2023, Nigel Horne
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
@@ -118,6 +118,7 @@ END {
 		sleep 2;
 		kill 'KILL', -$child;
 	}
+	kill 'CONT', 0;
 }
 
 use File::Spec;
@@ -295,7 +296,8 @@ if($config && defined($config->{'clean_after_test'})) {
 local $SIG{ALRM} = $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	print "Quitting...\n" if($opts{'v'});
 	# kill '-CONT', getpgrp();	# Fails with no such signal
-	kill 'CONT', $child if($child);
+	kill 'CONT', -$child if($child);
+	kill 'CONT', 0;
 	clean($clean_after_test);
 	if($ppf_is_installed) {
 		# $lock->release();
@@ -577,6 +579,7 @@ if($opts{'i'}) {
 
 # kill '-CONT', getpgrp();	# Fails with no such signal
 kill 'CONT', $child if($child);
+kill 'CONT', 0;
 
 my $now = time;
 foreach my $dist(@dists) {
@@ -694,6 +697,8 @@ sub timed_system {
 				Proc::Killfam::killfam('KILL', @pidlist);
 				sleep 2;
 				kill 'CONT', -$child;
+				sleep 2;
+				kill 'CONT', 0;
 				sleep 2;
 				kill 'CONT', $child;
 				sleep 2;
