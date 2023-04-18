@@ -34,4 +34,4 @@ jobs:
         run: |
           echo Add other actions to build,
           echo test, and deploy your project.
-	  yamllint ansible/smoker.yml ansible/roles/smoker/tasks/main.yml ansible/roles/smoker/tasks/smoker.yml
+          yamllint ansible/smoker.yml ansible/roles/smoker/tasks/main.yml ansible/roles/smoker/tasks/smoker.yml
