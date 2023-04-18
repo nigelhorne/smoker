@@ -1,6 +1,6 @@
 ---
-  - name: smoker
-    include_tasks: 'smoker.yml'
-    tags:
-      - always
-      - smoker
+- name: smoker
+  include_tasks: 'smoker.yml'
+  tags:
+    - always
+    - smoker
