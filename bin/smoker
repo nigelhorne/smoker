@@ -194,9 +194,12 @@ foreach my $module(@modules) {
 my %opts;
 getopts('dfiv', \%opts);
 
-if(!$opts{'f'}) {
+if(($Config{'osname'} eq 'linux') && (!$opts{'f'})) {
 	# Only run inside a docker container
-	exit unless(-r '/proc/1/cgroup');
+	if(!-r '/proc/1/cgroup') {
+		print STDERR "Quitting as '-f' not given and not inside a container\n" if($opts{'v'});
+		exit(0);
+	}
 }
 
 if($opts{'d'}) {
@@ -495,7 +498,7 @@ while(1) {
 		print "Checking lock\n" if($opts{'v'});
 		while($lock->alive()) {
 			if(++$count >= 6) {
-				die "Already running" if($opts{'v'});
+				die 'Already running' if($opts{'v'});
 				exit(0);
 			}
 			print "Already running\n" if($opts{'v'});
@@ -510,7 +513,7 @@ while(1) {
 			chomp $pid;
 			if(kill(0, $pid)) {
 				if(++$count >= 6) {
-					die "Already running" if($opts{'v'});
+					die 'Already running' if($opts{'v'});
 					exit(0);
 				}
 				print "Already running\n" if($opts{'v'});
@@ -628,15 +631,22 @@ sub timed_system {
 			$load_low_limit = 1;
 		}
 		my %args = (
-			name => 'testwrapper',
+			# name => 'testwrapper',
+			name => $basename,
 			command => \@command,
 			timeout => $timeout,
 			killfam => 1,
 			load_watch => 1,
 			load_high_limit => $number_of_cpus + 1,
 			load_low_limit => $load_low_limit,
-			on_multiple_instance => 'exit',
 		);
+		
+		$args{'on_multiple_instance'} = ($opts{'v'} ? 'Already running' : 'exit');
+
+		if($number_of_cpus <= 2) {
+			$args{'single_instance'} = 1;
+			$args{'pid_dir'} = $tmpdir;
+		}
 
 		print Data::Dumper->new([\%args])->Dump() if($opts{'v'});
 
