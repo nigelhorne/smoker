@@ -467,13 +467,13 @@ while(1) {
 		# so I don't trust it
 		my @lav = Sys::CpuLoad::load();
 		if(defined($lav[0])) {
-			if($lav[0] > 5) {
-				print STDERR 'Very Busy - Load Average ', $lav[0], "\n";
-				exit(0);
-			}
 			if($lav[0] > 3) {
+				if($lav[0] > 5) {
+					print STDERR 'Very Busy - Load Average ', $lav[0], "\n";
+					exit(0);
+				}
 				print STDERR 'Busy - Load Average ', $lav[0], "\n";
-				sleep(120);
+				sleep(10);
 				next;
 			}
 		}
