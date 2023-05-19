@@ -78,4 +78,7 @@ fi
 
 TMPDIR=$NEWTMPDIR $FLOCK perl -MCPAN -e "CPAN::Shell->clean($*)"
 
+# Ensure we're not trying to remove the directory we're currently in
+cd
+
 exec $FLOCK rm -rf ${NEWTMPDIR} ${LOCKFILE}
