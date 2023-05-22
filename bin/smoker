@@ -436,7 +436,7 @@ if($ARGV[0]) {
 				# Prune the tree of old results
 				print "Prune $dist from history\n" if($opts{'v'});
 				delete $prev_tests->{$^X}->{$dist};
-			} elsif($now > $then) {
+			} elsif($then > $now) {
 				print "$dist previous test is in the future - deleting\n" if($opts{'v'});
 				delete $prev_tests->{$^X}->{$dist};
 			}
