@@ -302,7 +302,15 @@ if($config && defined($config->{'clean_after_test'})) {
 local $SIG{ALRM} = $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	print "Quitting...\n" if($opts{'v'});
 	# kill '-CONT', getpgrp();	# Fails with no such signal
-	kill 'CONT', -$child if($child);
+	if($child) {
+		kill 'CONT', -$child;
+		sleep(2);
+		kill 'TERM', -$child;
+		sleep(2);
+		kill 'KILL', -$child;
+		sleep(2);
+		kill 'KILL', $child;
+	}
 	kill 'CONT', 0;
 	clean($clean_after_test);
 	if($ppf_is_installed) {
@@ -749,7 +757,7 @@ sub timed_system {
 					last;
 				}
 			}
-			kill(9, $child);
+			kill('KILL', $child);
 			$child = 0;
 			# TODO
 			# Elsif $rc != -1 - insert code like System module
