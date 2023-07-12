@@ -60,7 +60,9 @@ else
 	typeset -r FLOCK=
 fi
 
-trap "$FLOCK rm -fr ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
+# Avoid deadlock
+# trap "$FLOCK rm -fr ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
+trap "rm -fr ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
 
 # FIXME:  should all be done within one flock call
 

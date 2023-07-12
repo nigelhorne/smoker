@@ -598,6 +598,8 @@ if($opts{'i'}) {
 kill 'CONT', $child if($child);
 kill 'CONT', 0;
 
+kill 'TERM', $child if($child);
+
 my $now = time;
 foreach my $dist(@dists) {
 	$prev_tests->{$^X}->{$dist} = $now;
