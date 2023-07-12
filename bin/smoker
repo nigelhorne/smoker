@@ -633,7 +633,7 @@ sub timed_system {
 	my $command = join(' ', @_);
 
 	if($opts{'v'}) {
-		print "Shell: $shell\n";
+		print "Shell: $shell; timeout: $timeout; mode: $mode\n";
 		@command = ($shell, '-xc', $command);
 	} else {
 		@command = ($shell, '-c', $command);
