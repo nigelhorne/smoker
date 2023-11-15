@@ -81,7 +81,7 @@ cd && git clone https://github.com/nigelhorne/li.git && cd li && cc li.c && ./a.
 # cpancleanup
 # yum uninstall git bison byacc
 # yum clean all
-cd && rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/* li smoker/dockerprojects smoker/bin/loadall? smoker/.git
+cd && rm -rf .cpan/sources/authors/id/? .cpan/build /tmp/* li smoker/dockerprojects smoker/bin/loadall? smoker/.git .cpanm/*
 # apt-get purge -y git bison byacc
 
 EOF
