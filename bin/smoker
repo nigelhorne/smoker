@@ -328,7 +328,8 @@ local $SIG{ALRM} = $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 # This doesn't work on Cygwin or Windows
 if(($^O ne 'cygwin') && ($^O ne 'MSWin32')) {
 	if($Config{'osname'} ne 'solaris') {
-		if($^O ne 'darwin') {
+		if(($^O ne 'darwin') && ($^O ne 'openbsd')) {
+			# Can't set the limit on these systems :-(
 			setrlimit(2, 512 * 1024 * 1024, 512 * 1024 * 1024) or
 				warn('Can\'t limit the data size - watch for memory usage');
 		}
