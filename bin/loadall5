@@ -56,14 +56,14 @@ do
 	cpan -fi LWP::Simple:WithCache
 
 	if [[ "$kernel" == 'SunOS' ]]; then
-		perl -MCPAN -e 'CPAN::Shell->install("Test::Reporter::Transport", "CPAN::Reporter", "CPAN::DistnameInfo", "File::HomeDir", "Unix::Processors", "LWP::Simple::WithCache", "Config::Auto", "HTTP::Cache::Transparent", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON::MaybeXS", "Proc::PID::File", "autodie", "IPC::System::Simple", "File::Spec", "FindBin", "IPC::Run", "Unix::Uptime", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads CPAN::Meta::Requirements")'
+		perl -MCPAN -e 'CPAN::Shell->install("Test::Reporter::Transport", "CPAN::Reporter", "CPAN::DistnameInfo", "File::HomeDir", "Unix::Processors", "LWP::Simple::WithCache", "Config::Auto", "HTTP::Cache::Transparent", "Sys::CpuLoad", "Proc::Killfam", "Sys::LoadAvg", "BSD::Resource", "JSON::MaybeXS", "Proc::PID::File", "autodie", "IPC::System::Simple", "File::Spec", "FindBin", "IPC::Run", "Unix::Uptime", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads", "CPAN::Meta::Requirements")'
 	else
 		# Workaround for Deep Recursion problem on Linux
 		if [[ "$kernel" == 'Linux' ]]; then
 			perl -MCPAN -e 'CPAN::Shell->install("App::cpanminus")'
 			cpanm -iqn --skip-satisfied Proc::ProcessTable
 		fi
-		perl -MCPAN -e 'CPAN::Shell->install("Test::Reporter::Transport", "CPAN::Reporter", "CPAN::DistnameInfo", "Unix::Processors", "LWP::Simple::WithCache", "Config::Auto", "HTTP::Cache::Transparent", "Proc::Killfam", "Sys::CpuLoad", "Sys::LoadAvg", "BSD::Resource", "JSON::MaybeXS", "Proc::PID::File", "File::HomeDir", "Proc::Govern", "autodie", "IPC::System::Simple", "File::Spec", "FindBin", "IPC::Run", "Unix::Uptime", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads CPAN::Meta::Requirements")'
+		perl -MCPAN -e 'CPAN::Shell->install("Test::Reporter::Transport", "CPAN::Reporter", "CPAN::DistnameInfo", "Unix::Processors", "LWP::Simple::WithCache", "Config::Auto", "HTTP::Cache::Transparent", "Proc::Killfam", "Sys::CpuLoad", "Sys::LoadAvg", "BSD::Resource", "JSON::MaybeXS", "Proc::PID::File", "File::HomeDir", "Proc::Govern", "autodie", "IPC::System::Simple", "File::Spec", "FindBin", "IPC::Run", "Unix::Uptime", "Bundle::CPAN::Reporter::Smoker::Tests", "CPAN::Recent::Uploads", "CPAN::Meta::Requirements")'
 	fi
 
 	# Try again in different order in case one of the above failed
