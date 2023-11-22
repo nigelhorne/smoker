@@ -446,16 +446,23 @@ if($ARGV[0]) {
 			print "now: $now; then: $then\n" if($opts{'v'});
 			if(($now - $then) > 7 * 24 * 3600) {
 				# Prune the tree of old results
+				# Results of distros that are never restested don't get pruned
 				print "Prune $dist from history\n" if($opts{'v'});
 				delete $prev_tests->{$^X}->{$dist};
 			} elsif($then > $now) {
 				print "$dist previous test is in the future - deleting\n" if($opts{'v'});
 				delete $prev_tests->{$^X}->{$dist};
+			} else {
+				# It's a new version
+				unshift @dists, $dist;
+				print "Will test $dist\n" if($opts{'v'});
+				$prev_tests->{$^X}->{$dist} = $now;
 			}
 		} else {
 			# It's a new version
 			unshift @dists, $dist;
 			print "Will test $dist\n" if($opts{'v'});
+			$prev_tests->{$^X}->{$dist} = $now;
 		}
 	}
 }
@@ -598,11 +605,6 @@ kill 'CONT', $child if($child);
 kill 'CONT', 0;
 
 kill 'TERM', $child if($child);
-
-my $now = time;
-foreach my $dist(@dists) {
-	$prev_tests->{$^X}->{$dist} = $now;
-}
 
 unlink $json_file if(-e $json_file);
 
