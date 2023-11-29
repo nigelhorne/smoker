@@ -302,6 +302,7 @@ if($config && defined($config->{'clean_after_test'})) {
 local $SIG{ALRM} = $SIG{TERM} = $SIG{INT} = $SIG{HUP} = sub {
 	print "Quitting...\n" if($opts{'v'});
 	# kill '-CONT', getpgrp();	# Fails with no such signal
+	kill 'CONT', (getpgrp() * -1);
 	if($child) {
 		kill 'CONT', -$child;
 		sleep(2);
@@ -564,13 +565,14 @@ foreach my $dist(@dists) {
 	print "$dist\n";
 }
 # print join("\n", @dists), "\n";
+$list = "$Bin/testwrapper $list";
 if($opts{'i'}) {
 	# system("perl -MCPAN -e 'CPAN::Shell->test($list)'");
 	if($opts{'v'}) {
 		my $shell = $ENV{'SHELL'} || $CPAN::Config->{'shell'} || 'bash';
-		system("$shell -x $Bin/testwrapper $list");
+		system("$shell -x $list");
 	} else {
-		system("$Bin/testwrapper $list");
+		system($list);
 	}
 } else {
 	if($opts{'v'}) {
@@ -590,21 +592,20 @@ if($opts{'i'}) {
 			close(STDERR);
 			open(STDERR, '>>', "$logfile.err");
 		}
-		print "$Bin/testwrapper $list" if($opts{'v'});
-		timed_system(3000, "$Bin/testwrapper $list");
+		print "$list" if($opts{'v'});
+		timed_system(3000, $list);
 	} elsif($opts{'d'}) {
-		timed_system(3000, "$Bin/testwrapper $list < /dev/null");
+		timed_system(3000, "$list < /dev/null");
 	} else {
 		# timed_system(3000, "perl -MCPAN -e 'CPAN::Shell->test($list)' >> $logfile.out 2>> $logfile.err < /dev/null");
-		timed_system(3000, "$Bin/testwrapper $list >> $logfile.out 2>> $logfile.err < /dev/null");
+		timed_system(3000, "$list >> $logfile.out 2>> $logfile.err < /dev/null");
 	}
 }
 
 # kill '-CONT', getpgrp();	# Fails with no such signal
 kill 'CONT', $child if($child);
+kill 'CONT', (getpgrp() * -1);
 kill 'CONT', 0;
-
-kill 'TERM', $child if($child);
 
 unlink $json_file if(-e $json_file);
 
@@ -612,6 +613,8 @@ if(open(my $fout, '>', $json_file)) {
 	print $fout JSON::MaybeXS->new()->allow_nonref()->encode($prev_tests);
 	close $fout;
 }
+
+kill 'TERM', $child if($child);
 
 if($mode) {
 	nohang();
