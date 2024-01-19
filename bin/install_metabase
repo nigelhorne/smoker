@@ -65,7 +65,7 @@ do
 	# perl -MCPAN -e 'CPAN::Shell->install("App::cpanminus")' 2> /dev/null
 	# cpanm -iqn --skip-satisfied LWP::Protocol::http LWP::Protocol::https Test::Reporter::Transport::Metabase CPAN::Reporter
 	perl -MCPAN -e 'CPAN::Shell->install("App::cpm")' 2> /dev/null
-	cpm install --global --no-test LWP::Protocol::http LWP::Protocol::https Test::Reporter::Transport::Metabase CPAN::Reporter
+	cpm install --global --no-test LWP::Protocol::http LWP::Protocol::https Test::Reporter::Transport::Metabase CPAN::Reporter CPAN::DistnameInfo
 done
 
 rm -f ${LOCKFILE}

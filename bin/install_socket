@@ -58,7 +58,7 @@ do
 
 	rm ~/.cpan/prefs/disabled.yml
 	perl -MCPAN -e 'CPAN::Shell->install("App::cpm")' 2> /dev/null
-	cpm install --global --no-test Test::Reporter::Transport::Socket CPAN::Reporter
+	cpm install --global --no-test Test::Reporter::Transport::Socket CPAN::DistnameInfo CPAN::Reporter
 done
 
 rm -f ${LOCKFILE}
