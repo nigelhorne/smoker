@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+# Install the modules I've written
+#	perlbrew exec ./njhit
+
+if [ x$TMPDIR = 'x' ]; then
+	if [[ -d $HOME/tmp ]]; then
+		export TMPDIR=$HOME/tmp
+	else
+		export TMPDIR=/tmp
+	fi
+fi
+
+LOCKFILE=${TMPDIR}/cpan-test.lck
+if test -e ${LOCKFILE} && kill -0 `cat ${LOCKFILE}`; then
+	echo "Already running"
+	exit 0
+fi
+
+# make sure the lockfile is removed when we exit and then claim it
+trap "rm -f ${LOCKFILE}; exit" INT TERM ALRM EXIT
+echo $$ > ${LOCKFILE}
+
+. ~/perl5/perlbrew/etc/bashrc
+
+# Don't enable this, 'cos it'll get set in the dependancies
+# export AUTHOR_TESTING=1
+# export RELEASE_TESTING=1
+export CPAN_SQLITE_NO_LOG_FILES=1
+
+typeset -r NJHMODULES="Test::Reporter Test::Reporter::Transport Test::Reporter::Transport::Socket CPAN::Reporter CGI::ACL CGI::Buffer CGI::Info CGI::Lingua CGI::Untaint::CountyStateProvince CGI::Untaint::CountyStateProvince::GB CGI::Untaint::CountyStateProvince::US CGI::Untaint::Facebook CGI::Untaint::Twitter CHI::Driver::SharedMem DBD::XMLSimple Data::Fetch DateTime::Format::Genealogy FCGI::Buffer File::pfopen Geo::Coder::CA Geo::Coder::Free Geo::Coder::GooglePlaces Geo::Coder::List Geo::Coder::Postcodes Geo::Coder::US::Census Geo::Coder::XYZ HTML::SocialMedia LWP::UserAgent::Throttled Locale::AU Locale::CA Log::Dispatch::Email::Sendmail Log::Log4perl::Layout::Syslog Log::WarnDie Text::Names::GB WWW::Scrape::FindaGrave File::Print::Many Genealogy::ChroniclingAmerica DateTime::Format::Text Geo::Coder::DataScienceToolkit Geo::Location::Point File::Open::ReadOnly::NoCache Locale::Codes::Country::FR Class::Simple::Cached Class::Simple::Readonly::Cached Sub::Private Devel::FIXME Geo::Coder::Abbreviations Lingua::EN::NameCase DBIx::AnyDBD HTML::SimpleLinkExtor Test::HTTPStatus Lingua::FR::Nums2Words Genealogy::ObituaryDailyTimes Locale::Places Lingua::Conjunction Lingua::String Weather::Meteo Database::Abstraction Genealogy::Wills TimeZone::TimeZoneDB"
+# typeset -r USEDMODULES='App::Cpan Module::Install::Base Mail::DKIM Autocache Devel::NYTProf Net::Ident Math::Expression Text::TemplateFill Metabase::Fact YAML::Syck YAML::XS Test::Reporter CPAN::Reporter Test::Reporter::Transport::Metabase Test::Reporter::Transport::Socket Metabase::Client::Simple Test::Memory::Cycle Test::Taint IP::Country YAML:Any Bundle::CPAN::Reporter::Smoker::Tests Proc::Killfam CharsetDetector Test::MinimumVersion IPC::ShareLite JSON::XS Text::xSV Sys::Info::Device::CPU Sys::CPU Devel::AssertOS Probe::MachineInfo Encode::Detective IPC::System::Simple POE::XS::Queue::Array Apache::Session Net::IDN::Encode POE POE::Component::SmokeBox App::SmokeBox::Mini CPAN::YACSmoke CPANPLUS::YACSmoke SQL::Statement DBD::CSV Text::CSV_XS DBI DBD::Excel App::Metabase::Relayd GD::Graph::pie Imager Data::Dump Test::Distribution Test::Trap Software::License Test::Kwalitee Test::Strict Email::Fingerprint Crypt::Twofish2 HTML::TreeBuilder::XPath CGI::Lingua Test::CheckManifest App::Ack XMLRPC::Lite Business::MaxMind::CreditCardFraudDetection PerlIO::eol ClamAV::Client Locale::Country::Multilingual CGI::Info MIME::Parser Mozilla::CA Data::Throttler Date::Parse pQuery File::Fetch Data::ICal Date::ICal Devel::Cover WWW::Mechanize::Cached::GZip App::perlbrew Test::Portability::Files MD5 Text::xSV::Slurp CPAN::Mini Test::Perl::Critic Test::Pod::Snippets Test::Group Test::Perl::Metrics::Simple local::lib warnings::unused URI::ParseSearchString Test::Carp Test::ConsistentVersion Test::Pod::Content Test::Prereq Test::Spelling Test::GreaterVersion HTTP::Response::Encoding Test::Vars BSD::Resource Bundle::libnet Bundle::LWP Bundle::CPAN Bundle::CPANxxl Bundle::CPANReporter2 CSS::Packer JavaScript::Packer Template Test::Taint Test::NoPlan Test::CGI::Untaint CGI::Alert NetAddr::IP Date::Manip Roman Text::Soundex EV Coro::LWP Mail::SpamAssassin Locale::AU Locale::CA CGI::Untaint::Twitter CGI::Untaint::Facebook Log::Dispatch::Email::Sendmail Regexp::List Test::TempDir::Tiny String::Clean::XSS Params::Validate DateTime::Format::Natural App::cpanoutdated Google::API::Client Google::API::OAuth2::Client DateTime::Format::RFC3339 Devel::Dependencies Genealogy::Gedcom::Date SVG Mail::VRFY Tie::Static GD::Thumbnail Net::Google::SafeBrowsing3 Sort::Key::DateTime HTML::GoogleMaps::V3 Image::Magick::Thumbnail Captcha::noCAPTCHA DBD::XMLSimple Pod::Markdown App::csv2sqlite Data::Fetch Unix::Processors Geo::Coder::CA Geo::Coder::XYZ Log::Log4perl::Layout::Syslog Text::CSV::Slurp sqlite3 Storable Authen::NTLM Authen::SASL Getopt::Long Mail::Mbox::MessageParser Mail::MboxParser URI::Find Date::Calc HTML::Entities Net::OAuth Net::Twitter::Lite Locale::Country LWP::UserAgent File::Glob File::HomeDir Linux::loadavg Time::localtime WWW::Mechanize::Cached CHI::Driver::BerkeleyDB WWW::Shorten::TinyURL Net::Whois::IANA DBI IP::Country::Fast Geography::Countries Net::DNS MIME::Lite File::Temp Proc::ProcessTable Cache::Memcached File::Spec Proc::ProcessTable XML::Parser common::sense WWW::Mechanize::SpamCop XML::RSS::Parser::Lite DB_File URI::URL WWW::RobotRules::AnyDBM_File LWP::Parallel::UserAgent IO::Lambda IO::Lambda::HTTP SWF::Parser ShiftJIS::X0213::MapUTF Encode Encode::Alias Compress::Zlib IO::Uncompress::Gunzip List::Member Lingua::EN::Inflect::Number Lingua::StopWords Memoize Sys::Syslog Net::Whois::IANA HTML::Adsense I18N::LangTags::List SWF::Parser ShiftJIS::X0213::MapUTF Unicode::Map8 File::Type Mail::Verify Time::HiRes Cache::Memcached Text::Aspell Locale::Language Locale::Object::Country URI::Heuristic Locale::Language I18N::LangTags::Detect Data::Validate::IP Net::DNSBLLookup HTML::CheckArgs Sort::Fields Log::Dispatch::File Log::Dispatch::Email::MailSendmail XML::Twig DBD::AnyData Lingua::EN::Titlecase Sendmail::PMilter Geo::IP CHI::Driver::SharedMem WWW::CheckSite::Validator DateTime::Format::Mail Business::PayPal Crypt::SSLeay Parallel::Simple CGI::IDS Data::Dumper::Names String::EscapeCage Net::Subnet Test::Module::Used CHI::Driver::Redis LWP::UserAgent::CHICaching Lingua::EN::PluralToSingular Geo::Coder::OSM Test::BrewBuild String::ProgressBar Text::Names Lingua::EN::ABC Geo::Coder::GooglePlaces Sys::LoadAvg XML::RSS Mail::SPF Test::Smoke Encode::Detect CGI::SpeedyCGI Test::Log4perl Data::Validate::URI Template::Plugin::Gravatar MP3::Info MP4::Info Unicode::Map8 Mail::RFC822::Address Proc::PID::File'
+if [ $UID -eq 0 ]; then
+	su - njh -c "perlbrew exec cpan $NJHMODULES"
+	# su - njh -c "perlbrew exec cpan $USEDMODULES"
+
+	su - njh -c "li -r0l $HOME/perl5/perlbrew"
+
+	for VERSION in cpan /usr/bin/cpan5.* /usr/local/bin/cpan5.* /usr/pkg/bin/cpan5.*
+	do
+		echo $i:
+		rm ~/.cpan/FTPstats.yml*
+		$VERSION $MODULES
+	done
+else
+	if [ $1x == x ]
+	then
+		perlbrew exec cpan $NJHMODULES
+		# perlbrew exec cpan $USEDMODULES
+	else
+		for i in $*
+		do
+			echo $i:
+			perlbrew use $i
+			rm -f ~/.cpan/prefs/disabled.yml&
+			cpan $NJHMODULES
+			# cpan $USEDMODULES
+		done
+	fi
+
+	/usr/local/bin/li -r0l $HOME/perl5/perlbrew
+fi
+
+rm -f ${LOCKFILE}
