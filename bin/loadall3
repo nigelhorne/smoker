@@ -48,7 +48,7 @@ do
 	else
 		unset PERL_CPAN_REPORTER_DIR
 	fi
-	perl -MCPAN -e 'CPAN::Shell->install("YAML::Syck", "App::Cpan", "File::Spec", "Archive::Tar", "IO::Zlib", "CPAN::DistnameInfo", "DBD::SQLite", "File::HomeDir", "Expect", "CPAN::SQLite")'
+	perl -MCPAN -e 'CPAN::Shell->install("YAML::Syck", "App::Cpan", "File::Spec", "Archive::Tar", "IO::Zlib", "CPAN::DistnameInfo", "DBD::SQLite", "File::HomeDir", "Bundle::CPAN", "Bundle::CPANxxl", "Bundle::CPANReporter2", "Expect", "CPAN::SQLite")'
 	HARNESS_OPTIONS=c TEST_JOBS= perl -MCPAN -e 'CPAN::Shell->install("App::Cpan", "CPAN::SQLite")'
 	# perl -MCPAN -e 'CPAN::Shell->upgrade'
 
