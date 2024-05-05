@@ -9,8 +9,6 @@ For example:
 
     build-docker-image-daemon 5.28.1 21213
 
-Then modify 'udp-forwarder', adding <port> and start the program.
-
 To start each image:
 
     docker run --hostname=perl-$PERL.example.com -dt --name perl-$PERL-smoker --mount -p 0.0.0.0:$PORT:$PORT/udp perl-$PERL-smoker

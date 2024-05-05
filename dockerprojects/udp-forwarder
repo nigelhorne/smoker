@@ -1,9 +1,7 @@
 #!/usr/bin/env perl
 
 # The smokerupdate program broadcasts updates on port 21212. Forward the
-# update notifications to the docker images on the local machine.  In this
-# example the docker image is listening on port 21214 (see *dockerfile and
-# *install)
+# update notifications to the docker images on the local machine.
 
 use strict;
 use warnings;
