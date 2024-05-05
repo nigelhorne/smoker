@@ -41,6 +41,7 @@ while(my $line = <$pin>) {
 	my $dist = $1;
 	$dist .= "\n" if($dist !~ /\n$/);
 	$s->send($dist);
+	print $dist;
 	sleep(1);	# Give the clients a chance to do something so they don't miss the message
 	$count++;
 }
@@ -56,6 +57,6 @@ if($count == 1) {
 } else {
 	$msg = "Updated $count modules";
 }
-# print "$msg\n";
+print "$msg\n";
 syslog 'info', $msg;
 closelog;
