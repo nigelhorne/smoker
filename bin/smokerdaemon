@@ -94,7 +94,7 @@ use Getopt::Std;
 use POSIX ":sys_wait_h";
 
 # Only run inside a docker container
-exit unless(-r '/proc/1/cgroup');
+# exit unless(-r '/proc/1/cgroup');
 
 my $ppf_is_installed = 1;
 
