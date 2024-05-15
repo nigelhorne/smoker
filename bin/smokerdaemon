@@ -56,9 +56,12 @@ BEGIN {
 		}
 	}
 	if(scalar(@needfull)) {
-		system('cpan -i ' . join(' ', @needfull));
+		my $list = join(' ', @needfull);
+		print "Installing $list\n";
+		# system("cpan -i $list");
+		$ENV{'PERL_MM_USE_DEFAULT'} = 1;
+		system('perl -MCPAN -e \'CPAN::Shell->install("' . join('", "', @needfull) . '")\'');
 	}
-
 }
 
 foreach my $module(@modules) {
@@ -140,13 +143,40 @@ if($mode eq 'cmd') {
 
 my @needfull;
 foreach my $module(@modules) {
-	eval "use $module";
+	my $version;
+	my $module_name;
+	if($module =~ /(.+)\s(.+)$/) {
+		$module_name = $1;
+		$version = $2;
+		eval "require $1";
+	} else {
+		eval "require $module";
+	}
 	if($@) {
-		push @needfull, $module;
+		if($version) {
+			my $s = `cpan -D $module_name | grep /`;
+
+			chomp($s);
+			$s =~ s/^\s+//;
+			$s =~ s/(.+)\/.+/$1/;
+			$module_name =~ s/::/-/g;
+
+			# FIXME - could end in .tgz or even .zip
+			push @needfull, "$s/$module_name-$version.tar.gz";
+		} else {
+			push @needfull, $module;
+		}
+	} else {
+		$module->import();
 	}
 }
+
 if(scalar(@needfull)) {
-	system('cpan -i ' . join(' ', @needfull));
+	my $list = join(' ', @needfull);
+	print "Installing $list\n";
+	# system("cpan -i $list");
+	$ENV{'PERL_MM_USE_DEFAULT'} = 1;
+	system('perl -MCPAN -e \'CPAN::Shell->install("' . join('", "', @needfull) . '")\'');
 }
 
 foreach my $module(@modules) {
