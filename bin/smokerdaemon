@@ -321,7 +321,11 @@ if($config && defined($config->{'clean_after_test'})) {
 }
 
 # On first startup run a few tests that we may have missed
-if($opts{'v'}) {
+if($opts{'d'}) {
+	require Data::Dumper;
+	Data::Dumper->import();
+	my $rc = timed_system(300, 'perlbrew', 'exec', "$Bin/smoker", '-vd');
+} elsif($opts{'v'}) {
 	require Data::Dumper;
 	Data::Dumper->import();
 	my $rc = timed_system(300, 'perlbrew', 'exec', "$Bin/smoker", '-v');
