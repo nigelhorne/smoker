@@ -22,7 +22,7 @@ if [[ ! -r /proc/1/cgroup ]]; then
 	if [[ "$kernel" != 'FreeBSD' && "$kernel" != 'OpenBSD' && "$kernel" != 'CYGWIN_NT-10.0' && `ulimit -d` = unlimited ]]; then
 		ulimit -d 524288
 	fi
-	if [[ "$kernel" != 'SunOS' && "$kernel" != 'CYGWIN_NT-10.0' && `ulimit -m` = unlimited ]]; then
+	if [[ "$kernel" != 'Darwin' && "$kernel" != 'SunOS' && "$kernel" != 'CYGWIN_NT-10.0' && `ulimit -m` = unlimited ]]; then
 		ulimit -m 524288
 		ulimit -u 256
 	fi
