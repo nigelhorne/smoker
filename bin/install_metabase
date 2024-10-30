@@ -58,7 +58,6 @@ do
 
 	rm ~/.cpan/prefs/disabled.yml
 	# perl -MCPAN -e 'CPAN::Shell->install(Module::Install::Base)' 2>/dev/null
-	# perl -MCPAN -e 'CPAN::Shell->install("LWP::Protocol::http", "LWP::Protocol::https", "Crypt::SSLeay", "Test::Reporter::Transport::Metabase", "CPAN::Reporter")' 2> /dev/null
 
 	# perl -MCPAN -e 'CPAN::Shell->install("LWP::Protocol::http", "LWP::Protocol::https", "Test::Reporter::Transport::Metabase", "CPAN::Reporter")' 2> /dev/null
 	# No need to test as the reports won't go anyway
@@ -66,7 +65,7 @@ do
 	# cpanm -iqn --skip-satisfied LWP::Protocol::http LWP::Protocol::https Test::Reporter::Transport::Metabase CPAN::Reporter
 	perl -MCPAN -e 'CPAN::Shell->install("App::cpm")' 2> /dev/null
 	cpm install --global --no-test LWP::Protocol::http LWP::Protocol::https Test::Reporter::Transport::Metabase CPAN::Reporter CPAN::DistnameInfo
-	perl -MCPAN -e 'CPAN::Shell->install("LWP::Protocol::http LWP::Protocol::https Test::Reporter::Transport::Metabase CPAN::Reporter CPAN::DistnameInfo")' 2> /dev/null
+	perl -MCPAN -e 'CPAN::Shell->install("LWP::Protocol::http", "LWP::Protocol::https", "Crypt::SSLeay", "Test::Reporter::Transport::Metabase", "CPAN::Reporter")' 2> /dev/null
 done
 
 rm -f ${LOCKFILE}
