@@ -66,6 +66,7 @@ do
 	# cpanm -iqn --skip-satisfied LWP::Protocol::http LWP::Protocol::https Test::Reporter::Transport::Metabase CPAN::Reporter
 	perl -MCPAN -e 'CPAN::Shell->install("App::cpm")' 2> /dev/null
 	cpm install --global --no-test LWP::Protocol::http LWP::Protocol::https Test::Reporter::Transport::Metabase CPAN::Reporter CPAN::DistnameInfo
+	perl -MCPAN -e 'CPAN::Shell->install("LWP::Protocol::http LWP::Protocol::https Test::Reporter::Transport::Metabase CPAN::Reporter CPAN::DistnameInfo")' 2> /dev/null
 done
 
 rm -f ${LOCKFILE}
