@@ -11,10 +11,13 @@
 	# export PERL_CPAN_REPORTER_DIR=$HOME/.cpanreporter/$PERLBREW_PERL
 # fi
 
+# Check if running within Perlbrew environment
 if [[ -z "$PERLBREW_PERL" ]]; then
 	echo "Must run within Perlbrew environment" 1>&2
 	exit 1;
 fi
+
+set +e
 
 # Docker images have memory limits set elsewhere
 if [[ ! -r /proc/1/cgroup ]]; then
@@ -31,12 +34,13 @@ if [[ ! -r /proc/1/cgroup ]]; then
 	fi
 fi
 
-typeset -r NEWTMPDIR=${TMPDIR:-/tmp}/testwrapper.$$
-typeset -r ID=`id -u`
-
 # Don't exit if a ulimit fails
 set -e
 
+typeset -r NEWTMPDIR=${TMPDIR:-/tmp}/testwrapper.$$
+typeset -r ID=`id -u`
+
+# Ensure only one instance is running
 if [[ -d /run/user/$ID ]]; then
 	typeset -r LOCKFILE=/run/user/$ID/testwrapper.pid
 else
@@ -48,8 +52,10 @@ if [ -e ${LOCKFILE} ] && kill -0 `cat ${LOCKFILE}`; then
 	exit
 fi
 
+# Write the current process ID to the lock file
 echo $$ > ${LOCKFILE}
 
+# Create and secure the temporary directory
 mkdir $NEWTMPDIR
 chmod 700 $NEWTMPDIR
 cd $NEWTMPDIR
@@ -64,8 +70,10 @@ fi
 
 # Avoid deadlock
 # trap "$FLOCK rm -fr ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
+# Ensure the script exits on error and trap INT, TERM, EXIT, and ALRM signals
 trap "cd && rm -fr ${NEWTMPDIR}; exit" INT TERM EXIT ALRM
 
+# Run tests with a timeout if available
 # FIXME:  should all be done within one flock call
 
 if [[ -x /usr/bin/timeout ]]; then
@@ -77,12 +85,15 @@ elif [[ -x /usr/local/bin/gtimeout ]]; then
 	# OpenBSD - coreutils package
 	TMPDIR=$NEWTMPDIR $FLOCK /usr/local/bin/gtimeout -k 1m 45m perl -MCPAN -e "CPAN::Shell->test($*)"
 else
+	# Run without timeout
 	TMPDIR=$NEWTMPDIR $FLOCK perl -MCPAN -e "CPAN::Shell->test($*)"
 fi
 
+# Clean up after tests
 TMPDIR=$NEWTMPDIR $FLOCK perl -MCPAN -e "CPAN::Shell->clean($*)"
 
 # Ensure we're not trying to remove the directory we're currently in
 cd
 
+# Remove the temporary directory and lock file
 exec $FLOCK rm -rf ${NEWTMPDIR} ${LOCKFILE}

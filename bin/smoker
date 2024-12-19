@@ -144,12 +144,8 @@ my $mode;
 # Work out the best way to run commands
 # Generally Proc::Killfam is better to use since all children will be killed,
 #	I'm not persuaded that happens with Proc::Govern
-if(($Config{'osname'} eq 'solaris') ||
-   # ($Config{'osname'} eq 'cygwin') ||
-   ($Config{'osname'} eq 'MSWin32') ||
-   ($Config{'osname'} eq 'dragonfly') ||
-   ($Config{'osname'} eq 'haiku') ||
-   ($Config{'osname'} eq 'gnukfreebsd')) {
+# if ($Config{'osname'} =~ /solaris|cygwin|MSWin32|dragonfly|haiku|gnukfreebsd/) {
+if ($Config{'osname'} =~ /solaris|MSWin32|dragonfly|haiku|gnukfreebsd/) {
 	$mode = 'cmd';
 } elsif(($Config{'osname'} ne 'cygwin') && defined($^V) && ($^V ge 'v5.10.1')) {
 	# Doesn't needs at least Perl 5.10.1
@@ -662,7 +658,7 @@ sub timed_system {
 			load_high_limit => $number_of_cpus + 1,
 			load_low_limit => $load_low_limit,
 		);
-		
+
 		$args{'on_multiple_instance'} = ($opts{'v'} ? 'Already running' : 'exit');
 
 		if($number_of_cpus <= 2) {
