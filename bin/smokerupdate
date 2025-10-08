@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
-# Author Nigel Horne: njh@bandsman.co.uk
-# Copyright (C) 2016-2024, Nigel Horne
+# Author Nigel Horne: njh@nigelhorne.com
+# Copyright (C) 2016-2025, Nigel Horne
 
 # Usage is subject to licence terms.
 # The licence terms of this software are as follows:
@@ -20,7 +20,8 @@ use IO::Socket::INET;
 # FIXME - should be arguments
 # You have to use https since CPAN 2.29, which breaks Squid caching, but I don't see a way around that
 # Now I have to use http again.  Not sure what gives here.
-my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://www.cpan.org/ -C ~njh/.minicpanrc';
+my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://cpan.metacpan.org/ -C ~njh/.minicpanrc';
+# my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://www.cpan.org/ -C ~njh/.minicpanrc';
 # my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://cpan.mirror.constant.com/ -C ~njh/.minicpanrc';
 
 umask(022);
