@@ -17,11 +17,11 @@ use IO::Socket::INET;
 
 # Update the minicpan repository, and tell the smokers what to test
 
-# FIXME - should be arguments
+# FIXME - should be arguments or configurable
 # You have to use https since CPAN 2.29, which breaks Squid caching, but I don't see a way around that
 # Now I have to use http again.  Not sure what gives here.
-my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://cpan.metacpan.org/ -C ~njh/.minicpanrc';
-# my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://www.cpan.org/ -C ~njh/.minicpanrc';
+# my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://cpan.metacpan.org/ -C ~njh/.minicpanrc';
+my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://www.cpan.org/ -C ~njh/.minicpanrc';
 # my $minicpan_command = '/usr/bin/minicpan -l /var/www/mirrors/CPAN -r http://cpan.mirror.constant.com/ -C ~njh/.minicpanrc';
 
 umask(022);
