@@ -89,7 +89,7 @@ BEGIN {
 
 foreach my $module(@needfull) {
 	my $version;
-	if($module =~ /(.+)\s(.+)$/) {
+	if($module =~ /(\S+)\s+(.+)$/) {
 		$module = $1;
 		$version = $2;
 	}
@@ -215,7 +215,7 @@ if(scalar(@needfull)) {
 
 foreach my $module(@modules) {
 	my $version;
-	if($module =~ /(.+)\s(.+)$/) {
+	if($module =~ /(\S+)\s+(.+)$/) {
 		$module = $1;
 		$version = $2;
 	}
@@ -608,6 +608,7 @@ kill 'CONT', 0;
 unlink $json_file if(-e $json_file);
 
 if(open(my $fout, '>', $json_file)) {
+	$prev_tests //= {};
 	print $fout JSON::MaybeXS->new()->allow_nonref()->encode($prev_tests);
 	close $fout;
 }
