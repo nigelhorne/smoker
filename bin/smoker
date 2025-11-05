@@ -89,7 +89,7 @@ BEGIN {
 
 foreach my $module(@needfull) {
 	my $version;
-	if($module =~ /(\S+)\s+(.+)$/) {
+	if($module =~ /(.+)\s(.+)$/) {
 		$module = $1;
 		$version = $2;
 	}
@@ -215,7 +215,7 @@ if(scalar(@needfull)) {
 
 foreach my $module(@modules) {
 	my $version;
-	if($module =~ /(\S+)\s+(.+)$/) {
+	if($module =~ /(.+)\s(.+)$/) {
 		$module = $1;
 		$version = $2;
 	}
