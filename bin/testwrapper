@@ -34,6 +34,8 @@ if [[ ! -r /proc/1/cgroup ]]; then
 	fi
 fi
 
+ulimit -t 2700
+
 # Don't exit if a ulimit fails
 set -e
 
@@ -61,7 +63,7 @@ chmod 700 $NEWTMPDIR
 cd $NEWTMPDIR
 
 # make sure the lockfile is removed when we exit and then claim it
-if $(command -v flock > /dev/null); then
+if command -v flock > /dev/null; then
 	typeset -r FLOCK="flock -n ${LOCKFILE}"
 else
 	# Solaris doesn't have the flock command
@@ -80,10 +82,12 @@ if [[ -x /usr/bin/timeout ]]; then
 	# Since this is the last level of the call chain
 	#	smokerdaemon or /usr/bin/timeout->smoker->testwrapper
 	#	this should timeout first
-	TMPDIR=$NEWTMPDIR $FLOCK timeout -k 1m 45m perl -MCPAN -e "CPAN::Shell->test($*)"
+	TMPDIR=$NEWTMPDIR $FLOCK timeout --foreground -k 1m 45m \
+		bash -c 'exec perl -MCPAN -e "CPAN::Shell->test(@ARGV)"' bash "$@"
 elif [[ -x /usr/local/bin/gtimeout ]]; then
 	# OpenBSD - coreutils package
-	TMPDIR=$NEWTMPDIR $FLOCK /usr/local/bin/gtimeout -k 1m 45m perl -MCPAN -e "CPAN::Shell->test($*)"
+	TMPDIR=$NEWTMPDIR $FLOCK /usr/local/bin/gtimeout --foreground -k 1m 45m \
+		bash -c 'exec perl -MCPAN -e "CPAN::Shell->test(@ARGV)"' bash "$@"
 else
 	# Run without timeout
 	TMPDIR=$NEWTMPDIR $FLOCK perl -MCPAN -e "CPAN::Shell->test($*)"
